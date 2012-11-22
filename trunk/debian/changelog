@@ -1,0 +1,184 @@
+controlies (0.6.4-5) unstable; urgency=low
+
+  * Cambios esteticos
+  * Control de la sesion
+
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Fri, 16 Nov 2012 09:55:00 +0200
+
+controlies (0.6.4-4) unstable; urgency=low
+
+  * Solucionando error del zip de Rayuela
+
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Wed, 7 Nov 2012 14:00:00 +0200
+
+controlies (0.6.4-3) unstable; urgency=low
+
+  * Se a�aden nuevos campos al formulario de BD de portatiles
+  * Se a�aden los informes
+
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Tue, 30 Oct 2012 10:30:00 +0200
+
+controlies (0.6.4-2) unstable; urgency=low
+
+  * Correcci�n de errores
+
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Wed, 26 Sep 2012 10:23:00 +0200
+
+controlies (0.6.4-1) unstable; urgency=low
+
+  * Correcci�n de errores y activaci�n de la base de datos
+
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Wed, 26 Sep 2012 10:23:00 +0200
+
+controlies (0.6.3-5) unstable; urgency=low
+
+  * Cambio almacenamiento nombre y apellidos
+
+ -- Francisco Damian Mendez Palma <fmendezpalma@gmail.com>  Thu, 13 Sep 2012 10:00:00 +0200
+
+controlies (0.6.3-4) unstable; urgency=low
+
+  * Gesti�n de portatiles por aulas
+
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Tue, 20 Jun 2012 10:50:00 +0200
+
+controlies (0.6.3-3) unstable; urgency=low
+
+  * Se a�ade base de datos SQLite
+
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Tue, 12 Jun 2012 12:50:00 +0200
+
+controlies (0.6.3-2) unstable; urgency=low
+
+  * Cambios en postinst
+
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Wed, 23 May 2012 10:50:00 +0200
+
+controlies (0.6.3-1) unstable; urgency=low
+
+  * Protocolo UDP para detección de profesores logueados
+
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Wed, 14 Dec 2011 10:22:00 +0200
+ 
+controlies (0.6.2-1) unstable; urgency=low
+
+  * Creación de claves pública/privada para estabecer relación de confianza SSH
+
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Thu, 4 Nov 2011 12:48:00 +0200
+
+controlies (0.6.1-1) unstable; urgency=low
+
+  * Demonio avahi client para detección de ltsp-servers y profesores logueados
+  * Nueva opción: servidores de aula
+  * Nueva opción: gestión de portátiles
+  * Grupos: en el grid, desglose de los usuarios que pertenecen al grupo
+
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Thu, 27 Oct 2011 14:19:00 +0200
+ 
+controlies (0.6-1) unstable; urgency=low
+
+  * Validacion de los logins de Rayuela para Rayuela2Ldap
+
+ --  José L. Redrejo Rodríguez <jredrejo@debian.org>  Tue, 25 Oct 2011 10:44:10 +0200
+
+controlies (0.5-2) unstable; urgency=low
+
+  * Creación del directorio personal en el NFS al crear un nuevo usuario
+  * Corregido un bug en la paginación
+  * Corregido un bug en la modificación de la MAC en el nodo DHCP Config
+
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Thu, 13 Oct 2011 16:30:00 +0200
+ 
+controlies (0.5-1) unstable; urgency=low
+
+  * Añade LTSP Servers y Workstations a la rama ARPA
+  * Ya no gestiona los equipos que cuelgan directamente de la rama Hosts
+  * Selector de IPs en el formulario de LTSP Servers y Workstations
+  * Añadida funcionalidad de búsqueda en LTSP Servers, Workstations y Thinclients
+  * Corregidos algunos bugs debidos a las distintas estructuras de distintos LDAPs
+
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Thu, 13 Oct 2011 16:30:00 +0200
+
+controlies (0.4-9) unstable; urgency=low
+
+  * Añadida la funcionalidad de LTSP Servers, Workstations y Thinclients
+
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Wed, 5 Oct 2011 19:30:00 +0200
+
+controlies (0.4-8) unstable; urgency=low
+
+  * Se elimininan de los nombres las vocales con diéresis y las comas
+
+ -- José L. Redrejo Rodríguez <jredrejo@debian.org>  Tue, 20 Sep 2011 14:41:47 +0200
+
+controlies (0.4-7) unstable; urgency=low
+
+  * Corregido bug que podía producir repetición de algún login 
+
+ -- José L. Redrejo Rodríguez <jredrejo@debian.org>  Fri, 16 Sep 2011 12:38:09 +0200
+
+controlies (0.4-6) unstable; urgency=low
+
+  * Eliminados timeout de apache para permitir el proceso de ficheros con 
+    muchos usuarios (probado con hasta 900 usuarios, tardando 5 minutos)
+  * Contempla que haya grupos con nombre en blanco
+  * Reinicia apache2 después de instalar o actualizar el paquete
+
+ -- José L. Redrejo Rodríguez <jredrejo@debian.org>  Wed, 14 Sep 2011 10:09:01 +0200
+
+controlies (0.4-5) unstable; urgency=low
+
+  * Corregido problema cuando no hay segundo apellido
+  * Elimina espacios de los nombres de los grupos 
+
+ -- José L. Redrejo Rodríguez <jredrejo@debian.org>  Tue, 13 Sep 2011 10:51:28 +0200
+
+controlies (0.4-4) unstable; urgency=low
+
+  * Actualizada versión de jquery
+  * Añade apellidos al campo cn de ldap
+
+ -- José L. Redrejo Rodríguez <jredrejo@debian.org>  Mon, 12 Sep 2011 13:51:34 +0200
+
+controlies (0.4-2) unstable; urgency=low
+
+  * No limpia los grupos a no ser que se marque la casilla de principio de curso
+
+ -- José L. Redrejo Rodríguez <jredrejo@debian.org>  Mon, 12 Sep 2011 10:09:35 +0200
+
+controlies (0.4-1) unstable; urgency=low
+
+  * Añadida funcionalidad de rayuela a ldap
+
+ -- José L. Redrejo Rodríguez <jredrejo@debian.org>  Thu, 30 Jun 2011 14:03:14 +0200
+
+controlies (0.3-3) unstable; urgency=low
+
+  * Añade profesores al grupo teachers y alumnos al students
+
+ -- José L. Redrejo Rodríguez <jredrejo@debian.org>  Tue, 31 May 2011 13:52:41 +0200
+
+controlies (0.3-1) unstable; urgency=low
+
+  * Terminado de implementar en web2py todo lo que había con twisted
+
+ -- José L. Redrejo Rodríguez <jredrejo@debian.org>  Tue, 17 May 2011 13:08:40 +0200
+
+controlies (0.2-2) unstable; urgency=low
+
+  * Cambios en la configuración de apache: directorio en vez de vhost
+
+ -- José L. Redrejo Rodríguez <jredrejo@debian.org>  Mon, 16 May 2011 14:23:55 +0200
+
+controlies (0.2-1) unstable; urgency=low
+
+  * Completando funcionalidades
+
+ -- José L. Redrejo Rodríguez <jredrejo@debian.org>  Fri, 13 May 2011 14:37:17 +0200
+
+controlies (0.1-1) unstable; urgency=low
+
+  * First Debian package
+
+ -- José L. Redrejo Rodríguez <jredrejo@debian.org>  Wed, 04 May 2011 19:20:55 +0200
+

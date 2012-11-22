@@ -1,0 +1,103 @@
+<script language="javascript">
+
+    $(function() {
+        $("#name").focus();
+        $("#saveButton").button({ icons: { primary: "ui-icon-disk"}});
+          
+        $("#cancelButton")
+            .button({ icons: { primary: "ui-icon-close"}})
+            .click( function(){ $('#dialog-form').dialog('close'); });   
+
+        jQuery.post('call/json/getallranges', {}, function(result) {
+			for(i=0;i<result.response["subrange"].length;i++){			
+				$("#subrange").append(new Option(result.response["subrange"][i], result.response["subrange"][i]));
+			}
+			
+			for(i=0;i<result.response["ranges"].length;i++){
+				$("#range").append(new Option(result.response["ranges"][i], result.response["ranges"][i]));
+			}
+			for(i=1;i<256;i++){
+				$("#ip").append(new Option(i, i));
+			}
+		});
+
+    });
+
+    function restartStyle(){
+        $("#form_data p span").css("color","black");
+        $('#message').html("");
+    }
+
+
+    function send(){
+    	ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+        restartStyle();
+
+{{block controlador}}               
+        jQuery.post('call/json/modify', jQuery("#form_data").serialize(), function(result) {
+{{end}}        
+            switch(result.response){
+                case "OK":{
+                    jQuery('#message').html("Operación realizada correctamente").css("color","green").effect("highlight", {"color":"yellow"}, 1000);
+                    setTimeout("$('#dialog-form').dialog('close')",1000);
+                    jQuery("#list").trigger("reloadGrid");
+                    break;
+                }
+                case "fail":{
+                    jQuery('#message').html("Se produjo un error").effect("highlight", {"color":"yellow"}, 1000);
+                    break;
+                }
+                case "hostAlreadyExists":{
+                    jQuery('#nameTag').css("color","red");
+                    jQuery('#name').effect("highlight", {"color":"yellow"}, 1000).focus();
+                    jQuery('#message').html("Ya existe ese nombre de host").effect("slide");                 
+                    break;
+                }
+                case "macAlreadyExists":{
+                    jQuery('#macTag').css("color","red");
+                    jQuery('#mac').effect("highlight", {"color":"yellow"}, 1000).focus();
+                    jQuery('#message').html("Ya existe un host con esa MAC").effect("slide");                    
+                    break;
+                }
+                case "ipAlreadyExists":{
+                    jQuery('#ipTag').css("color","red");
+                    jQuery('#ip').effect("highlight", {"color":"yellow"}, 1000).focus();
+                    jQuery('#message').html("Ya existe un host con esa IP").effect("slide");                 
+                    break;
+                }                
+                case "groupOverflow":{
+                    jQuery('#groupTag').css("color","red");
+                    jQuery('#group').effect("highlight", {"color":"yellow"}, 1000).focus();
+                    jQuery('#message').html("El grupo escogido esta completo").effect("slide");                  
+                    break;  
+                }    
+                default:{
+                    jQuery('#'+result.response+"Tag").css("color","red");
+                    jQuery('#'+result.response).effect("highlight", {"color":"yellow"}, 1000).focus();
+                    jQuery('#message').html("Hay campos vacíos o incorrectos").effect("slide");
+                    break;
+                }
+            }
+        });
+
+        return false;
+    }
+    
+</script>
+
+
+<form id="form_data" onSubmit="return send();">
+    <input type="hidden" id="action" name="action"/>
+    <input type="hidden" id="type_host" name="type_host"/>
+    <p><span id="nameTag">Nombre del equipo:</span><br><input type="text" id="name" name="name" maxlength="20"/></p>
+    <p><span id="ipTag">Ip</span><br>172.<select id="subrange" name="subrange"></select>.<select id="range" name="range"></select>.<select id="ip" name="ip"></select></p> 
+    <p><span id="macTag">MAC</span><br><input type="text" id="mac" name="mac" maxlength="17"/></p>
+
+    <div id="message" style="text-align:center; font-weight:bold; color:red; padding:3px; "></div>
+    <div style="text-align:center;"><button id="saveButton" type="submit" style="width:100px;">Guardar</button>&nbsp;&nbsp;<button type="button" id="cancelButton" style="width:100px;">Cancelar</button></div>
+    <p style="padding-top:10px; text-align:center; font-size:10px;" id="messageForm"></p>       
+</form>
+
+<script language="javascript">
+
+</script>

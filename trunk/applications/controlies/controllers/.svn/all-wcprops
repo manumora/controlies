@@ -1,0 +1,71 @@
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/servidores/!svn/ver/437/controlies/trunk/applications/controlies/controllers
+END
+gestion.py
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/servidores/!svn/ver/436/controlies/trunk/applications/controlies/controllers/gestion.py
+END
+usuarios.py
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/servidores/!svn/ver/436/controlies/trunk/applications/controlies/controllers/usuarios.py
+END
+reports.py
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/servidores/!svn/ver/437/controlies/trunk/applications/controlies/controllers/reports.py
+END
+grupos.py
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/servidores/!svn/ver/436/controlies/trunk/applications/controlies/controllers/grupos.py
+END
+laptops_trademarks.py
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/servidores/!svn/ver/436/controlies/trunk/applications/controlies/controllers/laptops_trademarks.py
+END
+hosts.py
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/servidores/!svn/ver/436/controlies/trunk/applications/controlies/controllers/hosts.py
+END
+laptops_groups.py
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/servidores/!svn/ver/436/controlies/trunk/applications/controlies/controllers/laptops_groups.py
+END
+dhcpd.py
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/servidores/!svn/ver/178/controlies/trunk/applications/controlies/controllers/dhcpd.py
+END
+laptops.py
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/servidores/!svn/ver/437/controlies/trunk/applications/controlies/controllers/laptops.py
+END
+default.py
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/servidores/!svn/ver/437/controlies/trunk/applications/controlies/controllers/default.py
+END
+thinclients.py
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/servidores/!svn/ver/436/controlies/trunk/applications/controlies/controllers/thinclients.py
+END

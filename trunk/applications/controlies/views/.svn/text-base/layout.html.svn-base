@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="{{=T.accepted_language or 'en'}}" class="no-js"><!-- no-js need it for modernzr -->
+  <head>
+    
+    <meta charset="utf-8" />        
+    <!-- www.phpied.com/conditional-comments-block-downloads/ -->
+    <!--[if IE]><![endif]-->    
+    <!-- Always force latest IE rendering engine 
+     (even in intranet) & Chrome Frame 
+     Remove this if you use the .htaccess -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>{{=response.title or request.application}}</title>
+    
+    <!-- http://dev.w3.org/html5/markup/meta.name.html -->
+    <meta name="application-name" content="{{=request.application}}" /> 
+    
+    
+    <!-- Place favicon.ico and apple-touch-icon.png in the root of your domain and delete these references -->
+    <link rel="shortcut icon" href="{{=URL('static','favicon.ico')}}" type="image/x-icon">
+    <link rel="apple-touch-icon" href="{{=URL('static','favicon.png')}}">
+
+    <!-- For the less-enabled mobile browsers like Opera Mini -->
+    <link rel="stylesheet" media="handheld" href="{{=URL('static','css/handheld.css')}}">
+    
+    <!-- All JavaScript at the bottom, except for Modernizr which enables HTML5 elements & feature detects -->
+    <script src="{{=URL('static','js/modernizr-1.7.min.js')}}"></script>
+    
+{{response.files.append(URL('static','js/jdgrid/css/ui.jqgrid.css'))}}
+{{response.files.append(URL('static','js/jquery/jquery.dropdown.js'))}}
+{{response.files.append(URL('static','js/jdgrid/grid.locale-sp.js'))}} 
+{{response.files.append(URL('static','js/jdgrid/jquery.jqGrid.min.js'))}}
+{{response.files.append(URL('static','js/jdgrid/src/grid.common.js'))}}
+{{response.files.append(URL('static','js/jdgrid/src/grid.formedit.js'))}}
+{{response.files.append(URL('static','js/jdgrid/src/grid.custom.js'))}}
+    
+    {{#------  require CSS and JS files for this page (read info in base.css) ------}}
+    {{response.files.append(URL('static','css/base.css'))}}
+    {{response.files.append(URL('static','css/superfish.css'))}}
+    {{response.files.append(URL('static','js/superfish.js'))}}
+
+    {{response.files.append(URL('static','ui/css/ui-lightness/jquery-ui-1.8.9.custom.css'))}}
+
+    
+   
+    
+    
+    {{#------ include web2py specific js code (jquery, calendar, form stuff) ------}}
+    {{include 'web2py_ajax.html'}}
+
+    {{
+    #using sidebars need to know what sidebar you want to use
+    #prior of using it, because of static width size of content, you can use
+    #left_sidebar, right_sidebar, both or none (False left and right)    
+    left_sidebar_enabled = globals().get('left_sidebar_enabled',False)
+    right_sidebar_enabled = globals().get('right_sidebar_enabled',False)
+    if left_sidebar_enabled and right_sidebar_enabled: width_content='63%'
+    elif left_sidebar_enabled != right_sidebar_enabled: width_content='740px'
+    else: width_content='100%'
+    if left_sidebar_enabled: left_sidebar_style = 'style="display: block;"'
+    else: left_sidebar_style = 'style="display: none;"'
+    if right_sidebar_enabled: right_sidebar_style = 'style="display: block;"'
+    else: right_sidebar_style = 'style="display: none;"'
+    style_content = 'style="width: %s"' % width_content
+    }}
+  </head>
+  
+  <body> 
+    
+    <div class="flash">{{=response.flash or ''}}</div> <!-- notification div -->
+    
+    <div id="container">                        
+      <div id="wrapper">        
+		    <div class="topbar">
+		      <div class="container">    
+		        <div class="sixteen columns">
+		         {{if auth.user is not None: }}
+		          <div style="float:left; vertical-align:middle;" id="myTitle">Control<span class="fontTitle">IES</span><br></div>
+		          <div id="menu">{{=MENU(response.menu,_class='sf-menu') }}</div>
+              	  {{pass}}
+		        </div>
+		      </div>
+		    </div><!-- topbar -->
+    
+            <div id="header"> <!-- header and login nav -->
+              {{block header}} <!-- this is default header -->
+				{{try:}}{{=SPAN(T('Welcome'),' ',auth.user.first_name,' [ ', A(T('logout'),_href=URL('default','user')+'/logout'), ']',_class='auth_navbar')}}{{except:pass}}   
+	              <div style="clear: both;"></div><!-- Clear the divs -->
+              {{end}}                                     
+            </div><!-- header  -->
+    
+    
+            <div id="page"> <!-- Here my central body -->     
+        
+                  {{if left_sidebar_enabled:}}
+                      <div id="left_sidebar" {{=XML(left_sidebar_style)}} >
+                        <div style="padding: 4px;">
+                      {{block left_sidebar}}Content Left Sidebar{{end}}       
+                        </div>
+                      </div><!-- left_sidebar -->
+                  {{pass}}
+        		  <br>
+                  <!-- content -->
+                  <div id="content" {{=XML(style_content)}}>
+                  
+                      {{include}}           
+                  
+                  </div>
+                  <!-- content -->
+        
+                  {{if right_sidebar_enabled:}}
+                      <div id="right_sidebar" {{=XML(right_sidebar_style)}} >
+                        <div style="padding: 4px;">
+                          {{block right_sidebar}}Content Right Sidebar{{end}}
+                        </div>
+                  </div><!-- right_sidebar -->
+                      {{pass}}
+        
+        
+              <div style="clear: both;"></div><!-- Clear the divs -->
+              
+            </div><!-- page -->                         
+
+	<div style="text-align:center">
+	<p class="ui-state-default ui-corner-all" style="padding:2px; margin-top:1em; text-align:center; ">
+	<span style="float:center; margin:-2px 5px 0 0;"></span>
+		<span id="licenseText">Copyright (C) 2012 - ControlIES es una aplicación bajo licencia GPL versión 2 ó posteriores.</span> <a href="javascript:showInfo();">[<span id="licenseInfo">+ info</span>]</a>
+	</p>    
+     </div>
+      </div><!-- wrapper -->
+    </div><!-- container -->        
+
+	<script language="javascript">
+	function showInfo(){
+		 jQuery( "#dialog-info" ).dialog({
+			resizable: false,
+			height:400,
+			width:700,
+			modal: true,
+			buttons: { "Cerrar": function() { $( this ).dialog( "close" ); }}
+		 }).dialog('open');
+	}
+	</script>
+   <div id="dialog-info" title="Acerca de ControlIES" style="display:none;"><br>
+       <b>Versi&oacute;n del paquete:</b> 0.6.4-4<br><br>
+       <b>Autores:</b>
+       <p> - Manuel Mora Gordillo - manuel.mora.gordillo@gmail.com</p>
+       <p> - Francisco Damián Méndez Palma - fmendezpalma@gmail.com</p>
+       <p> - José Luis Redrejo Rodríguez - jredrejo@debian.org</p><br>
+       <b>Licencia:</b><br>
+       <b>ControlIES</b> is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or (at your option) any later version.<br>
+ <b>ControlIES</b> is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.<br>
+ You should have received a copy of the GNU General Public License along with <b>ControlIES</b>. If not, see <a href="http://www.gnu.org/licenses/" target="_blank">http://www.gnu.org/licenses/</a>.<br>
+       <p style="text-align:center;"><a href="http://desarrollo.educarex.es/linex/projects/servidoressecundaria/repository/show/controlies" target="_blank">Código Fuente</a></p>
+   </div>
+
+  </body>
+</html>

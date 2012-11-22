@@ -1,0 +1,203 @@
+<!-- Libreria Multiselect -->
+{{response.files.append(URL('static','js/multiselect/jquery.multiselect.css'))}}
+{{response.files.append(URL('static','js/multiselect/jquery.multiselect.min.js'))}}
+{{response.files.append(URL('static','js/multiselect/jquery.multiselect.es.js'))}}
+{{#response.files.append(URL('static','css/helper.css'))}}
+{{#response.files.append(URL('static','css/dropdown.css'))}}
+{{#response.files.append(URL('static','css/default.advanced.css'))}}
+ 
+{{extend 'layout.html'}}
+
+        <div id="tabla_clientes" class="centerGrid">
+            <table id="list" width="100%"></table>
+            <div id="pager" style=""></div> 
+            <div id="filter" style="margin-left:30%;display:none">Buscar nada</div>
+        </div>
+
+        <div id="dialog-form"></div>
+
+        <div id="dialog-confirm" title="¿Borrar el registro seleccionado?" style="display:none;">
+            <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>Este elemento quedará permanentemente eliminado. ¿Está seguro?</p>
+        </div>
+
+        <div id="dialog-alert" title="Atención" style="display:none;">
+            <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>Para operar sobre un registro debe seleccionarlo previamente.</p>
+        </div>
+
+
+<script type="text/javascript">  
+    
+    jQuery(function() {
+        jQuery("#dialog-confirm").dialog({ autoOpen: false });
+        jQuery("#dialog-alert").dialog({ autoOpen: false });
+    });
+    
+                
+    function print_grid(){  
+          jQuery("#list").jqGrid({
+                //url:"/controlies/laptops_trademarks/call/json/list",
+                url:"{{=URL(c='laptops_trademarks',f='call',args=['json','list'])}}",
+                data: "{}",
+                datatype: 'json',
+                mtype: 'GET',
+                contentType: "application/json; charset=utf-8",
+                complete: function(jsondata, stat) {
+                    if (stat == "success") {
+                        var thegrid = jQuery("#list")[0];
+                        thegrid.addJSONData(JSON.parse(jsondata.responseText).d);
+                    }
+                },
+                
+                colNames:['Marca','Modelo'],
+                colModel:[ 
+                    {name:'trademark',index:'trademark', width:60, align:"center"},
+                    {name:'model',index:'model', width:115, align:"center"}],
+                rowNum:25,
+                height:335,
+                width: 900,
+                rowList:[25,50,75],  
+                pager: '#pager', 
+                sortname: 'trademark', 
+                autowidth: false,
+                viewrecords: true, 
+                sortorder: "asc", 
+                caption:"Marcas de Portátiles"    
+        
+          }); 
+          jQuery("#list").jqGrid('navGrid','#pager',{add:false,edit:false,del:false,search:false,refresh:false});
+        
+            jQuery("#list").jqGrid('navButtonAdd','#pager',{
+                    caption: "Insertar",
+                    buttonicon :'ui-icon-plus',
+                    onClickButton : function (){ 
+                        addRecord();
+                    } 
+            }); 
+            jQuery("#list").jqGrid('navButtonAdd','#pager',{
+                    caption: "Modificar", 
+                    buttonicon :'ui-icon-pencil',
+                    onClickButton : function (){ 
+                        modifyRecord();
+                } 
+            }); 
+            jQuery("#list").jqGrid('navButtonAdd','#pager',{
+                    caption: "Borrar", 
+                    buttonicon :'ui-icon-trash',
+                    onClickButton : function (){ 
+                        deleteRecord();
+                } 
+            });  
+          
+          jQuery("#list").jqGrid('filterToolbar'); 
+       
+    }
+    
+    
+    function rowSelected(){
+            var id = jQuery("#list").jqGrid('getGridParam','selrow'); 
+        
+            if( id == null ){
+                jQuery( "#dialog-alert" ).dialog({
+                    resizable: false,
+                    height:150,
+                    width:290,
+                    modal: true,
+                    buttons: { "Aceptar": function() { $( this ).dialog( "close" ); }}
+                }).dialog('open');
+                return false;
+            }
+            return id;
+    }           
+    
+    function addRecord(){
+    		ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+            jQuery("#messageLoading").show();
+        
+            jQuery("#dialog-form").html("").css("display","none");
+            jQuery("#dialog-form").load("form.html", function() {
+				            	
+                jQuery("#form_data #action").val("add");
+                jQuery("#form_data #messageForm").html("Todos los campos son obligatorios");                                     
+        
+                x = (jQuery(window).width()-350)/2;
+                y = (jQuery(window).height()-500)/2;
+        
+                jQuery("#messageLoading").hide();
+        
+                jQuery("#dialog-form").dialog({
+                    resizable: false,
+                    position: top,
+                    modal: true,
+                    width: 350,
+                    title: "Añadir Marca/Modelo"
+                }).dialog('option', 'position', [x, y]);
+            });
+    }
+    
+    function modifyRecord(){
+    		ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+			var id;
+
+			jQuery("#messageLoading").show();
+			
+			var id = rowSelected();
+			if(id==false)
+				return false;
+
+			jQuery("#dialog-form").html("").css("display","none");
+			jQuery("#dialog-form").load("form.html", function() {
+
+				jQuery("#form_data #action").val("modify");
+				jQuery("#form_data #messageForm").html("Todos los campos son obligatorios");
+				
+				jQuery.post('call/json/getTrademarkData',{ id_trademark: id }, function(result) {						
+
+					jQuery("#form_data #id_trademark").val(result.response['id_trademark']);
+					jQuery("#form_data #trademark").val(result.response['trademark']);
+					jQuery("#form_data #model").val(result.response['model']);					
+
+					x = (jQuery(window).width()-350)/2;
+					y = (jQuery(window).height()-500)/2;
+					
+					jQuery("#messageLoading").hide();
+					
+					jQuery("#dialog-form").dialog({
+						resizable: false,
+						modal: true,
+						width: 350,
+						title: "Modificar Marca/Modelo"
+					}).dialog('option', 'position', [x, y]);                        
+				});               
+			});
+    }
+    
+    function deleteRecord(){
+    		ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+            var id = rowSelected();
+            if(id==false)
+                return false;
+        
+            jQuery( "#dialog-confirm" ).dialog({
+                resizable: false,
+                height:160,
+                width:350,
+                modal: true,
+                buttons: {
+                    "Borrar": function() {
+                        jQuery.post("call/json/delete","id_trademark="+id, function(data){
+                            jQuery("#dialog-confirm").dialog( "close" );
+                            jQuery("#list").trigger("reloadGrid");
+                        });
+                    },
+                    "Cancelar": function() {
+                        $(this).dialog( "close" );
+                    }
+                }
+            }).dialog('open');
+    }
+
+</script>
+
+<script type="text/javascript">
+  jQuery(document).ready(function(){ print_grid();}); 
+</script>

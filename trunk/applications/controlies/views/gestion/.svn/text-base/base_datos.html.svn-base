@@ -1,0 +1,113 @@
+{{if right_version:}}
+
+    {{response.files.append(URL('static','js/fileuploader.js'))}}
+{{else:}}
+    {{response.files.append(URL('static','css/AjaxUpload.css'))}}
+    {{response.files.append(URL('static','js/AjaxUpload.2.0.min.js'))}}
+{{pass}}
+
+{{extend 'layout.html'}}
+   
+<p><h1>Importación de datos de Port&aacute;tiles</h1><p>
+<p><h3>Pasos a realizar:</h3><p>
+
+
+<ol>
+  <li>Generar el archivo de intercambio correspondiente con la herramienta de exportaci&oacute;n. La herramienta genera dos ficheros: <strong>profesores.csv</strong> (con los port&aacute;tiles de profesores) y <strong>alumnos.csv</strong> (con los port&aacute;tiles de los alumnos).</li>
+  <li>Subir, usando el botón <strong>Explorar fichero de importaci&oacute;n</strong>, el
+archivo correspondiente (por separado). Si el port&aacute;til existe en la BD, no se har&aacute; nada.</li>
+</ol>
+
+<br>
+<hr />
+<br>
+
+
+<center>
+<br/>
+
+{{if right_version:}}
+    <div id="file-upload">
+      <noscript>
+        <p>Please enable JavaScript to use file uploader.</p>
+      </noscript>
+      
+    </div>
+{{else:}}
+    <div id="upload_button">Subir fichero</div>
+    <ul id="lista">
+    </ul>
+{{pass}}
+
+<h3>Pulse Enviar después de que el archivo o archivos hayan terminado de subir al servidor</h3>
+
+{{=form.custom.begin}}
+
+{{=form.custom.submit}}
+
+{{=form.custom.end}}
+
+</center>
+<hr />
+
+
+{{if right_version:}}
+
+<script type="text/javascript">
+  function createUploader(){            
+     var uploader = new qq.FileUploader({
+  element: document.getElementById('file-upload'),
+  action: '{{=URL("subida_rayuela")}}', 
+  sizeLimit: 200000000,      
+  minSizeLimit: 0,
+  debug: true,
+        onSubmit: function(id, fileName){},
+        onProgress: function(id, fileName, loaded, total){},
+        onComplete: function(id, fileName, responseJSON){},
+        onCancel: function(id, fileName){},
+        allowedExtensions: ['csv'],
+        messages: {
+            typeError: "{file} {{='Tiene una extensión incorrecta.'}} {{='Sólo se permiten archivos csv '}} {extensions}",
+            sizeError: "{file} {{'es demasiado grande, el tamaño máximo permitido es'}} {sizeLimit}.",
+            minSizeError: "{file} {{='es demasiado pequeño, el tamaño mínimo de archivo es'}} {minSizeLimit}.",
+            emptyError: "{file} {{='está vacío, selecciona archivos de nuevo'}}",
+            onLeave: "{{='Se están subiendo los archivos. Si sales ahora se cancelará la subida.'}}"                         
+        },
+        showMessage: function(message){ alert(message); }        
+     });           
+  }
+  window.onload = createUploader;     
+</script>
+
+
+{{else:}}
+<script language="javascript">
+$(document).ready(function(){
+    var button = $('#upload_button'), interval;
+    new AjaxUpload('#upload_button', {
+        action:  '{{=URL("subida_rayuela")}}',
+        onSubmit : function(file , ext){
+        if (! (ext && /^(csv)$/.test(ext))){
+            // extensiones permitidas
+            alert('Error: Tiene una extensión incorrecta. Sólo se permiten archivos .csv');
+            // cancela upload
+            return false;
+        } else {
+                       //Cambio el texto del boton y lo deshabilito
+            button.text('Subiendo fichero');
+            this.disable();
+        }
+        },
+        onComplete: function(file, response){
+            button.text('Subir un fichero');
+            // habilito upload button                       
+            this.enable();          
+            // Agrega archivo a la lista
+            //$('#lista').appendTo('.files').text(file);
+             $( "<li ></li>" ).text( file ).appendTo( $('#lista'));
+        }   
+    });
+});
+</script>
+
+{{pass}}

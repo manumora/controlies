@@ -1,0 +1,76 @@
+<script language="javascript">
+
+    $(function() {
+        $("#name").focus();
+        $("#saveButton").button({ icons: { primary: "ui-icon-disk"}});
+        $("#cancelButton")
+            .button({ icons: { primary: "ui-icon-close"}})
+            .click( function(){ $('#dialog-form').dialog('close'); });
+    });
+
+    function restartStyle(){
+        $("#form_data p span").css("color","black");
+        $('#message').html("");
+    }
+
+
+    function send(){
+    	ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+        restartStyle();
+
+        jQuery.post('call/json/modify', jQuery("#form_data").serialize(), function(result) {
+            switch(result.response){
+                case "OK":{
+                    jQuery('#message').html("Operación realizada correctamente").css("color","green").effect("highlight", {"color":"yellow"}, 1000);
+                    setTimeout("$('#dialog-form').dialog('close')",1000);
+                    jQuery("#list").trigger("reloadGrid");
+                    break;
+                }
+                case "fail":{
+                    jQuery('#message').html("Se produjo un error").effect("highlight", {"color":"yellow"}, 1000);
+                    break;
+                }
+                case "distinctPassword":{
+                    jQuery('#password2Tag').css("color","red");
+                    jQuery('#password2').effect("highlight", {"color":"yellow"}, 1000).focus();
+                    jQuery('#message').html("La repetición no coincide").effect("highlight", {"color":"yellow"}, 1000);
+                    break;
+                }
+                case "userAlreadyExists":{
+                    jQuery('#userTag').css("color","red");
+                    jQuery('#user').effect("highlight", {"color":"yellow"}, 1000).focus();
+                    jQuery('#message').html("Ya existe ese nombre de usuario").effect("slide");                  
+                    break;
+                }
+                default:{
+                    jQuery('#'+result.response+"Tag").css("color","red");
+                    jQuery('#'+result.response).effect("highlight", {"color":"yellow"}, 1000).focus();
+                    jQuery('#message').html("Hay campos vacíos o incorrectos").effect("slide");
+                    break;
+                }
+            }
+        });
+
+        return false;
+    }
+    
+</script>
+ 
+<form id="form_data" onsubmit="return send();">
+    <input type="hidden" id="action" name="action"/>
+    <p><span id="typeTag">Tipo Grupo</span><br>
+        <select id="type" name="type">
+            <option value="none">Seleccione...</option>
+            <option value="school_department">Departamento</option>
+            <option value="school_class">Curso</option>
+        </select>
+    </p>    
+    <p><span id="nameTag">Nombre </span><br><input type="text" id="name" name="name"/></p>
+
+    <p><span id="usersTag">Usuarios</span>
+       <div class="form_users"><input type="text" name="users" value="" id="users" /></div>
+    </p>
+    <p  style="margin-bottom:300px;"></p>
+    <div id="message" style="text-align:center; font-weight:bold; color:red; padding:3px; "></div>
+    <div style="text-align:center;"><button id="saveButton" type="submit" style="width:100px;">Guardar</button>&nbsp;&nbsp;<button type="button" id="cancelButton" style="width:100px;">Cancelar</button></div>      
+</form>

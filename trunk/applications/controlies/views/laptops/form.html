@@ -1,0 +1,83 @@
+<script language="javascript">
+
+    $(function() {
+        $("#id_trademark").focus();
+        $("#saveButton").button({ icons: { primary: "ui-icon-disk"}});
+        $("#cancelButton")
+            .button({ icons: { primary: "ui-icon-close"}})
+            .click( function(){ $('#dialog-form').dialog('close'); });
+    });
+
+    function restartStyle(){
+        $("#form_data p span").css("color","black");
+        $('#message').html("");
+    }
+
+    function send(){
+    	ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+    	
+        restartStyle();
+        jQuery.post('call/json/modify', jQuery("#form_data").serialize(), function(result) {
+            switch(result.response){
+                case "OK":{
+                    jQuery('#message').html("Operación realizada correctamente").css("color","green").effect("highlight", {"color":"yellow"}, 1000);
+					jQuery("#list").trigger("reloadGrid");					
+					setTimeout("$('#dialog-form').dialog('close')",1000);
+                    break;
+                }
+                case "fail":{
+                    jQuery('#message').html("Se produjo un error").effect("highlight", {"color":"yellow"}, 1000);
+                    break;
+                }
+                case "serial_number_exists":{
+                    jQuery('#serial_numberTag').css("color","red");
+                    jQuery('#serial_number').effect("highlight", {"color":"yellow"}, 1000).focus();
+                    jQuery('#message').html("Ya existe ese número de serie").effect("slide");                  
+                    break;
+                }
+                case "mac_eth0_exists":{
+                    jQuery('#mac_eth0Tag').css("color","red");
+                    jQuery('#mac_eth0').effect("highlight", {"color":"yellow"}, 1000).focus();
+                    jQuery('#message').html("Ya hay otro equipo con esa mac").effect("slide");                  
+                    break;
+                }
+                case "mac_wlan0_exists":{
+                    jQuery('#mac_wlan0Tag').css("color","red");
+                    jQuery('#mac_wlan0').effect("highlight", {"color":"yellow"}, 1000).focus();
+                    jQuery('#message').html("Ya hay otro equipo con esa mac").effect("slide");                  
+                    break;
+                }
+                default:{
+                    jQuery('#'+result.response+"Tag").css("color","red");
+                    jQuery('#'+result.response).effect("highlight", {"color":"yellow"}, 1000).focus();
+                    jQuery('#message').html("Hay campos vacíos o incorrectos").effect("slide");
+                    break;
+                }
+            }
+        });
+
+        return false;
+    }
+
+</script>
+ 
+<form id="form_data" onsubmit="return send();">
+    <input type="hidden" id="action" name="action"/>
+    <input type="hidden" id="id_laptop" name="id_laptop"/>    
+    <div>
+		<p><span id="id_trademarkTag">Marca / Modelo (*)</span><br>
+			<select type="text" id="id_trademark" name="id_trademark">
+				<option value="none">Seleccione...</option>
+			</select>
+		</p>    
+		<p><span id="serial_numberTag">Número Serie (*)</span><br><input type="text" id="serial_number" name="serial_number"/></p>
+		<p><span id="nameTag">Nombre</span><br><input type="text" id="name" name="name" maxlength="20"/></p>
+		<p><span id="battery_snTag">Número Serie Batería</span><br><input type="text" id="battery_sn" name="battery_sn"/></p>
+		<p><span id="charger_snTag">Número Serie Cargador</span><br><input type="text" id="charger_sn" name="charger_sn"/></p>
+		<p><span id="mac_eth0Tag">MAC eth0</span><br><input type="text" id="mac_eth0" name="mac_eth0" maxlength="17"/></p>
+		<p><span id="mac_wlan0Tag">MAC wlan0</span><br><input type="text" id="mac_wlan0" name="mac_wlan0" maxlength="17"/></p>
+    </div>
+    <div id="message" style="text-align:center; font-weight:bold; color:red; padding:3px; "></div>
+    <div style="text-align:center;"><button id="saveButton" type="submit" style="width:100px;">Guardar</button>&nbsp;&nbsp;<button type="button" id="cancelButton" style="width:100px;">Cancelar</button></div>
+    <p style="padding-top:10px; text-align:center; font-size:10px;" id="messageForm"></p>       
+</form>

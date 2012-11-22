@@ -1,0 +1,176 @@
+{{if right_version:}}
+    
+    {{response.files.append(URL('static','js/fileuploader.js'))}}
+{{else:}}
+    {{response.files.append(URL('static','css/AjaxUpload.css'))}}
+    {{response.files.append(URL('static','js/AjaxUpload.2.0.min.js'))}}
+{{pass}}
+
+{{extend 'layout.html'}}
+   
+<p><h1>Importación de datos de alumnos y profesores desde Rayuela</h1><p>
+<p><h3>Pasos a realizar:</h3><p>
+
+
+<ol>
+  <li>Ir a <a href="http://rayuela.educarex.es">Rayuela
+(http://rayuela.educarex.es</a>), entrar con el login particular
+de administrador de un centro y desde Utilidades-&gt;Intercambios
+de informaci&oacute;n generar y descargar el listado que se desee
+de alumnos
+y/o profesores.</li>
+  <li>Subir, usando el botón <strong>Subir uno o más ficheros</strong>, el
+archivo
+descargado (No hay problema en seleccionar y subir juntos el archivo de profesores y de alumnos)</li>
+
+  <li>Una vez que los archivos están subidos (aparece su tamaño a la derecha del nombre), usar el botón <strong>Enviar</strong> para iniciar el proceso (antes se debe marcar el recuadro de <strong>Principio de curso...</strong> si se desea borrar los usuarios antiguos. 
+  <li>Se dar&aacute;n de alta en ldap los grupos a los que
+pertenecen
+los usuarios del listado, los usuarios y se
+a&ntilde;adir&aacute;n los usuarios a los grupos.&nbsp;</li>
+  <li>La aplicaci&oacute;n proporcionar&aacute; un
+archivo de salida con los
+usuarios y sus datos (login y contrase&ntilde;as)
+para comprobar si hay alg&uacute;n problema o error. Por motivos de
+seguridad obvios ese archivo debe destruirse o guardarse en lugar
+seguro una vez comprobado. Los usuarios incluidos en el archivo de Rayuela que estuvieran dados de alta previamente en el ldap aparecerán, pero sin su contraseña</li>
+</ol>
+
+<br>
+<hr />
+<br>
+
+
+<center>
+<br/>
+
+{{if right_version:}}
+    <div id="file-upload">
+      <noscript>
+        <p>Please enable JavaScript to use file uploader.</p>
+      </noscript>
+      
+    </div>
+{{else:}}
+    <div id="upload_button">Subir un fichero</div>
+    <ul id="lista">
+    </ul>
+{{pass}}
+
+<h3>Pulse Enviar después de que el archivo o archivos hayan terminado de subir al servidor</h3>
+
+{{=form.custom.begin}}
+{{=form.custom.widget.principiocurso}}
+Para principio de curso, borrar los usuarios que no estén en este 
+archivo. Lo hace tanto con profesores (si es un archivo de profesores), como con alumnos (si hay archivo de alumnos).
+<span style="font-weight: bold;">Esta opción borrará usuarios.</span>
+<br><br>
+{{=form.custom.submit}}
+
+{{=form.custom.end}}
+<br>
+</center>
+<hr />
+<br>
+<h3>Información adicional de utilidad para los administradores:</h3>
+
+Durante el curso en cualquier momento se pueden dar de alta nuevos
+usuarios directamente usando el menú de administración, o importandolos desde Rayuela. Importar de nuevo un archivo descargado de Rayuela no afecta a los usuarios ya dados de alta (a no ser que se active la opción de principio de curso y haya profesores que hayan sido dados de baja en el centro en Rayuela) <br>
+<br>
+Los profesores ser&aacute;n dados de alta con el mismo login que
+tengan en
+Rayuela, la contrase&ntilde;a ser&aacute; su NIF.&nbsp;S&oacute;lo si ya hab&iacute;a 
+un usuario con el mismo login en
+el centro, le cambiar&aacute; la numeraci&oacute;n final del
+login.
+<br>
+<br>
+Los alumnos tendr&aacute;n como contrase&ntilde;a su fecha de nacimiento
+ en ocho dígitos (p. ej: 2-Enero-1989 tiene de contraseña 02011989) . Su
+login ser&aacute;:<br>
+<ul>
+  <li>Si el centro ha dado de alta a los alumnos como usuarios en
+Rayuela, el login que tengan ah&iacute;</li>
+  <li>Si no les ha dado de alta, ser&aacute;: primeras letras
+del
+nombre, primer apellido completo, primera letra del segundo apellido y
+01. Los acentos, puntos y caracteres no disponibles en el alfabeto inglés son eliminados.
+Por ejemplo: Mar&iacute;a Pilar Rodriguez-Mu&ntilde;ino
+Sanchez ser&aacute; el usuario:
+mprodriguezmuninos01. Si al dar al alumno de alta existiera
+ya otro
+alumno con ese login, el sistema cambiar&aacute; el 01 por 02 y
+as&iacute; sucesivamente.</li>
+</ul>
+<br>
+<br>
+<b>Importante</b>:
+Las carpetas de los usuarios y de los grupos se generan
+autom&aacute;ticamente
+en el servidor de NFS. Cada 5 minutos se comprueba si hay
+alg&uacute;n usuario
+nuevo y se genera su carpeta ah&iacute;. Si no se desea esperar y
+se quieren
+generar inmediatamente las carpetas, basta con ejecutar el script <i>crearCarpetas</i>
+en el servidor de NFS.
+
+{{if right_version:}}
+
+<script type="text/javascript">
+  function createUploader(){            
+     var uploader = new qq.FileUploader({
+  element: document.getElementById('file-upload'),
+  action: '{{=URL("subida_rayuela")}}', 
+  sizeLimit: 200000000,      
+  minSizeLimit: 0,
+  debug: true,
+        onSubmit: function(id, fileName){},
+        onProgress: function(id, fileName, loaded, total){},
+        onComplete: function(id, fileName, responseJSON){},
+        onCancel: function(id, fileName){},
+        allowedExtensions: ['zip','xml'],
+        messages: {
+            typeError: "{file} {{='Tiene una extensión incorrecta.'}} {{='Sólo se permiten estas extensiones: '}} {extensions}",
+            sizeError: "{file} {{'es demasiado grande, el tamaño máximo permitido es'}} {sizeLimit}.",
+            minSizeError: "{file} {{='es demasiado pequeño, el tamaño mínimo de archivo es'}} {minSizeLimit}.",
+            emptyError: "{file} {{='está vacío, selecciona archivos de nuevo'}}",
+            onLeave: "{{='Se están subiendo los archivos. Si sales ahora se cancelará la subida.'}}"                         
+        },
+        showMessage: function(message){ alert(message); }        
+     });           
+  }
+  window.onload = createUploader;     
+</script>
+
+
+{{else:}}
+<script language="javascript">
+$(document).ready(function(){
+    var button = $('#upload_button'), interval;
+    new AjaxUpload('#upload_button', {
+        action:  '{{=URL("subida_rayuela")}}',
+        onSubmit : function(file , ext){
+        if (! (ext && /^(zip|xml)$/.test(ext))){
+            // extensiones permitidas
+            alert('Error: Tiene una extensión incorrecta. Sólo se permiten estas extensiones: xml, zip');
+            // cancela upload
+            return false;
+        } else {
+                       //Cambio el texto del boton y lo deshabilito
+            button.text('Subiendo fichero');
+            this.disable();
+        }
+        },
+        onComplete: function(file, response){
+            button.text('Subir un fichero');
+            // habilito upload button                       
+            this.enable();          
+            // Agrega archivo a la lista
+            //$('#lista').appendTo('.files').text(file);
+             $( "<li ></li>" ).text( file ).appendTo( $('#lista'));
+        }   
+    });
+});
+</script>
+
+{{pass}}

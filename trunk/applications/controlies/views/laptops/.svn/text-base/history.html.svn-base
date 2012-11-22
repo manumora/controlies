@@ -1,0 +1,228 @@
+<script language="javascript">
+
+    $(function() {
+        $("#cancelButton")
+            .button({ icons: { primary: "ui-icon-close"}})
+            .click( function(){ 
+            	jQuery("#dialog-form-history").empty();
+            	jQuery('#dialog-form').dialog('destroy'); 
+             });
+            
+        jQuery("#dialog-form-history").empty();
+    });
+
+    function print_grid_historical(){  
+          jQuery("#table_history #list_history").jqGrid({
+                url:"{{=URL(c='laptops',f='call',args=['json','listHistory'])}}",
+                data: "{}",
+                datatype: 'json',
+                mtype: 'GET',
+                contentType: "application/json; charset=utf-8",
+                complete: function(jsondata, stat) {
+                    if (stat == "success") {
+                        var thegrid = jQuery("#table_history #list_history")[0];
+                        thegrid.addJSONData(JSON.parse(jsondata.responseText).d);
+                    }
+                },
+                
+                colNames:['Fecha/Hora','Estado','Login','Nombre','Comentario'],
+                colModel:[ 
+                    {name:'datetime',index:'datetime', width:70, align:"center"},
+                    {name:'state',index:'state', width:60, align:"center"},
+                    {name:'username',index:'username', width:50, align:"center"},
+                    {name:'name',index:'name', width:100, align:"center"},             
+                    {name:'comment',index:'comment', width:100, align:"center"}
+                ],
+                postData:{id_laptop:$("#form_history #id_laptop").val()},
+                rowNum:25,
+                height:150,
+                width: 780,
+                rowList:[25,50,75],  
+                pager: '#pager_history', 
+                sortname: 'datetime', 
+                autowidth: false,
+                viewrecords: true, 
+                sortorder: "desc", 
+                caption:"Historial"    
+        
+          }); 
+          jQuery("#list_history").jqGrid('navGrid','#pager_history',{add:false,edit:false,del:false,search:false,refresh:false});
+        
+        jQuery("#list_history").jqGrid('navButtonAdd','#pager_history',{
+                caption: "Insertar",
+                buttonicon :'ui-icon-plus',
+                onClickButton : function (){ 
+                    addRecordHistory();
+                } 
+        });
+        jQuery("#list_history").jqGrid('navButtonAdd','#pager_history',{
+                caption: "Modificar", 
+                buttonicon :'ui-icon-pencil',
+                onClickButton : function (){ 
+                    modifyRecordHistory();
+            } 
+        }); 
+        jQuery("#list_history").jqGrid('navButtonAdd','#pager_history',{
+                caption: "Borrar", 
+                buttonicon :'ui-icon-trash',
+                onClickButton : function (){ 
+                    deleteRecordHistory();
+            } 
+        }); 
+    }
+
+    function rowSelectedHistory(){
+        var id = jQuery("#list_history").jqGrid('getGridParam','selrow'); 
+    
+        if( id == null ){
+            jQuery( "#dialog-alert" ).dialog({
+                resizable: false,
+                height:150,
+                width:290,
+                modal: true,
+                buttons: { "Aceptar": function() { $( this ).dialog( "close" ); }}
+            }).dialog('open');
+            return false;
+        }
+        return id;
+    }   
+
+    function addRecordHistory(){
+    	ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+        jQuery("#messageLoading").show();
+		jQuery("#dialog-form-history").html("");
+        jQuery("#dialog-form-history").html("").css("display","none");
+        jQuery("#dialog-form-history").load("form_history.html", function() {
+			getAllStates();
+			getAllUserTypes();
+            jQuery("#form_data_history #action").val("add");
+            jQuery("#form_data_history #id_laptop").val(jQuery("#form_history #id_laptop").val());
+            jQuery("#form_data_history #messageFormHistory").html("Los campos marcados con asterisco son obligatorios");                                     
+    
+            x = (jQuery(window).width()-400)/2;
+            y = (jQuery(window).height()-300)/2;
+    
+            jQuery("#messageLoading").hide();
+    
+            jQuery("#dialog-form-history").dialog({
+                resizable: false,
+                position: top,
+                modal: true,
+                width: 400,
+                title: "Añadir histórico"
+            }).dialog('option', 'position', [x, y]);
+        });
+    }
+	
+    function modifyRecordHistory(){
+    	ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+		var id;
+
+		jQuery("#messageLoading").show();
+		
+		var id = rowSelectedHistory();
+		if(id==false)
+			return false;
+			
+		jQuery("#dialog-form-history").html("").css("display","none");
+		jQuery("#dialog-form-history").load("form_history.html", function() {
+			getAllStates();
+			getAllUserTypes();			
+			jQuery("#form_data_history #action").val("modify");
+        	jQuery("#form_data_history #messageFormHistory").html("Los campos marcados con asterisco son obligatorios");
+			
+			jQuery.post('call/json/getDataHistory',{ id_historical: id }, function(result) {
+
+				jQuery("#form_data_history #id_historical").val(id);
+				jQuery("#form_data_history #id_state").val(result.response['id_state']);				
+				jQuery("#form_data_history #id_laptop").val(result.response['id_laptop']);
+				jQuery("#form_data_history #username").val(result.response['username']);
+				jQuery("#form_data_history #id_user_type").val(result.response['id_user_type']);	
+				jQuery("#form_data_history #name").val(result.response['name']);
+				jQuery("#form_data_history #nif").val(result.response['nif']);
+				jQuery("#form_data_history #comment").val(result.response['comment']);					
+
+				showFields();
+				
+				x = (jQuery(window).width()-400)/2;
+				y = (jQuery(window).height()-300)/2;
+				
+				jQuery("#messageLoading").hide();
+				
+				jQuery("#dialog-form-history").dialog({
+					resizable: false,
+					modal: true,
+					width: 400,
+					title: "Modificar histórico"
+				}).dialog('option', 'position', [x, y]);                        
+			});               
+		});
+    }
+
+    function deleteRecordHistory(){
+    		ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+            var id = rowSelectedHistory();
+            if(id==false)
+                return false;
+        
+            jQuery( "#dialog-confirm" ).dialog({
+                resizable: false,
+                height:160,
+                width:350,
+                modal: true,
+                buttons: {
+                    "Borrar": function() {
+                        jQuery.post("call/json/deleteHistory","id_historical="+id, function(data){
+                            jQuery("#dialog-confirm").dialog( "close" );
+                            jQuery("#list_history").trigger("reloadGrid");
+                            jQuery("#list").trigger("reloadGrid");
+                        });
+                    },
+                    "Cancelar": function() {
+                        $(this).dialog( "close" );
+                    }
+                }
+            }).dialog('open');
+    }
+
+    function getAllStates(){
+            $.post("call/json/getAllStates",   function(result) {
+                $.each( result.response, function(i, l){
+                    jQuery("#form_data_history #id_state").append("<option value='"+l.id_state+"'>"+l.state+"</option>");
+                });                    
+            });             
+    }
+    
+    function getAllUserTypes(){
+            $.post("call/json/getAllUserTypes",   function(result) {
+                $.each( result.response, function(i, l){
+                    jQuery("#form_data_history #id_user_type").append("<option value='"+l.id_user_type+"'>"+l.user_type+"</option>");
+                });                    
+            });             
+    }
+</script>
+ 
+<form id="form_history">
+    <input type="hidden" id="id_laptop" name="id_laptop"/>    
+    <div style="text-align:center;">
+		    <b>Marca / Modelo:</b>&nbsp;<span id="id_trademark"></span>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+		    <b>Número Serie:</b>&nbsp;<span id="serial_number"></span>
+    </div>
+    <br><br>
+    <div>
+        <div id="table_history" class="centerGrid">
+            <table width="100%" align="center">
+            <tr>
+                <td style="width:2%"></td>
+                <td style="text-align:center;"><table id="list_history" width="100%"></table></td>
+                <td style="width:2%"></td>
+            </tr>
+            </table>
+            <div id="pager_history" style=""></div> 
+            <div id="filter_history" style="margin-left:30%;display:none">Buscar nada</div>
+        </div>
+    </div>
+    <div id="message" style="text-align:center; font-weight:bold; color:red; padding:3px; "></div>
+    <div style="text-align:center;"><button type="button" id="cancelButton" style="width:100px;">Cerrar</button></div>       
+</form>
+<div id="dialog-form-history"></div>
