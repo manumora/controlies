@@ -1,7 +1,0 @@
-applications var/web2py
-wsgihandler.py var/web2py
-subwsgihandler.py var/web2py
-VERSION var/web2py
-controlies-apache etc/apache2/conf.d
-applications/__init__.py var/web2py
-applications/controlies/controlies etc/init.d

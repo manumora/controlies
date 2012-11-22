@@ -1,6 +1,0 @@
-{{extend 'layout_hosts.html'}}
-
-{{block vars_definition}} 
-	var type_host = "workstation-hosts";
-	var name_host = "Workstation";
-{{end}}
