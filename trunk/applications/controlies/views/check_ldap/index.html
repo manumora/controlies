@@ -1,0 +1,76 @@
+{{response.files.append(URL('static','js/utils.js'))}}
+
+{{extend 'layout.html'}}
+<script>
+    $(function() {
+        $("#tabsSearch").tabs().css("font-size","13px");
+        $("#buttonCheck")
+        	.button({ icons: { primary: "ui-icon-document"}})
+        	.click( function(){ check(); });        
+    })
+
+
+    function restartStyle(){
+        jQuery('#messageCheck').html("");
+    }
+	
+	function check(){
+    	ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+		restartStyle();
+		
+		jQuery.ajax({url:"{{=URL(c='check_ldap',f='call',args=['json','check_groups'])}}",
+			data:jQuery("#form_check").serialize()})
+			.done(function ( data ){
+                $.each( data.info, function(i, l){                	
+                	switch(l.info){
+                		case 'dont_exists':{
+							text="Grupo: "+l.group+": El usuario no existe - "+l.user;                			
+                		}                		
+                	}
+                	
+                    jQuery("#form_check #result_check").append("<option value='"+l.id_check+"'>"+text+"</option>");
+                });   
+			}
+		);	
+	}
+
+</script>
+<form id="form_check">
+   <table width="100%" cellspacing="12">
+    <tr>
+    <td>    
+        <div id="tabsSearch">
+            <ul>
+                <li><a href="#tabs-1"><span id="actions">Chequear LDAP</span></a></li>
+            </ul>
+            <div id="tabs-1" style="padding:3px;">  
+                <table style="width:100%">
+                    <tr>
+                        <td>
+                        	Tipo chequeo<br>
+                        	<select id="id_type_check" name="id_type_check">
+                        		<option value="groups">Grupos</option>
+                        	</select>
+                        </td>
+                   </tr>
+                    <tr>
+                        <td>
+                        	Resultado<br>
+                        	<select id="result_check" name="result_check" multiple="multiple" size="20"></select>
+                        </td>
+                   </tr>
+                   <tr>
+                        <td colspan="4" style="text-align:center;">
+                        	<br><div id="messageCheck" style="text-align:center; font-weight:bold; color:red; padding:3px; "></div>
+                        	<button type="button"  id="buttonCheck">Chequear</button>
+                        </td>
+                   </tr>
+                </table>
+            </div>
+        </div>              
+    </td>
+</tr>
+</table>
+</form>
+
+<div id="dialog-details"></div>
