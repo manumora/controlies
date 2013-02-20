@@ -43,20 +43,21 @@ response.menu+=[
 response.menu+=[('Gestión', False, None,[            
             ('Servidores de Aula', False,URL( 'gestion', 'servidores_aula')),   
             ('Importación de Rayuela', False, URL( 'gestion', 'rayuela')),
+            ('Mantenimiento de LDAP', False, None,[
+                ('Limpieza de grupos', False, URL('check_ldap','index')),
+                ('Detección de uid o gid duplicados', False, URL( 'gestion', 'duplicados')),
+                ])
 #            ('Importación datos de Portátiles', False, URL( 'gestion', 'base_datos')),
             ]
    )]
 
-response.menu+=[('Portátiles', False, None,[            
-            ('Listado de Portátiles', False,URL( 'laptops', 'index')),
-            ('Portátiles por Grupo', False,URL( 'laptops_groups', 'index')),
-            ('Marcas', False,URL( 'laptops_trademarks', 'index')),   
-            ]
-   )]
 
-response.menu+=[('Impresoras', False, None,[            
-            ('Listado de Impresoras', False,URL( 'laptops', 'index')),
-            ('Marcas', False,URL( 'laptops_trademarks', 'index')),   
+response.menu+=[('Base de Datos', False, None,[            
+            ('Dispositivos', False, None, [            
+                ('Listado', False,URL( 'laptops', 'index')),
+                ('Portátiles por Grupo', False,URL( 'laptops_groups', 'index')),
+                ('Marcas', False,URL( 'laptops_trademarks', 'index'))  
+                ]),
             ]
    )]
 
@@ -67,9 +68,3 @@ response.menu+=[('Informes', False, None,[
    )]
 
 response.menu+=[('Acerca de', False, 'javascript:showInfo()')]
-
-response.menu+=[('Mantenimiento de LDAP', False, None,[
-                ('Limpieza de usuarios inexistentes en grupos', False, URL( 'gestion', 'limpieza_usuarios')),
-                ('Detección de uid o gid duplicados', False, URL( 'gestion', 'duplicados')),
-            ]
-   )],        
