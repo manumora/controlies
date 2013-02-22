@@ -1,3 +1,9 @@
+controlies (0.6.4-6) unstable; urgency=low
+
+  * Cambio del literal portatiles por dispositivos
+
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Wed, 20 Feb 2012 13:15:00 +0200
+
 controlies (0.6.4-5) unstable; urgency=low
 
   * Cambios esteticos
