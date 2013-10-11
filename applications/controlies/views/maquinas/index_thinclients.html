@@ -1,0 +1,292 @@
+{{response.files.append(URL('static','js/multiselect/jquery.multiselect.css'))}}
+{{response.files.append(URL('static','js/multiselect/jquery.multiselect.min.js'))}}
+{{response.files.append(URL('static','js/multiselect/jquery.multiselect.es.js'))}}
+{{#response.files.append(URL('static','css/helper.css'))}}
+{{#response.files.append(URL('static','css/dropdown.css'))}}
+{{#response.files.append(URL('static','css/default.advanced.css'))}}
+ 
+
+{{extend 'layout.html'}}
+       
+        <form action="" enctype="multipart/form-data" method="post" id="form_maquinas">
+            <input type="button" value="Actualizar" onclick="javascript: reloadGrid()">            
+            <input type="button" value="Limpiar histórico anterior a 30 días" onclick="javascript: limpiarHistorico()">
+        </form>
+        <br/>
+        <div id="tabla_thinclient" style="float:left;">
+            <table id="list" width="100%"></table>
+            <div id="pager" style=""></div> 
+            <div id="filter" style="margin-left:30%;display:none">Buscar nada</div>
+        </div>
+        <div id="tabla_detalle" style="float:right;">
+            <table id="list_detalle" width="100%"></table>
+            <div id="pager_detalle" style=""></div>
+            <div id="filter_detalle" style="margin-left:30%;display:none">Buscar nada</div>
+        </div>
+
+        <div id="dialog-form-sesiones"></div>
+
+        <div id="dialog-alert" title="Atención" style="display:none;">
+            <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>Operacion Realizada.</p>
+        </div>
+         
+
+<script type="text/javascript">    
+
+   jQuery(function() {
+        jQuery("#dialog-alert").dialog({ autoOpen: false });
+    });
+    
+
+   function print_grid(){  
+          jQuery("#list").jqGrid({
+                url:"{{=URL(c='maquinas',f='call',args=['json','list_thinclients_state'])}}",
+                data: "{}",
+                datatype: 'json',
+                mtype: 'GET',
+                contentType: "application/json; charset=utf-8",
+                complete: function(jsondata, stat) {
+                    if (stat == "success") {
+                        var thegrid = jQuery("#list")[0];
+                        thegrid.addJSONData(JSON.parse(jsondata.responseText).d);
+                    }
+                },
+                onSelectRow: function (id) { showGridDetalle(id); },
+                colNames:['Thinclient','Hora','Teclado','Raton'],
+                colModel:[                  
+                    {name:'host',index:'host', width:30, align:"left"},
+                    {name:'time',index:'time', width:50, align:"center"},
+                    {name:'teclado',index:'teclado', width:50, align:"center",stype:'select', formatter: formatColumna, editoptions:{value:":Todos;0:Apagado;1:Desconectado;2:Conectado"}},
+                    {name:'raton',index:'raton', width:50, align:"center",stype:'select', formatter: formatColumna , editoptions:{value:":Todos;0:Apagado;1:Desconectado;2:Conectado"}}
+                ], 
+                rowNum:15,
+                height:335,
+                width: 475,
+                rowList:[15,30,45],  
+                pager: '#pager', 
+                sortname: 'host', 
+                autowidth: false,
+                viewrecords: true, 
+                sortorder: "asc", 
+                caption:"Control de Thinclients"            
+          }); 
+          jQuery("#list").jqGrid('navGrid','#pager',{add:false,edit:false,del:false,search:false,refresh:false});
+          jQuery("#list").css("cursor","pointer");        
+          jQuery("#list").jqGrid('filterToolbar'); 
+          $("tr.ui-search-toolbar").height(30);
+          jQuery("#tabla_thinclient").find("select").height("90%");
+    }
+
+    function formatColumna(cellvalue) {
+       switch (cellvalue) { 
+           case "0": txt="Apagado"; fondo="gray"; break;
+           case "1": txt="Desconectado"; fondo="orange"; break;
+           case "2": txt="Conectado"; fondo="green"; break;
+           default: txt="Login: "+cellvalue; fondo="transparent";
+       }
+       contenido="<span style='background-color:"+fondo+"; display:block; background-image:none;margin-right:-2px; margin-left:-2px; height:20px; padding:1px;'>" + txt + "</span>";
+       return contenido;
+    }
+
+   function showGridDetalle(id) {
+
+         data=jQuery("#list").jqGrid('getRowData',id); 
+         equipo=data.host;
+         $('#tabla_detalle').show();
+         print_grid_detalle(equipo);
+   }
+
+   function reloadGrid() {
+
+        $('#list').trigger('reloadGrid');
+        $('#tabla_detalle').hide();
+
+   }
+
+
+   function limpiarHistorico() {
+
+           jQuery.post('call/json/cleanthinclients', { data: "" } , function(result) {
+                switch(result.response){
+                    case "OK":{
+                        jQuery( "#dialog-alert" ).dialog({
+                                resizable: false,
+                                height:150,
+                                width:290,
+                                modal: true,
+                                buttons: { "Aceptar": function() { $( this ).dialog( "close" ); }}
+                         }).dialog('open');
+                         break;
+                    }
+                }
+           });
+          return false;
+    }
+
+
+ 
+   function print_grid_detalle(equipo){
+
+          jQuery("#list_detalle").jqGrid('GridUnload');
+ 
+          jQuery("#list_detalle").jqGrid({
+                url:"{{=URL(c='maquinas',f='call',args=['json','list_thinclient_detail'])}}",
+                data: "{}",
+                postData: { host: function () { return equipo;} },
+                datatype: 'json',
+                jsonReader: {
+                        root: 'rows',
+                        page: 'page',
+                        total: 'total',
+                        records: 'records',
+                        userdata : 'rows',
+                        repeatitems: true,
+                        id: 'Id'
+                },
+                mtype: 'GET',
+                contentType: "application/json; charset=utf-8",
+                onSelectRow: function (id) { verUsuario(id); },
+                complete: function(jsondata, stat) {
+                    if (stat == "success") {
+                        var thegrid = jQuery("#list")[0];
+                        thegrid.addJSONData(JSON.parse(jsondata.responseText).d);
+                    }
+                },
+                colNames:['Hora','Teclado','Raton'],
+                colModel:[
+                    {name:'time',index:'time', width:50, align:"center"},
+                    {name:'teclado',index:'teclado', width:40, align:"center",stype:'select', formatter: formatColumna,  cellattr: attrCellTeclado, editoptions:{value:":Todos;0:Apagado;1:Desconectado;2:Conectado"}},
+                    {name:'raton',index:'raton', width:40, align:"center",stype:'select', formatter: formatColumna , editoptions:{value:":Todos;0:Apagado;1:Desconectado;2:Conectado"}}
+                ],
+                rowNum:15,
+                height:335,
+                width: 400,
+                rowList:[15,30,45],
+                pager: '#pager_detalle',
+                sortname: 'time',
+                autowidth: false,
+                viewrecords: true,
+                sortorder: "desc",
+                caption: "Detalle del thinclient " +equipo
+          });
+          jQuery("#list_detalle").jqGrid('navGrid','#pager_detalle',{add:false,edit:false,del:false,search:false,refresh:false});
+          jQuery("#list_detalle").jqGrid('filterToolbar');
+          $("tr.ui-search-toolbar").height(30);
+          jQuery("#tabla_detalle").find("select").height("90%");
+
+    }
+
+    function attrCellTeclado(rowId, cv, rowObject, colModel, arrData) {
+       
+       cellvalue=rowObject[1];      
+       switch (cellvalue) {
+           case "0": formato=" colspan=2"; break;
+           case "1": formato="" ; break;
+           case "2": formato="" ;  break;
+           default: formato=" colspan=2"; 
+       }
+       return formato;
+
+    }
+
+   function attrCellRaton(rowId, cv, rowObject, colModel, arrData) {
+
+       cellvalue=rowObject[2];
+       switch (cellvalue) {
+           case "0": formato= ' style="display:none;"'; break;
+           case "1": formato="" ; break;
+           case "2": formato="" ; break;
+           default: formato= ' style="display:none;"'; 
+       }
+       return formato;
+
+    }
+
+
+  function verUsuario(id){
+
+
+                    ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+
+                    jQuery("#messageLoading").show();
+
+                    //Obtenemos los datos de userData, que son los originales de la celda enviados desde el servidor.
+                    //si usasemos los que hay en la celda, al haber pasado por el formatter están formateados con <span>...
+                    data = jQuery("#list_detalle").getGridParam('userData')[id-1];
+
+                    uid=data.teclado; 
+                    if( (uid==false) || (uid=="0") || (uid=="1") || (uid=="2") )  return false;
+
+                    jQuery("#list_detalle").css("cursor","wait");
+
+                    jQuery("#dialog-form-sesiones").html("").css("display","none");
+                    jQuery("#dialog-form-sesiones").load("/controlies/init/seguimiento/form.html", function() {
+
+                        jQuery("#form_data #action").val("view");
+                        jQuery("#form_data #user").attr("readonly","true");
+                        jQuery("#form_data #user").css("background-color","#DDD");
+                        jQuery.post('call/json/getUserData',{ username: uid }, function(result) {
+                            //var result = jQuery.parseJSON(data);
+
+
+                            if(result.response['type']=="teacher")
+                                var textType = "Profesor";
+                            else
+                               if (result.response['type']=="student")
+                                    var textType = "Alumno";
+                                else
+                                      var textType="local";
+
+                            if (textType !=  "local" ) {
+                                                                        jQuery("#form_data #type").val(textType);
+                                                                        jQuery("#form_data #name").val(result.response['name']);
+                                                                        jQuery("#form_data #nif").val(result.response['nif']);
+                                                                        jQuery("#form_data #user").val(result.response['user']);
+                                                                        jQuery("#form_data #surname").val(result.response['surname']);
+                                                                        if (result.response['photo']!='')
+                                                                               jQuery("#form_data #photo").attr("src","data:image/png;base64,"+result.response['photo']);                    $
+
+                                                                        grupos="";
+                                                                        $.each(result.response['groups']['departments'], function(i, l){
+                                                                                grupos=grupos + l + " " ;
+                                                                        });
+
+                                                                        $.each(result.response['groups']['classrooms'], function(i, l){
+                                                                                grupos=grupos + l + " " ;
+                                                                        });
+                                                                        jQuery("#form_data #group").val(grupos);
+                                                        }
+                                                        else {
+                                                                        jQuery("#form_data #type").val("local de la máquina");
+                                                                        jQuery("#form_data #user").val(uid);
+                                                        };
+
+                                                        jQuery("#form_data #equipo").val(data.host);
+                                                        jQuery("#form_data #iniSesion").val(data.time);
+                                                        jQuery("#form_data #finSesion").val(data.timelogout);
+                                                        jQuery("#form_data #exitButton").hide();
+
+                                                        x = (jQuery(window).width()-400)/2;
+                                                        y = (jQuery(window).height()-500)/2;
+
+                                                        jQuery("#messageLoading").hide();
+                                                        jQuery("#list_detalle").css("cursor","pointer");
+
+                                                        jQuery("#dialog-form-sesiones").dialog({
+                                                                resizable: false,
+                                                                modal: true,
+                                                                width: 400,
+                                                                stack: false,
+                                                                title: "Consultar Sesión de Usuario"
+                                                        }).dialog('option', 'position', [x, y]);
+
+                        });
+                    });
+    }
+
+
+
+</script>
+<script type="text/javascript">
+   jQuery(document).ready(function(){  print_grid();}); 
+</script>

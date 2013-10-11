@@ -1,0 +1,189 @@
+{{response.files.append(URL('static','js/multiselect/jquery.multiselect.css'))}}
+{{response.files.append(URL('static','js/multiselect/jquery.multiselect.min.js'))}}
+{{response.files.append(URL('static','js/multiselect/jquery.multiselect.es.js'))}}
+{{#response.files.append(URL('static','css/helper.css'))}}
+{{#response.files.append(URL('static','css/dropdown.css'))}}
+{{#response.files.append(URL('static','css/default.advanced.css'))}}
+ 
+
+{{extend 'layout.html'}}
+
+        <form action="" enctype="multipart/form-data" method="post">
+            Fecha inicio: <input class="date" id="fechaini" name="fechaini" type="date" />
+            Fecha fin: <input class="date" id="fechafin" name="fechafin" type="date" />
+            <input type="button" value="Actualizar" onclick="javascript:$('#list').trigger('reloadGrid')">
+            &nbsp;&nbsp;
+            <input type="button" value="Borrado de sesiones antiguas" style="float:right;" onclick="javascript:borrarSesiones()"> 
+        </form>
+        <br/>
+        <div id="tabla_sesiones">
+          <table id="list" width="100%"></table>
+            <div id="pager" style=""></div> 
+            <div id="filter" style="margin-left:30%;display:none">Buscar nada</div>
+        </div>
+
+        <div id="dialog-form"></div>
+
+        <div id="dialog-form-borrado"></div>
+
+        <div id="dialog-alert" title="Atención" style="display:none;">
+            <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>Para operar sobre un registro debe seleccionarlo previamente.</p>
+        </div>
+         
+
+<script type="text/javascript">    
+                
+    function print_grid(){  
+          jQuery("#list").jqGrid({
+                url:"{{=URL(c='seguimiento',f='call',args=['json','list'])}}",
+                data: "{}",
+                postData: { fechaini: function() { return $("#fechaini").val();} , 
+                            fechafin: function() { return $("#fechafin").val();} },
+                datatype: 'json',
+                mtype: 'GET',
+                contentType: "application/json; charset=utf-8",
+                complete: function(jsondata, stat) {
+                    if (stat == "success") {
+                        var thegrid = jQuery("#list")[0];
+                        thegrid.addJSONData(JSON.parse(jsondata.responseText).d);
+                    }
+                },
+                
+                onSelectRow: function (id) { verUsuario(id); },
+                
+                colNames:['Host','Usuario','Login','Logout','Tipo Host'],
+                colModel:[                  
+                    {name:'host',index:'host', width:70, align:"left"},
+                    {name:'usuario',index:'usuario', width:50, align:"center"},
+                    {name:'timelogin',index:'timelogin', width:50, align:"center"},
+                    {name:'timelogout',index:'timelogout', width:50, align:"center"},
+                    {name:'tipohost',index:'tipohost', width:50, align:"center",stype:'select', editoptions:{value:":TODOS;LTSP:LTSP;THINCLIENT:THINCLIENT;WORKSTATION:WORKSTATION;PORTATIL:PORTATIL;WINDOWS:WINDOWS"}}
+                    
+                ], 
+                rowNum:25,
+                height:335,
+                width: 900,
+                rowList:[25,50,75],  
+                pager: '#pager', 
+                sortname: 'timelogin', 
+                autowidth: false,
+                viewrecords: true, 
+                sortorder: "desc", 
+                caption:"Sesiones"    
+        
+          }); 
+          jQuery("#list").jqGrid('navGrid','#pager',{add:false,edit:false,del:false,search:false,refresh:false});
+
+          jQuery("#list").css("cursor","pointer");        
+          
+          jQuery("#list").jqGrid('filterToolbar'); 
+       
+    }
+   
+             
+    function verUsuario(id){
+   
+                    jQuery("#list").css("cursor","wait");        
+       
+					ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+					
+					
+                    jQuery("#messageLoading").show();
+                                        
+                    data=jQuery("#list").jqGrid('getRowData',id); 
+                    
+                    uid=data.usuario;
+                    
+                                       
+                    if(uid==false) return false;                    
+                    
+                    jQuery("#dialog-form").html("").css("display","none");
+                    jQuery("#dialog-form").load("form.html", function() {
+                   
+                        jQuery("#form_data #action").val("view");
+                        jQuery("#form_data #user").attr("readonly","true");
+                        jQuery("#form_data #user").css("background-color","#DDD");
+                        
+                                                                    
+                        jQuery.post('call/json/getUserData',{ username: uid }, function(result) {
+                            //var result = jQuery.parseJSON(data);
+                            
+                                                        
+                            if(result.response['type']=="teacher")
+                                var textType = "Profesor";
+                            else
+                               if (result.response['type']=="student")  
+                                    var textType = "Alumno";
+                                else
+                                      var textType="local";
+                                                                                                                  
+                            if (textType !=  "local" ) {
+									jQuery("#form_data #type").val(textType);
+									jQuery("#form_data #name").val(result.response['name']);
+									jQuery("#form_data #nif").val(result.response['nif']);       
+									jQuery("#form_data #user").val(result.response['user']);
+									jQuery("#form_data #surname").val(result.response['surname']);
+									if (result.response['photo']!='')
+										jQuery("#form_data #photo").attr("src","data:image/png;base64,"+result.response['photo']);                       
+			
+									grupos="";
+									$.each(result.response['groups']['departments'], function(i, l){
+										grupos=grupos + l + " " ;                                
+									});
+			
+									$.each(result.response['groups']['classrooms'], function(i, l){
+										grupos=grupos + l + " " ;
+									});                  
+									jQuery("#form_data #group").val(grupos);   
+							}
+							else {
+									jQuery("#form_data #type").val("local de la máquina");
+									jQuery("#form_data #user").val(uid);
+							};
+							
+							jQuery("#form_data #equipo").val(data.host);                               
+							jQuery("#form_data #iniSesion").val(data.timelogin);   
+							jQuery("#form_data #finSesion").val(data.timelogout);   
+			
+							x = (jQuery(window).width()-400)/2;
+							y = (jQuery(window).height()-500)/2;
+							
+							jQuery("#messageLoading").hide();
+							jQuery("#list").css("cursor","pointer");                
+							
+							jQuery("#dialog-form").dialog({
+								resizable: false,
+								modal: true,
+								width: 400,
+								stack: false,                                
+								title: "Consultar Sesión de Usuario"
+							}).dialog('option', 'position', [x, y]);                        
+
+                        });               
+                    });
+    }
+    
+    
+    function borrarSesiones(){
+			
+			ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+			jQuery("#dialog-form-borrado").load("formdelete.html", function() {
+				
+		       	x = (jQuery(window).width()-400)/2;
+                y = (jQuery(window).height()-200)/2;
+				//Hay que cambiar el zindex en static/css/calendar.css a 5000 para que el calendario se muestre por encima del dialogo.
+				jQuery("#dialog-form-borrado").dialog({
+					resizable: false,
+					modal: true,					
+					width: 400,
+					title: "Borrado de sesiones antiguas"
+				}).dialog('option', 'position', [x, y]);                        
+				
+			});
+    }
+    
+      
+</script>
+<script type="text/javascript">
+  jQuery(document).ready(function(){  print_grid();}); 
+</script>

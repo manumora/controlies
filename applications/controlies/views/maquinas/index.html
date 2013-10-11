@@ -1,0 +1,310 @@
+{{response.files.append(URL('static','js/multiselect/jquery.multiselect.css'))}}
+{{response.files.append(URL('static','js/multiselect/jquery.multiselect.min.js'))}}
+{{response.files.append(URL('static','js/multiselect/jquery.multiselect.es.js'))}}
+{{#response.files.append(URL('static','css/helper.css'))}}
+{{#response.files.append(URL('static','css/dropdown.css'))}}
+{{#response.files.append(URL('static','css/default.advanced.css'))}}
+ 
+
+{{extend 'layout.html'}}
+       
+        <form action="" enctype="multipart/form-data" method="post" id="form_maquinas">
+            Fecha inicio: <input class="date" id="fechaini" name="fechaini" type="date" />
+            Fecha fin: <input class="date" id="fechafin" name="fechafin" type="date" />
+            <input type="button" value="Actualizar" onclick="javascript:$('#list').trigger('reloadGrid')">            
+            
+        </form>
+        <br/>
+        <div id="tabla_maquinas">
+          <table id="list" width="100%"></table>
+            <div id="pager" style=""></div> 
+            <div id="filter" style="margin-left:30%;display:none">Buscar nada</div>
+        </div>
+
+        <div id="dialog-form"></div>
+
+        <div id="dialog-alert" title="Atención" style="display:none;">
+            <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>Para operar sobre un registro debe seleccionarlo previamente.</p>
+        </div>
+         
+
+<script type="text/javascript">    
+
+   jQuery(function() {
+        jQuery("#dialog-alert").dialog({ autoOpen: false });
+    });
+    
+                
+    function print_grid(){  
+		  
+          jQuery("#list").jqGrid({
+                url:"{{=URL(c='maquinas',f='call',args=['json','list'])}}",
+                data: "{}",
+                postData: { fechaini: function() { return $("#fechaini").val();} , 
+                            fechafin: function() { return $("#fechafin").val();} },
+                datatype: 'json',
+                mtype: 'GET',
+                contentType: "application/json; charset=utf-8",
+                complete: function(jsondata, stat) {
+                    if (stat == "success") {
+                        var thegrid = jQuery("#list")[0];
+                        thegrid.addJSONData(JSON.parse(jsondata.responseText).d);
+                    }
+                },                               
+                colNames:['Host','Tipo', 'Fecha informe','Ultimo arranque','Ult. pkgsync/WPKG','Estado Paquetes','Ultimo puppetd','Estado puppet'],
+                colModel:[                  
+                    {name:'host',index:'host', width:30, align:"left"},
+                    {name:'tipohost',index:'tipohost', width:40, align:"left",stype:'select', editoptions:{value:":TODOS;WORKSTATION:WORKSTATION;LTSP:LTSP;PORTATIL:PORTATIL;WINDOWS:WINDOWS"}},
+                    {name:'ultimorefresco',index:'ultimorefresco', width:50, align:"center"},
+                    {name:'ultimoarranque',index:'ultimoarranque', width:50, align:"center"},
+                    {name:'ultimopkgsync',index:'ultimopkgsync', width:50, align:"center", formatter: formatColumna },
+                    {name:'estadopaquetes',index:'estadopaquetes', width:25, align:"center",stype:'select', editoptions:{value:":TODOS;OK:OK;ERROR:ERROR"}},
+                    {name:'ultimopuppet',index:'ultimopuppet', width:50, align:"center", formatter: formatColumna },
+                    {name:'estadopuppet',index:'estadopuppet', width:25, align:"center",stype:'select', editoptions:{value:":TODOS;OK:OK;ERROR:ERROR"}}                    
+                ], 
+                rowNum:25,
+                height:335,
+                width: 900,
+                rowList:[25,50,75],  
+                pager: '#pager', 
+                sortname: 'ultimorefresco', 
+                autowidth: false,
+                viewrecords: true, 
+                sortorder: "desc", 
+                caption:"Estado maquinas"            
+          }); 
+          jQuery("#list").jqGrid('navGrid','#pager',{add:false,edit:false,del:false,search:false,refresh:false});
+          jQuery("#list").jqGrid('navButtonAdd','#pager',{
+                    caption: " LOG apt-get/wpkg ",
+                    buttonicon :'ui-icon-plus',
+                    onClickButton : function (){ 
+                        verPkgsync();
+                    } 
+          }); 
+          jQuery("#list").jqGrid('navButtonAdd','#pager',{
+                    caption: " LOG puppet ",
+                    buttonicon :'ui-icon-plus',
+                    onClickButton : function (){ 
+                        verPuppetLog();
+                    } 
+          }); 
+          
+          jQuery("#list").jqGrid('navButtonAdd','#pager',{
+                    caption: "Sesiones",
+                    buttonicon :'ui-icon-plus',
+                    onClickButton : function (){ 
+                        verUsuariosHost();
+                    } 
+          }); 
+
+          
+          jQuery("#list").jqGrid('filterToolbar'); 
+       
+    }
+
+    function convertirFecha(strFecha) {
+
+       anio=strFecha.substr(0,4);
+       mes=strFecha.substr(5,2);
+       dia=strFecha.substr(8,2);
+       hora=strFecha.substr(11,2);
+       minuto=strFecha.substr(14,2);
+       segundos=strFecha.substr(17,2);
+
+       return new Date(anio,mes,dia,hora,minuto,segundos);
+
+    }
+   
+    function formatColumna(cellvalue, options, rowObject) {
+
+      formato="";
+      if (cellvalue) {
+
+         fechaCelda=convertirFecha(cellvalue);
+         strFechaArranque=rowObject[3];
+         fechaArranque=convertirFecha(strFechaArranque);
+
+         intervalo=Math.abs(fechaCelda - fechaArranque); /*diferencia en milisegundos*/
+         rangomaximo=86400000; /* 1 dia en milisegundos*/
+
+         if (intervalo > rangomaximo) fondo="#FFDB58";
+         else fondo="transparent";
+
+         formato="<span title='AVISO: fecha muy distanciada de la fecha del último arranque' style='background-color:"+fondo+"; display:block; background-image:none;margin-right:-2px; margin-left:-2px; height:20px; padding:1px;'>" + cellvalue + "</span>";
+       };
+       
+       return formato;
+    }
+
+   function rowSelected(){
+            var uid = jQuery("#list").jqGrid('getGridParam','selrow'); 
+        
+            if( uid == null ){
+                jQuery( "#dialog-alert" ).dialog({
+                    resizable: false,
+                    height:150,
+                    width:290,
+                    modal: true,
+                    buttons: { "Aceptar": function() { $( this ).dialog( "close" ); }}
+                }).dialog('open');
+                return false;
+            }
+            return uid;
+    }           
+    
+    function verPkgsync(){
+		
+		    ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+            jQuery("#messageLoading").show();
+        
+            var uid = rowSelected();
+            if(uid==false)
+                        return false;
+            
+            jQuery("#dialog-form").html("").css("display","none");
+            jQuery("#dialog-form").load("form.html", function() {
+                
+                jQuery("#form_data #action").val("verPkgsync");                
+                jQuery.post('call/json/getFicheroPkgSync',{ id: uid }, function(result) {
+				   	     mensaje="<pre>"+nl2br(result)+"</pre>";				   	     
+				   	     jQuery("#form_data #texto").html(mensaje);
+				    }
+			    );
+                       
+                x = (jQuery(window).width()-800)/2;
+                y = (jQuery(window).height()-500)/2;
+        
+                jQuery("#messageLoading").hide();
+                jQuery("#dialog-form").dialog({
+                    resizable: false,
+                    position: top,
+                    modal: true,
+                    width: 800,                    
+                    title: "Ver estado paquetes"
+                }).dialog('option', 'position', [x, y]);
+            });
+    }
+    
+    function nl2br(text){
+		text = escape(text);
+		if(text.indexOf('%0D%0A') > -1){
+			re_nlchar = /%0D%0A/g ;
+		}else if(text.indexOf('%0A') > -1){
+			re_nlchar = /%0A/g ;
+		}else if(text.indexOf('%0D') > -1){
+			re_nlchar = /%0D/g ;
+		}
+    return unescape( text.replace(re_nlchar,'<br />') );
+    }
+        
+    function verPuppetLog(){
+		
+		    ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+            jQuery("#messageLoading").show();
+        
+            var uid = rowSelected();
+            if(uid==false)
+                        return false;
+            
+            jQuery("#dialog-form").html("").css("display","none");
+            jQuery("#dialog-form").load("form.html", function() {
+                
+                jQuery("#form_data #action").val("verPkgsync");                
+                jQuery.post('call/json/getFicheroLogPuppet',{ id: uid }, function(result) {
+				   	     mensaje=result; 				   	     
+				   	     jQuery("#form_data #texto").html(mensaje);
+				    }
+			    );
+                       
+                x = (jQuery(window).width()-800)/2;
+                y = (jQuery(window).height()-500)/2;
+        
+                jQuery("#messageLoading").hide();
+                jQuery("#dialog-form").dialog({
+                    resizable: false,
+                    position: top,
+                    modal: true,
+                    width: 800,                    
+                    title: "Ver Log de Puppet"
+                }).dialog('option', 'position', [x, y]);
+            });
+    }
+          
+          
+    function hostSelected() {
+	        var uid = jQuery("#list").jqGrid('getGridParam','selrow'); 
+        
+            if( uid == null ){
+                jQuery( "#dialog-alert" ).dialog({
+                    resizable: false,
+                    height:150,
+                    width:290,
+                    modal: true,
+                    buttons: { "Aceptar": function() { $( this ).dialog( "close" ); }}
+                }).dialog('open');
+                return false;
+            }
+            data=jQuery("#list").jqGrid('getRowData',uid); 
+            return data.host;
+   }
+   
+   
+   function tipohostSelected() {
+	        var uid = jQuery("#list").jqGrid('getGridParam','selrow'); 
+        
+            if( uid == null ){
+                jQuery( "#dialog-alert" ).dialog({
+                    resizable: false,
+                    height:150,
+                    width:290,
+                    modal: true,
+                    buttons: { "Aceptar": function() { $( this ).dialog( "close" ); }}
+                }).dialog('open');
+                return false;
+            }
+            data=jQuery("#list").jqGrid('getRowData',uid); 
+            return data.tipohost;
+   }                 
+   	   
+
+   function verUsuariosHost(){
+		
+    		ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+            jQuery("#messageLoading").show();
+        
+            var host = hostSelected();
+            var tipohost=tipohostSelected();
+            
+            if(host==false)
+                        return false;
+            
+                                    
+            jQuery("#dialog-form").html("").css("display","none");
+            jQuery("#dialog-form").load("../seguimiento/usuarioshost.html", function() {
+                
+                
+                jQuery("#form_host #host").val(host);  
+                /*Hasta que no esté cargado el valor en host no hay que recargar el grid,
+                para que se aplique correctamente el filtro*/
+                jQuery("#form_host #tipohost").val(tipohost);  
+                jQuery("#list_sesiones").jqGrid('setGridParam',{datatype:"json"}).trigger("reloadGrid") ;
+                  
+                x = (jQuery(window).width()-750)/2;
+                y = (jQuery(window).height()-500)/2;
+        
+                jQuery("#messageLoading").hide();
+                jQuery("#dialog-form").dialog({
+                    resizable: false,
+                    position: top,
+                    modal: true,
+                    width: 750,                    
+                    title: "Ver usuarios de "+host
+                }).dialog('option', 'position', [x, y]);                
+            });
+               }                 
+    
+          
+</script>
+<script type="text/javascript">
+   jQuery(document).ready(function(){  print_grid();}); 
+</script>
