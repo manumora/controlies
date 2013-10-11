@@ -46,8 +46,9 @@ response.menu+=[('Gestión', False, None,[
             ('Mantenimiento de LDAP', False, None,[
                 ('Limpieza de grupos', False, URL('check_ldap','index')),
                 ('Detección de uid o gid duplicados', False, URL( 'gestion', 'duplicados')),
-                ])
+                ]),
 #            ('Importación datos de Portátiles', False, URL( 'gestion', 'base_datos')),
+            ('Configuración', False, URL( 'gestion', 'config')),
             ]
    )]
 
@@ -58,6 +59,10 @@ response.menu+=[('Base de Datos', False, None,[
                 ('Portátiles por Grupo', False,URL( 'laptops_groups', 'index')),
                 ('Marcas', False,URL( 'laptops_trademarks', 'index'))  
                 ]),
+            ('Seguimiento Usuarios', False,URL( 'seguimiento', 'index')), 
+            ('Seguimiento Maquinas', False,URL( 'maquinas', 'index')), 
+            ('Seguimiento Thinclients', False, URL('maquinas', 'index_thinclients')),
+            ('Seguimiento Impresión', False, URL('logprinter', 'index')),    
             ]
    )]
 

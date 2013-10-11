@@ -73,3 +73,63 @@ cdb.define_table('printers_trademarks',
                  Field('id_printers_trademark','integer'),
                  Field('trademark','string'),
                  primarykey=['id_printers_trademark'])
+                 
+
+import datetime
+cdb.define_table('sesiones',
+    Field('host'),
+    Field('usuario'),
+    Field('timelogin','datetime',default=datetime.datetime.today()),
+    Field('timelogout','datetime'),
+    Field('tipohost'))
+cdb.executesql('CREATE INDEX IF NOT EXISTS idxseshost ON sesiones (host);')
+cdb.executesql('CREATE INDEX IF NOT EXISTS idxsesusuario ON sesiones (usuario);')
+
+cdb.define_table(
+    'maquinas',
+    Field('host'),
+    Field('tipohost'),
+    Field('ultimorefresco','datetime',default=datetime.datetime.today()),
+    Field('ultimoarranque','datetime'),
+    Field('ultimopkgsync','datetime'),
+    Field('estadopaquetes'),
+    Field('logpkgsync','upload',autodelete=True),
+    Field('ultimopuppet','datetime'),
+    Field('estadopuppet'),
+    Field('logpuppet','upload', autodelete=True) )
+cdb.executesql('CREATE INDEX IF NOT EXISTS idxmaqhost ON maquinas (host);')
+cdb.executesql('CREATE INDEX IF NOT EXISTS idxmaqtime ON maquinas (ultimorefresco);')
+  
+cdb.define_table(
+    'thinclients',
+    Field('host'),
+    Field('time','datetime',default=datetime.datetime.today()),
+    Field('raton'),   # 0->poweroff, 1->absent, 2->present
+    Field('teclado') )
+cdb.executesql('CREATE INDEX IF NOT EXISTS idxthctime ON thinclients (time DESC);')
+cdb.executesql('CREATE INDEX IF NOT EXISTS idxthchost ON thinclients (host);')
+
+
+cdb.define_table('config',
+          Field('mail_server','string'),
+          Field('mail_sender','string'),
+          Field('mail_user','string'),
+          Field('mail_password','password'),
+          Field ('mail_receiver','string'))
+
+
+cdb.define_table('logprinter',
+          Field('time','datetime',default=datetime.datetime.today()),
+          Field('impresora','string'),
+          Field('jobid','integer'),
+          Field('usuario','string'),
+          Field('host','string'),
+          Field('trabajo','string'),
+          Field('paginas','integer'),
+          Field('copias','integer'),
+          Field('total','integer'),
+          Field ('tamanio','integer'))
+          
+
+
+                 
