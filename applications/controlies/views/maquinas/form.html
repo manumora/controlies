@@ -1,0 +1,22 @@
+<script language="javascript">
+
+    $(function() {
+        $("#name").focus();
+        $("#exitButton")
+             .click( function(){ $('#dialog-form').dialog('close'); });
+    });
+    
+</script>
+ 
+<form id="form_data">
+    <input type="hidden" id="action" name="action"/>
+    <div>
+         <div id="texto" name="texto" style="width: 100%; margin: 0; padding: 0; border-width: 1; height:400px; background-color:white;overflow-y: scroll; ">
+         </div>
+            
+    </div>
+    <div id="message" style="text-align:center; font-weight:bold; color:red; padding:3px; "></div>
+    <div style="text-align:center;">
+    <button type="button" id="exitButton" style="width:100px;">OK</button></div>
+    <p style="padding-top:10px; text-align:center; font-size:10px;" id="messageForm"></p>       
+</form>

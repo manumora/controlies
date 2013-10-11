@@ -1,1 +1,4 @@
 #crontab
+
+#Una vez al día se llama a ese método del controlador maquinas.
+0 0 * * * root *maquinas/cleanthinclients
