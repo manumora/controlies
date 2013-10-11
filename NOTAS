@@ -1,0 +1,323 @@
+1. Aplicacion controlies. Instalación y configuración
+=====================================================
+
+1.1. Instalación Servidor LDAP
+==============================
+
+Instalar el paquete debian mediante dpkg -i.
+
+1.2. Instalación en clientes linux. Tarea puppet
+================================================
+
+-Para que controlies muestre datos, hace falta que los PC del centro se los envien. Esta tarea se encarga
+de definir los scripts para que se realice esta parte del trabajo desde los clientes. Su ubicacion es:
+
+	     controlies/clients/puppet/controlies-puppet.tgz
+
+Este fichero se copia a /etc/puppet/modules de nuestro(s) servidor(es) puppet y se descomprime allí.	
+
+La tarea controlies es una tarea genérica que sirve para servidores de aula, thinclients,
+portátiles y workstations, ya que la tarea y los scripts determinan en que tipo de cliente estamos
+usando el facter "use" de puppet. Simplemente hay que instalarla /etc/puppet/modules y poner el
+include “controlies” en la clase específica correspondiente. Es la que se encarga de distribuir
+los scripts que comunican los ordenadores con el controlies para ir actualizando los datos.
+
+-La tarea instala los siguientes procesos:
+        Scripts que envian a controlies registro de los logines para todos los equipos.
+        
+        Scripts que envian a controlies registro de los logouts para todos los equipos (en
+        caso de apagado abrupto no se guarda nada, por ejemplo en los thinclients).
+        
+        Scripts para servidores de aula, workstations y portátiles que se ejecutan cada cierto
+        intervalo de tiempo (es configurable) y actualizan los datos de seguimiento de
+        máquinas.
+        
+        Script para comprobar el estado (conectado o no) de teclado y ratón en cada arranque de los thinclient.
+        
+        Script para despertar los thinclient automaticamente a una hora del día (por ejemplo, antes del comienzo del 
+        horario lectivo), para que se haga una revision automática de las aulas. Además de verificar el estado de 
+        teclados y ratones, este script nos permite determinar que thinclients no se encienden o están bloqueados.
+		
+	    Para el seguimiento de impresión: se instala el filtro tea4cups, su configuracion y un script para recopilar
+	    los datos de los trabajos de impresión y mandarlos a controlies.
+
+
+1.3. Instalación en clientes Windows (opcional)
+===============================================
+
+También se puede llevar un seguimiento de los equipos Windows, especialmente 
+si usamos la herramienta WPKG para instalar software en ellos y configurarlos centralizadamente.
+
+a) Seguimiento de usuarios: hay que descomprimir el fichero controlies/clients/wpkg/controlies-win.zip 
+y copiar el contenido de la carpeta "politicas" en la ruta C:\Windows\system32\GroupPolicy. Esta última
+es una carpeta oculta, para verla hay que configurar el explorador de windows para que se muestren las
+carpetas ocultas y del sistema.
+
+OJO: al descomprimir estos ficheros se machaca cualquier política de grupo que tuviésemos
+definida previamente en el equipo, ya fuere mediante gpedit.msc o cualquier otra herramienta.
+
+Si disponemos de un servidor WPKG para controlar los windows, el package que nos automatizaría 
+esta instalación sería:
+
+ <package
+         id="controlies"
+         name="Scripts controlies"
+         revision="1"
+         priority="10"
+         reboot="false">
+         <!-- create a shortcut with arguments for the executable -->
+          <check type="file" condition="exists"
+                path="c:\windows\system32\GroupPolicy\User\Scripts\Logon\ControliesLogin.vbs" />
+          <install cmd='%ComSpec% /c xcopy /Q /I /E /Y /R "%SOFTWARE%\politicas\GroupPolicy\*.*"
+                     "c:\windows\system32\GroupPolicy"' />
+
+          <update cmd='%ComSpec% /c xcopy /Q /I /E /Y /R "%SOFTWARE%\politicas\GroupPolicy\*.*"
+                       "c:\windows\system32\GroupPolicy"' />
+  </package>
+
+-Previamente, en la ruta "%SOFTWARE%\politicas del wpkg hay que descomprimir el contenido del 
+ fichero controlies-win.zip
+
+-No olvidar luego incluir el package en los ficheros profile.xml y hosts.xml de wpkg que deseemos.
+
+b) Seguimiento de máquinas: solo se puede usar si disponemos de un servidor wpkg para los windows. 
+Consiste en una modificación del script original wpkg.js ubicado en el servidor samba para que, 
+además de su trabajo normal, envíe datos de la máquina al controlies. Evidentemente no hay datos 
+pkgsync ni puppet, en su lugar se guarda la fecha de la última sincronización con wpkg, la dirección
+IP del equipo Windows, el resultado de la sincronización, los paquetes aplicados y el log del wpkg. 
+La ubicación del fichero wpkg.js modificado es:
+
+		controlies/clients/wpkg/wpkg.js
+
+
+1.4. Otras configuraciones adicionales para que todo funcione
+=============================================================
+
+1) En el servidor ldap: instalar a mano el paquete python-yaml y meterlo en el /etc/pkgsync/
+mayhave de ldap para evitar que se desinstale. Este mayhave no es sobreescrito desde
+Mérida.
+
+2)En el servidor nfs:
+
+        Editar el fichero /etc/puppet/puppet.conf para incluir la sincronización entre puppet y
+        controlies. Simplemente es añadir estas dos líneas en el lugar adecuado del fichero:
+
+        [main]
+                .......
+                reports=store,http
+                reporturl=http://ldap.vguadalupe/controlies/init/registro/actualizalogpuppet
+        [master]
+                ....
+        
+        Ojo, cambiar el dominio ldap.vguadalupe por lo que corresponda según IES.
+
+        En los mayhave del servidor puppet correspondientes a los equipos donde se aplica la tarea 
+        puppet controlies (servidores de aula, workstations y/o portátiles) meter el paquete curl, 
+        necesario para el correcto funcionamiento de los scripts, evitando así  que se desinstale 
+        automáticamente en el siguiente pkgsync.
+
+3) En el servidor que se use como servidor puppet para los workstations, siempre que no sea el
+servidor nfs, hacer lo mismo que en el punto 2.
+
+4) Para el seguimiento de impresión:
+
+        En los mayhave del servidor puppet correspondientes a los equipos donde se aplica la tarea 
+        puppet controlies (servidores de aula, workstations y/o portátiles) debemos meter el paquete
+        pkpgcounter, necesario para el correcto funcionamiento de los scripts, evitando así  que se
+        desinstale automáticamente en el siguiente pkgsync.
+        
+        En cada cola de impresión que queramos controlar hay que añadir el filtro tea4cups, para ello:
+        
+		Editar el fichero /etc/cups/printers.conf, localizamos la cola en cuestión y en la linea
+		del DeviceURI anteponemos tea4cups:// al URI, delante del usb://, ipp://, socket://, etc.
+		Ejemplo:
+		
+			DeviceURI tea4cups://socket://192.168.1.100:9100
+				
+		Hay que tener cuidado con una cosa: si ponemos el filtro tea4cups en varias colas de impresión
+		conectadas en cascada a la misma impresora, en la contabilidad los trabajos apareceran
+		repetidos. El caso tipico es una impresora usb conectada a un PC y compartida hacia otros
+		PC. En ese caso el filtro tea4cups debe ponerse solamente en el PC conectado fisicamente a la
+		impresora, no en todos los demás.
+
+
+2. Funcionalidades añadidas de seguimiento de equipos, usuarios, clientes ligeros y documentos impresos
+=======================================================================================================
+
+Seguimiento de usuarios: histórico de los logines y logouts de los usuarios. Se aplica a : servidores de
+							 aula, worktations, portatiles, thinclients y, si queremos, a los windows.
+			 Pinchando sobre un usuario accedemos a sus datos con foto incluida.
+
+Seguimiento de equipos: datos de cada equipo monitorizado (thinclient, workstation o servidor de aula),
+que se sobreescribe periodicamente. En los equipos con arranque dual windows/linux se muestra un registro
+por cada sistema operativo. Muestra los siguientes datos:
+			Fecha/hora de la actualización del registro
+			Fecha/hora del último arranque del equipo
+			Fecha/hora del último pkgsync ejecutado automáticamente.
+			Estado del sistema de paquetes y repositorios (OK o ERROR)
+			Log de los errores del sistema de paquetes.
+			Fecha/hora de la última sincronización puppet.
+			Resultado del último puppet (OK o ERROR)
+			Log del último puppet
+			Acceso al histórico de sesiones de usuario en ese equipo. Acceso a las fichas de los usuarios.
+
+Seguimiento de thinclients:
+			Estado de teclado y raton en todos los arranques. Indica si ha sido desconectado o no detectado.
+			Histórico de sesiones de usuario en ese thinclient. Acceso a las fichas de los usuarios.
+			Sistema de arranques automáticos programables a ciertas horas para comprobar si hay clientes 
+			colgados y desconectados de la red o corriente.
+			Sistema de borrado automático de todos los registros anteriores a 30 días, ya que esta
+			tabla tiende a crecer mucho y a ralentizar el acceso.
+
+Seguimiento de impresión:
+			Listado de ordenes de impresión en las colas de CUPS configuradas para el seguimiento. Guarda
+			los siguientes datos:
+				Nombre impresora
+				Usuario
+				Host desde donde se imprime
+				Fecha y hora
+				Nombre del documento impreso
+				Jobid del trabajo en la cola de CUPS.
+				Paginas y nº de copias
+				Tamaño en bytes del trabajo
+
+Gestión/Configuracion:
+		Permite definir una cuenta de correo para enviar a través de ella correos automáticos de controlies.
+		De momento solo es de prueba, será usado en el futuro.
+		Ejemplo de configuracion para Gmail: http://microbuffer.wordpress.com/2012/03/28/enviar-email-con-python-y-gmail/
+
+3. Instalación manual
+=====================
+
+Antes de nada, hacer una copia de seguridad del directorio /var/web2py/applications/controlies en el servidor ldap.
+
+Mientras que no se genere el paquete debian, se copiará al directorio anterior la rama completa:
+
+     controlies/applications/controlies/
+
+descargada de github. La descarga se realiza con los comandos:
+
+	git init
+	git clone https://github.com/japastor/controlies
+
+	Si no tenemos instalado el cliente git, pues hacemos como siempre:
+
+		apt-get install git
+
+4. Registro de cambios
+=====================
+
+19-Diciembre-2012: version alpha subida a github.
+
+29-Enero-2013: versión inicial beta. 
+
+22-Marzo-2012:
+
+    -Incluido seguimiento en thinclients de teclados y ratones.
+    -Ahora todos los scripts averiguan el dominio del centro para añadirlo en las peticiones ldap.
+    -El script de seguimiento de equipos, al verificar el estado del sistema de paquetes no se daba cuenta de si los repositorios estaban bien o mal, normalmente por
+    problemas de firmas.  Ahora lo verifica y pone el estado a "ERROR" si ve que no se puede acceder a algún repositorio.
+    -El script wpkg.js no avisaba siempre si había errores en el log del wpkg y por dicho motivo había equipos donde fallaba un paquete pero no te enterabas.
+    -Varios cambios estéticos.
+
+Mayo-2013:
+
+	-Arreglo de varios bugs menores.
+
+17-junio-2013:
+
+   -Definidos índices en las tablas de la BD.
+   -Seguimiento: modificado el interface para que permita llamadas por xmlrpc, no solo por wget/REST, con vistas a permitir que los scripts cliente en el futuro sean en python y no en bash.
+   -Seguimiento de usuarios: no se ha tocado nada.
+   -Seguimiento de máquinas:
+           -En el grid de sesiones de usuario para una maquina dada, al pulsar sobre el usuario sale una ventana con su foto y datos.
+           -Una misma máquina, con arranque dual en Windows y Linux se guarda en dos registros separados apareciendo dos veces en la lista, una por cada sistema operativo. Al mostrar las
+            sesiones de usuario de esa máquina solo se muestran las de Windows o las de Linux, no ambas mezcladas.
+           -Cuando la fecha del último puppet y/o pkgsync es anterior en 24 horas a la del ultimo arranque, aparece resaltada en naranja en el grid, como aviso de que algo puede ir mal.
+           -Arreglado bug que hacía que en los equipos duales los datos de puppet se guardasen tanto en el registro de los Linux como de los Windows.
+   -Seguimiento de thinclients:
+           -Quitado el filtro de consulta por fechas, ya que no servía para nada (solo nos interesa el estado último de los thinclients) y ralentiza el proceso de consulta.
+           -Añadido un botón que elimina todos los registros de thinclients anteriores a 30 dias. Es solo de prueba, ya que se ha añadido un proceso en el crontab de controlies que hace
+            lo mismo automáticamente cada noche.
+           -Al pulsar sobre un thinclient, en el grid de la derecha ya no solo aparecen el histórico de estados previos de teclados y ratones, también aparecen los logines de los usuarios 
+            que han iniciado sesión en esos equipos. Pulsando sobre un usuario aparece su ficha con datos y foto.
+
+   -Nueva opción->Gestion/Configuracion: permite definir los parámetros de una cuenta de correo (la he probado con gmail sin problemas) para enviar mensajes automáticos desde controlies.
+    Con vistas a enviar informes periódicos automatizados al administrador. He añadido un botón para probar in situ si funciona.
+
+   -Wpkg:
+		-Modificado wpkg.js para que las conexiones sean con user-agent Mozilla en lugar de Internet Explorer, de tal forma que el Squid no las bloquee.
+		-Entre los datos del informe enviado al Controlies se incluye la IP del equipo Windows en el momento de hacer enviar los datos.
+		-Puesto try..catch en todas las llamadas de envio de datos, para que si se produce un error de comunicación no se haga nada. Ahora sacaba una ventana de alert que 
+			 despistaba mucho al usuario. También se ha puesto en los scripts que controlan el login/logout de los usuarios Windows.
+   -Scripts instalados mediante puppet:
+		-Se modifican los scripts para que averiguen el dominio del IES (gracias, Paco), ya que había imágenes donde daba problemas de conexión si no se ponía el dominio.
+		-Al verificar el estado de paquetes en el script seguimiento_equipos se producía un "falso positivo" de error si en ese momento se está ejecutando el pkgsync en dicho ordenador.
+		Para evitarlo se comprueba si hay un pkgsync en marcha y, en caso afirmativo, se deja la comprobación del estado del sistema de paquetes para la siguiente revisión.
+
+12-julio-2013:
+
+    -Añadido control de documentos impresos en Linux mediante tea4cups y pkpgcounter.
+
+10-octubre 2013:
+
+   -Arreglado bug en el script despierta_clientes, que hacía que los thinclients que no estuviesen en la rama group1 del arbol ldap fuesen ignorados. Reportado por
+    Ana Belén Cerejo Cortijo.
+   -Arreglado bug en pkpgcounter en impresoras HP-10XX con filtro foo2zjs (Zenographics), ya está notificado a Jerome (creador del tea4cups). Se cambia la clase
+    python pertinente del paquete pkpgcouter para que tenga en cuena la cabecera PJL que éste filtro añade al fichero mandado a la impresora. Es un parche sobre el
+    paquete original, de tal forma que si dicho paquete se actualiza se perderá el cambio. De momento se queda así hasta que Jerome parchee la aplicación y la envie
+    a los empaquetadores de Debian. Reportado por: Paco (IES Téllez).
+   -Modificadas las cabeceras del script seguimiento_thinclient para que solo se ejecute en el nivel 2, al encendido, ya que ahora ha dejado de hacer caso 
+    al update-rc y se mete en todos los niveles, generando llamadas repetidas a controlies. Solucionado por Paco da con la solucion y modifica script y tarea puppet.
+
+5. TODO
+=======
+
+-Cambiar los scripts y hacerlos en python. El envio de datos debe ser por xmlrpc. Dejar el envio de datos por wget solo para puppet (no hay otra opción) y 
+ para windows (no hay otra opción).
+
+-El borrado nocturno mediante crontab del seguimiento de clientes no funciona. Averiguar la causa.
+
+-Envio de correos electrónicos ante determinados eventos:
+	-Uno cada mañana de resumen de todas las indidencias encontradas en thinclients y resto de hosts.	
+    -Uno cada vez que se detecte una desconexión de teclado y/o ratón.
+    -Uno que se ejecute cada vez que se enciende una máquina determinada que queremos monitorizar.
+
+-En el seguimiento de equipos incluir una opción para eliminar equipos antiguos (para limpiar portátiles de años anteriores y desasignados).
+
+-Integrar sarg: http://sourceforge.net/p/sarg/discussion/363374/thread/e95afce5/
+
+-La consulta de thinclients es muy lenta conforme va habiendo datos. Ideas:
+
+            -Revisar consulta SQL: confirmar si existen indices descendente de equipo+fecha, equipo y fecha desc.
+
+            -Implementear la consulta por código:
+                bucle que saque los distinct thinclients que cumplan el filtro.
+                bucle que saque el first del order by fecha desc de cada thinclient que cumpla el filtro.
+                Devolver XML con el segundo bucle.
+
+            -Desnormalizar la tabla
+
+            -Abandonar sqlite y usar MySQL.
+
+-A veces al escribir en registro.py da error de database locked y falla alguna inserción de datos (visto en errors), ya que sqlite bloquea la base de datos 
+completa cuando está haciendo una consulta y si esta es muy pesada puede tardar un rato en desbloquearla. Meter en ese caso un temporizador aleatorio y 3 
+retries si observo que se repite con frecuencia.
+
+-Posibilidad comentada por Ana Belén: monitorizar teclado y ratón para clientes ligeros continuamente, no solo en el arranque. Asi se detecta en que momento
+pierden la conexión. Seria un script ejecutado por crontab que miraría estado de teclado y ratón, y lo compararía con el estado anterior, mandando un mensaje
+al momento de detectar cualquier variación.
+
+-Posibilidad comentada por profesor del IES: hacer capturas de pantalla periódicas de un alumno concreto y guardarlas en un directorio seguro, para hacer 
+un seguimientovisual de lo que hace.
+
+-Llevar control de impresión también para los Windows. Hay que hacer un servicio en C# que monitorice los eventos de impresión, usando el ensamblado 
+PrintedPages....
+
+-
+
+
+
+
+
+
