@@ -1,0 +1,32 @@
+<script language="javascript">
+
+    $(function() {
+        $("#name").focus();
+        $("#exitButton")
+             .click( function(){ $('#dialog-form').dialog('close'); });
+    });
+    
+</script>
+ 
+<form id="form_data">
+    <input type="hidden" id="action" name="action"/>
+    <div>
+        <div style="float:right;">
+            <p> {{=IMG(_src=URL('static','images/nobody.png'),_id='photo',_name='photo', _style='width:100px;height:100px;border:1px solid #BBB;')}} </p>
+        </div>
+        <div>       
+            <p><span id="userTag">Usuario</span><br><input type="text" id="user" name="user" readonly="true"/></p>            
+            <p><span id="typeTag">Tipo Usuario</span><br><input type="text" id="type" name="type" readonly="true"/></p>
+            <p><span id="nameTag">Nombre y Apellidos</span><br><input type="text" id="name" name="name" readonly="true"/></p>
+            <p><span id="nifTag">NIF/NIA</span><br><input type="text" id="nif" name="nif" readonly="true"/></p>
+            <p><span id="groupTag">Grupos</span><br><input type="text" id="group" name="group" readonly="true" style="width:300px;"/></p>
+            <p><span id="equipoTag">Equipo</span><br><input type="text" id="equipo" name="equipo" readonly="true"/></p>
+            <p><span id="iniSesionTag">Inicio Sesi&oacute;n</span><br><input type="text" id="iniSesion" name="iniSesion" readonly="true"/></p>
+            <p><span id="finSesionTag">Fin Sesi&oacute;n</span><br><input type="text" id="finSesion" name="finSesion" readonly="true"/></p>
+        </div>
+    </div>
+    <div id="message" style="text-align:center; font-weight:bold; color:red; padding:3px; "></div>
+    <div style="text-align:center;">
+    <button type="button" id="exitButton" style="width:100px;">OK</button></div>
+    <p style="padding-top:10px; text-align:center; font-size:10px;" id="messageForm"></p>       
+</form>

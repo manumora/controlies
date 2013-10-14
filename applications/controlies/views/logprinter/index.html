@@ -1,0 +1,195 @@
+{{response.files.append(URL('static','js/multiselect/jquery.multiselect.css'))}}
+{{response.files.append(URL('static','js/multiselect/jquery.multiselect.min.js'))}}
+{{response.files.append(URL('static','js/multiselect/jquery.multiselect.es.js'))}}
+{{#response.files.append(URL('static','css/helper.css'))}}
+{{#response.files.append(URL('static','css/dropdown.css'))}}
+{{#response.files.append(URL('static','css/default.advanced.css'))}}
+ 
+
+{{extend 'layout.html'}}
+       
+        <form action="" enctype="multipart/form-data" method="post" id="form_maquinas">
+            Fecha inicio: <input class="date" id="fechaini" name="fechaini" type="date" />
+            Fecha fin: <input class="date" id="fechafin" name="fechafin" type="date" />
+            <input type="button" value="Actualizar" onclick="javascript:$('#list').trigger('reloadGrid')">            
+            
+        </form>
+        <br/>
+        <div id="tabla_logprinter">
+          <table id="list" width="100%"></table>                        
+            <div id="pager" style=""></div> 
+            <div id="filter" style="margin-left:30%;display:none">Buscar nada</div>
+        </div>
+
+        <div id="dialog-form"></div>
+
+        <div id="dialog-alert" title="Atención" style="display:none;">
+            <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>Para operar sobre un registro debe seleccionarlo previamente.</p>
+        </div>
+         
+
+<script type="text/javascript">    
+
+   jQuery(function() {
+        jQuery("#dialog-alert").dialog({ autoOpen: false });
+    });
+    
+                
+    function print_grid(){  
+		  
+          jQuery("#list").jqGrid({
+                url:"{{=URL(c='logprinter',f='call',args=['json','list'])}}",
+                data: "{}",
+                postData: { fechaini: function() { return $("#fechaini").val();} , 
+                            fechafin: function() { return $("#fechafin").val();} },
+                datatype: 'json',
+                mtype: 'GET',
+                contentType: "application/json; charset=utf-8",
+                complete: function(jsondata, stat) {
+                    if (stat == "success") {
+                        var thegrid = jQuery("#list")[0];
+                        thegrid.addJSONData(JSON.parse(jsondata.responseText).d);
+                    }
+                },        
+                onSelectRow: function (id) { verUsuario(id); },                       
+                colNames:['Fecha','Impresora','Jobid','Usuario','Host','Nombre','Pág.','Cop.','Tot.','Bytes'],
+                colModel:[                  
+                    {name:'time',index:'time', width:40, align:"left"},
+                    {name:'impresora',index:'impresora', width:40, align:"left"},
+                    {name:'jobid',index:'jobid', width:12, align:"left"},
+                    {name:'usuario',index:'usuario', width:30, align:"left"},
+                    {name:'host',index:'host', width:30, align:"left"},
+                    {name:'trabajo',index:'trabajo', width:60, align:"left"},
+                    {name:'paginas',index:'paginas', width:10, align:"left"},
+                    {name:'copias',index:'copias', width:10, align:"left"},
+                    {name:'total',index:'total', width:10, align:"left"},
+                    {name:'tamanio',index:'tamanio', width:15, align:"left"}
+                ], 
+                rowNum:25,
+                height:335,
+                width: 900,
+                rowList:[25,50,75],  
+                pager: '#pager', 
+                sortname: 'time',                 
+                autowidth: false,
+                viewrecords: true, 
+                sortorder: "desc", 
+                caption:"Log impresión",
+                footerrow: true, 
+                userDataOnFooter: true            
+          }); 
+          jQuery("#list").jqGrid('navGrid','#pager',{add:false,edit:false,del:false,search:false,refresh:false});          
+          jQuery("#list").jqGrid('filterToolbar'); 
+          
+          jQuery("#list").jqGrid('navButtonAdd','#pager',{
+                    caption: " Exportar todo a fichero CVS ",
+                    buttonicon :'ui-icon-calculator',
+                    onClickButton : function (){               
+						   window.open("{{=URL(c='logprinter',f='export_csv',args=['run'])}}");
+  		            } 
+          }); 
+
+          
+          
+       
+    }
+
+function verUsuario(id){
+   
+                    jQuery("#list").css("cursor","wait");        
+       
+					ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+															
+					
+                    jQuery("#messageLoading").show();
+                                        
+                    data=jQuery("#list").jqGrid('getRowData',id); 
+                    
+                    uid=data.usuario;
+                                       
+                    if(uid==false) return false;                    
+                    
+                    jQuery("#dialog-form").html("").css("display","none");
+                    jQuery("#dialog-form").load("form.html", function() {
+                   
+                        jQuery("#form_data #action").val("view");
+                        jQuery("#form_data #user").attr("readonly","true");
+                        jQuery("#form_data #user").css("background-color","#DDD");
+                        
+                                                                    
+                        jQuery.post('call/json/getUserData',{ username: uid }, function(result) {
+                            //var result = jQuery.parseJSON(data);
+                                                        
+                            
+                            if(result.response['type']=="teacher")
+                                var textType = "Profesor";
+                            else
+                               if (result.response['type']=="student")  
+                                    var textType = "Alumno";
+                                else
+                                      var textType="local";
+                                                                                                                  
+                            if (textType !=  "local" ) {
+									jQuery("#form_data #type").val(textType);
+									jQuery("#form_data #name").val(result.response['name']);
+									jQuery("#form_data #nif").val(result.response['nif']);       
+									jQuery("#form_data #user").val(result.response['user']);
+									jQuery("#form_data #surname").val(result.response['surname']);
+									if (result.response['photo']!='')
+										jQuery("#form_data #photo").attr("src","data:image/png;base64,"+result.response['photo']);                       
+			
+									grupos="";
+									$.each(result.response['groups']['departments'], function(i, l){
+										grupos=grupos + l + " " ;                                
+									});
+			
+									$.each(result.response['groups']['classrooms'], function(i, l){
+										grupos=grupos + l + " " ;
+									});                  
+									jQuery("#form_data #group").val(grupos);   
+							}
+							else {
+									jQuery("#form_data #type").val("local de la máquina");
+									jQuery("#form_data #user").val(uid);
+							};
+							
+							jQuery("#form_data #equipo").val(data.host);                               
+							jQuery("#form_data #iniSesion").val(data.timelogin);   
+							jQuery("#form_data #finSesion").val(data.timelogout);   
+			
+							x = (jQuery(window).width()-400)/2;
+							y = (jQuery(window).height()-500)/2;
+							
+							jQuery("#messageLoading").hide();
+							jQuery("#list").css("cursor","pointer");                
+							
+							jQuery("#dialog-form").dialog({
+								resizable: false,
+								modal: true,
+								width: 400,
+								stack: false,                                
+								title: "Consultar Sesión de Usuario"
+							}).dialog('option', 'position', [x, y]);                        
+
+                        });               
+                    });
+    }
+    
+    function convertirFecha(strFecha) {
+
+       anio=strFecha.substr(0,4);
+       mes=strFecha.substr(5,2);
+       dia=strFecha.substr(8,2);
+       hora=strFecha.substr(11,2);
+       minuto=strFecha.substr(14,2);
+       segundos=strFecha.substr(17,2);
+
+       return new Date(anio,mes,dia,hora,minuto,segundos);
+
+    }
+   
+           
+</script>
+<script type="text/javascript">
+   jQuery(document).ready(function(){  print_grid();}); 
+</script>

@@ -5,6 +5,7 @@ import applications.controlies.modules.Utils.LdapUtils as LdapUtils
 from applications.controlies.modules.SQLiteConnection import SQLiteConnection
 from applications.controlies.modules.Laptops import Laptops
 from applications.controlies.modules.LaptopsHistory import LaptopsHistory
+from gluon.tools import Mail
 
 @service.json   
 @auth.requires_login()
@@ -259,6 +260,79 @@ def getLTSPStatus():
         teachers=()
 
     return dict(computers=computers,teachers=teachers)
+
+
+@auth.requires_login()
+def config():
+
+    if not auth.user: redirect(URL(c='default',f='index'))
+
+    configuracion=getConfig()
+    if configuracion==None:
+       configuracion={}
+       configuracion["mail_server"]=""
+       configuracion["mail_sender"]=""
+       configuracion["mail_user"]=""
+       configuracion["mail_password"]=""
+       configuracion["mail_receiver"]=""
+
+    form=SQLFORM.factory(
+          Field('m_server',type='string', label="Servidor correo (nombre:puerto)", length=50, default=configuracion["mail_server"]),
+          Field('m_sender',type='string', label="Email de envio" , length=50, default=configuracion["mail_sender"]),
+          Field('m_user', type='string', label="Usuario correo", length=50, default=configuracion["mail_user"]),
+          Field('m_password',type='password',label="Contraseña correo" , length=30, default=configuracion["mail_password"]),
+          Field ('m_receiver',type='string', label="Email receptor", length=50, default=configuracion["mail_receiver"]),
+          submit_button='Guardar Datos')
+
+    if form.accepts(request.vars, session):
+          response.flash = 'Procesando datos, espere'
+          setConfig(request.vars["m_server"],request.vars["m_sender"], request.vars["m_user"], request.vars["m_password"], request.vars["m_receiver"])
+          redirect( URL( 'gestion', 'config')) 
+
+    return dict(form=form)
+
+def getConfig():
+
+    fila=cdb(cdb.config).select().first()
+    return fila
+
+def setConfig(server,sender,user,password,receiver):
+
+    fila=cdb(cdb.config).select().first()
+    if fila==None:
+           cdb.config.insert(mail_server=server, mail_sender=sender, mail_user=user, mail_password=password, mail_receiver=receiver)
+    else:
+           fila.update_record(mail_server=server, mail_sender=sender, mail_user=user, mail_password=password, mail_receiver=receiver)
+
+    cdb.commit()
+
+    return "OK"
+
+
+@service.json
+def sendMail():
+
+    return envioCorreo('Desde controlies', 'Este es un mensaje enviado desde Controlies. Si le ha llegado es que todo esta correcto.')
+
+
+def envioCorreo(asunto,mensaje):
+
+    configuracion=getConfig()
+    if configuracion!=None:
+        mail = Mail()
+
+        mail.settings.server = configuracion["mail_server"]
+        mail.settings.sender = configuracion["mail_sender"]
+        mail.settings.login = configuracion["mail_user"] +":"+configuracion["mail_password"]
+
+        if mail.send(configuracion["mail_receiver"], asunto, mensaje):
+              salida="OK: correo enviado al servidor"
+        else:
+              salida="ERROR: fallo en envio, revise los parámetros."
+    else:
+        salida="ERROR: no configurado correo."
+    return salida
+
 
 def call():
     """
