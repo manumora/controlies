@@ -1,3 +1,9 @@
+controlies (0.6.5-0) unstable; urgency=low
+
+  * Modificaciones para seguimiento de usuarios, hosts, impresiones y clientes ligeros.
+
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Tue, 15 Oct 2013 10:20:00 +0200
+
 controlies (0.6.4-6) unstable; urgency=low
 
   * Cambio del literal portatiles por dispositivos
