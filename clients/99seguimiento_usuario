@@ -1,0 +1,42 @@
+#!/bin/bash
+#Irá en /etc/X11/Xsession.d
+#El nombre no es al azar, debe ser: XXcustom_script, sin extensiones, sino Xsession no lo procesa.
+
+equipo=$(hostname -s)
+usuario=$USER
+dominio=$(host -d -t CNAME servidor | grep domain | cut -f1 -d".")
+
+
+#Determinamos que tipo de equipo es en función del facter use. Si no tiene el facter lo consideramos workstation.
+tipo="WORKSTATION"
+if [ -e /usr/bin/facter ]
+then
+      use=$(facter | grep ^use | cut -d" " -f3)
+      case $use in
+           ltsp*) tipo="LTSP"
+                          ;;
+           work*) tipo="WORKSTATION"
+                          ;;
+           port*) tipo="PORTATIL"
+                          ;;
+           *) tipo="WORKSTATION"
+                          ;;
+      esac
+fi
+
+#Si es un LTSP, debemos saber si es profesor, ya que los alumnos tambien hacen login (indirectamente) en el equipo del profesor
+#y aparecerían registrados en él.
+if [ $tipo = "LTSP" ]
+then 
+	es_profe=$(id -nG $usuario | grep teachers | wc -l)
+	if [ $es_profe -ne 0 ]
+	then
+	  peticion="http://ldap.$dominio/controlies/init/registro/login?usuario=$usuario&maquina=$equipo&tipohost=$tipo"
+	  actualiza=$(wget -q -O - $peticion 2>/dev/null)
+	fi
+else
+    peticion="http://ldap.$dominio/controlies/init/registro/login?usuario=$usuario&maquina=$equipo&tipohost=$tipo"
+    actualiza=$(wget -q -O - $peticion 2>/dev/null)
+fi
+
+

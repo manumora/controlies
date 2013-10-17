@@ -1,0 +1,48 @@
+#!/bin/bash
+
+function valid_ip()
+{
+    local  ip=$1
+    local  stat=1
+
+    if [[ $ip =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+        OIFS=$IFS
+        IFS='.'
+        ip=($ip)
+        IFS=$OIFS
+        [[ ${ip[0]} -le 255 && ${ip[1]} -le 255 \
+            && ${ip[2]} -le 255 && ${ip[3]} -le 255 ]]
+        stat=$?
+    fi
+    return $stat
+}
+
+
+#URLEncode para el titulo del documento
+TEATITLE=$(python -c "import sys, urllib as ul; print ul.quote_plus(sys.argv[1])" "$TEATITLE")
+
+#Echo para pruebas
+#echo $TEAPRINTERNAME $TEAJOBID $TEAUSERNAME $TEATITLE $TEACLIENTHOST $TEACOPIES `pkpgcounter $TEADATAFILE` >>/var/log/printaccounting.log
+
+dominio=$(host -d -t CNAME servidor | grep domain | cut -f1 -d".")
+paginas=$(pkpgcounter "$TEADATAFILE")
+
+
+#Hay que convertir el valor de TEACLIENTHOST en un nombre de equipo.
+if [ "$TEACLIENTHOST" == "localhost" ]
+then
+   equipo=$(hostname -s)
+else
+   if valid_ip $TEACLIENTHOST
+   then
+      equipo=$(host $TEACLIENTHOST | cut -d" " -f5 | cut -d"." -f1)
+   else
+      equipo=$TEACLIENTHOST
+   fi
+fi
+
+peticion="http://ldap.$dominio/controlies/init/registro/actualizalogprinter?impresora=$TEAPRINTERNAME&jobid=$TEAJOBID&usuario=$TEAUSERNAME&host=$equipo&trabajo=$TEATITLE&paginas=$paginas&copias=$TEACOPIES&tamanio=$TEAJOBSIZE"
+actualiza=$(wget -q -O - $peticion 2>/dev/null)
+
+exit 0
+
