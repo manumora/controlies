@@ -7,7 +7,13 @@ Standards-Version: 3.8.4
 
 Package: controlies
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, python-gluon, python-avahi, avahi-daemon, python-memcache, python-m2crypto, python-paramiko, python-ldap, python-imaging, python-dev, libapache2-mod-wsgi, libapache2-mod-python, libapache2-mod-gnutls, openssl, ssl-cert
+Depends: ${shlibs:Depends}, ${misc:Depends}, python-gluon, python-avahi, avahi-daemon, python-memcache, python-m2crypto, python-paramiko, python-ldap, python-imaging, python-dev, python-gobject, python-yaml, libapache2-mod-wsgi, libapache2-mod-python, libapache2-mod-gnutls, openssl, ssl-cert
 Description: Gestión de LDAP para un centro educativo
  ControlIES gestiona cuentas de usuarios, grupos, aulas, departamentos,
  distintos tipos de ordenadores, importación de Rayuela, etc.
+
+Package: controlies-client
+Architecture: all
+Depends: python
+Conflicts: controlies
+Description: Caracteristicas adicionales de controlies
