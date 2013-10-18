@@ -1,1 +1,6 @@
 clients/PostSession usr/share/controlies-client
+clients/seguimiento_equipo usr/share/controlies-client
+clients/99seguimiento_usuario etc/X11/Xsession.d
+clients/seguimiento_impresion usr/share/controlies-client
+clients/tea4cups.conf etc/cups
+clients/tea4cups usr/lib/cups/backend

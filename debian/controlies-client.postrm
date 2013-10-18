@@ -10,16 +10,17 @@ if [ -f "/etc/init.d/gdm3" ]; then
 fi
 
 case "$1" in
-    remove)
+    remove|purge)
+	#####################################################
+	# Registro Post Session
 	if [ -f "/etc/$DIR/PostSession/Default" ]; then
-		sed -i.bak 's/\/usr\/share\/controlies-client\/PostSession \$LOGNAME//g' /etc/$DIR/PostSession/Default
+		sed -i.bak '/\/usr\/share\/controlies-client\/PostSession \$LOGNAME/d' /etc/$DIR/PostSession/Default
 	fi
-    ;;
 
-    purge)
-	if [ -f "/etc/$DIR/PostSession/Default" ]; then
-		sed -i.bak 's/\/usr\/share\/controlies-client\/PostSession \$LOGNAME//g' /etc/$DIR/PostSession/Default
-	fi
+	######################################################
+	# Seguimiento equipos
+	sed -i.bak '/\*\/57 \* \* \* \* root \/usr\/share\/controlies-client\/seguimiento_equipo/d' /etc/crontab
+	service cron restart
     ;;
 
     upgrade|abort-upgrade|abort-remove|abort-deconfigure)
