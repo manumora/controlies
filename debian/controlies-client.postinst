@@ -31,7 +31,7 @@ case "$1" in
 
 	######################################################
 	# Seguimiento equipos
-	if ! grep "*/57 * * * * root /usr/share/controlies-client/seguimiento_equipo" /etc/crontab
+	if ! grep "\*/57 \* \* \* \* root /usr/share/controlies-client/seguimiento_equipo" /etc/crontab
 	then
 		echo "*/57 * * * * root /usr/share/controlies-client/seguimiento_equipo" >> /etc/crontab
 	fi
