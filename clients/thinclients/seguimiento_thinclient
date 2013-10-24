@@ -1,0 +1,46 @@
+#!/bin/bash
+
+### BEGIN INIT INFO
+# Provides:          seguimiento_thinclient
+# Required-Start:    $remote_fs $all
+# Should-Start:      $network $syslog
+# Required-Stop:     $remote_fs
+# Should-Stop:       $network $syslog
+# Default-Start:     2
+# Default-Stop:      
+# Short-Description: Seguimiento de teclados y ratones de los thinclients
+# Description:       Se detecta si el teclado y el ratón están activos
+#                    al arrancar el thinclient.
+### END INIT INFO
+
+equipo=$(hostname -s)
+dominio=$(host -d -t CNAME servidor | grep domain | cut -f1 -d".")
+
+
+#En teclados Sweex USB, aparece mouse en devices, aun cuando no haya ratón 
+#conectado. Con el filtro grep -v kbd eliminamos esas lineas, para que solo
+#coja las corresponden a un ratón real.
+raton=$(cat /proc/bus/input/devices  | grep -i mouse | grep -v kbd | wc -l)
+
+
+#En teclados RML, la cadena es "keykoard" en lugar de "keyboard"
+teclado=$(cat /proc/bus/input/devices  | grep -i key[bk]oard | wc -l)
+
+#Valor "1": no detectado. Valor "2": detectado. Valor "0": desconocido, no revisado.
+if [ $raton -eq 0 ]
+then
+   hayraton="1"
+else
+   hayraton="2"
+fi
+
+if [ $teclado -eq 0 ]
+then
+  hayteclado="1"
+else
+  hayteclado="2"
+fi
+peticion="http://ldap.$dominio/controlies/init/registro/actualizathinclient?host=$equipo&raton=$hayraton&teclado=$hayteclado"
+actualiza=$(wget -q -O - $peticion 2>/dev/null)
+#echo "Equipo $equipo. Ratón $raton. Teclado $teclado"
+#echo "$peticion"

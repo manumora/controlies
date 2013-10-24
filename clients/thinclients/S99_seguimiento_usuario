@@ -1,0 +1,28 @@
+#!/bin/bash
+#para guardar en /usr/share/ldm/rc.d de la imagen de los clientes.
+#Debe empezar por SXX para que se ejecute en el arranque de sesión en el orden XX
+
+#La siguiente linea se hace realmente en LocalApps, pero como controaula lo ha quitado
+#lo hacemos aqui hasta que se solucione.
+
+if [ -z $LDM_SOCKET ]
+then
+   LDM_SOCKET=$(ls -1 /var/run/ldm_socket*  | head -1)
+fi
+
+if [ -z $LDM_SERVER ]
+then
+   LDM_SERVER=192.168.0.254
+fi
+
+
+LDM_USERNAME=$(ssh -S $LDM_SOCKET $LDM_SERVER "id -un")
+
+equipo=$(hostname -s)
+usuario=$LDM_USERNAME
+dominio=$(host -d -t CNAME servidor | grep domain | cut -f1 -d".")
+
+peticion="http://ldap.$dominio/controlies/init/registro/login?usuario=$usuario&maquina=$equipo&tipohost=THINCLIENT"
+actualiza=$(wget -q -O - $peticion 2>/dev/null)
+
+

@@ -1,0 +1,3 @@
+clients/thinclient/K99_seguimiento_usuario opt/ltsp/i386/usr/share/ldm/rc.d/K99_seguimiento_usuario
+clients/thinclient/S99_seguimiento_usuario opt/ltsp/i386/usr/share/ldm/rc.d/S99_seguimiento_usuario
+clients/thinclient/seguimiento_thinclient opt/ltsp/i386/etc/init.d/seguimiento_thinclient

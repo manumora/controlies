@@ -1,0 +1,24 @@
+#/bin/bash
+#para guardar en /usr/share/ldm/rc.d de la imagen de los clientes.
+#Debe empezar por KXX para que se ejecute en el cierre de sesión n el orden XX
+
+if [ -z $LDM_SOCKET ]
+then
+   LDM_SOCKET=$(ls -1 /var/run/ldm_socket*  | head -1)
+fi
+
+if [ -z $LDM_SERVER ]
+then
+   LDM_SERVER=192.168.0.254
+fi
+
+LDM_USERNAME=$(ssh -S $LDM_SOCKET $LDM_SERVER "id -un")
+
+equipo=$(hostname -s)
+usuario=$LDM_USERNAME
+dominio=$(host -d -t CNAME servidor | grep domain | cut -f1 -d".")
+
+peticion="http://ldap.$dominio/controlies/init/registro/logout?usuario=$usuario&maquina=$equipo"
+actualiza=$(wget -q -O - $peticion 2>/dev/null)
+
+
