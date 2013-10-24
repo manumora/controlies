@@ -1,3 +1,9 @@
+controlies (0.6.5-1) unstable; urgency=low
+
+  * Paquete para thinclients.
+
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Thu, 24 Oct 2013 11:21:00 +0200
+
 controlies (0.6.5-0) unstable; urgency=low
 
   * Modificaciones para seguimiento de usuarios, hosts, impresiones y clientes ligeros.
