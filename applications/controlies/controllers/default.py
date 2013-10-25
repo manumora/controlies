@@ -33,14 +33,11 @@ def user():
     """
 
     if "host" in request.vars:
-        print request.vars
         session.server=request.vars["host"]
         session.username=request.vars["username"]        
         session.password=request.vars["password"]
         con_parameters=auth.settings.login_methods[0].func_defaults
-        print con_parameters
-        print auth
-        print session
+
         if con_parameters[0] != request.vars["host"] or request.vars["username"] != 'admin':
             #tengo que cambiar los parámetros con los que se llama a la función de logueo:
             new_parameters=list(con_parameters)

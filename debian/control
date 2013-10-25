@@ -17,3 +17,9 @@ Architecture: all
 Depends: curl, cups, pkpgcounter
 Conflicts: controlies
 Description: Caracteristicas adicionales de controlies
+
+Package: controlies-thinclient
+Architecture: all
+Depends: 
+Conflicts: controlies
+Description: Caracteristicas adicionales de controlies para thinclients

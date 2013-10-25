@@ -119,7 +119,9 @@ class Laptops(object):
         sql = sql+" LEFT JOIN users_types ut ON ut.id_user_type=lh.id_user_type "     
         sql = sql+" WHERE 1=1 "
         sql = sql+" AND l.id_laptop=lh.id_laptop "
-        sql = sql+" AND lh.id_historical IN (SELECT MAX(lh2.id_historical) FROM laptops_historical lh2 WHERE lh2.id_laptop=l.id_laptop) "
+
+        if str(args['typeSearch']) == "current":
+            sql = sql+" AND lh.id_historical IN (SELECT MAX(lh2.id_historical) FROM laptops_historical lh2 WHERE lh2.id_laptop=l.id_laptop) "
                 
         try:
             if str(args['serial_number']) != "None":
@@ -160,7 +162,9 @@ class Laptops(object):
         except LookupError:
             pass
 
-        sql = sql + " GROUP BY l.id_laptop"
+        if str(args['typeSearch']) == "current":
+            sql = sql + " GROUP BY l.id_laptop"
+            
         sql = sql + " ORDER BY "+args['sidx']+" "+args['sord']+", lh.datetime desc"
 
         result = self.DB.executesql(sql)

@@ -8,6 +8,11 @@
 
 {{extend 'layout.html'}}  
 
+	  <div id="radio">
+	    <input type="radio" id="radio1" name="radio" value="current" checked="checked" onclick="javascript:jQuery('#list').trigger('reloadGrid');"/><label for="radio1">&nbsp;Situación actual&nbsp;</label>
+	    <input type="radio" id="radio2" name="radio" value="complete" onclick="javascript:jQuery('#list').trigger('reloadGrid');"/><label for="radio2">Historial completo</label>
+	  </div>
+
         <div id="tabla_clientes" class="centerGrid">
             <table id="list" width="100%"></table>
             <div id="pager" style=""></div> 
@@ -37,6 +42,7 @@
           jQuery("#list").jqGrid({
                 url:"{{=URL(c='laptops',f='call',args=['json','list'])}}",
                 data: "{}",
+                postData: { typeSearch: function() { return jQuery('input[name=radio]:checked').val();}},
                 datatype: 'json',
                 mtype: 'GET',
                 contentType: "application/json; charset=utf-8",
@@ -264,5 +270,8 @@
 </script>
 
 <script type="text/javascript">
-  jQuery(document).ready(function(){ print_grid();}); 
+  jQuery(document).ready(function(){
+  	print_grid();
+  	$( "#radio" ).buttonset();
+  }); 
 </script>

@@ -7,9 +7,9 @@ set -e
 
 case "$1" in
     configure)
-	chmod 644 /opt/ltsp/i386/usr/share/ldm/rc.d/S99_seguimiento_usuario
-	chmod 644 /opt/ltsp/i386/usr/share/ldm/rc.d/K99_seguimiento_usuario
-	chmod 755 /opt/ltsp/i386/etc/init.d/seguimiento_thinclient
+	chmod 644 /usr/share/ldm/rc.d/S99_seguimiento_usuario
+	chmod 644 /usr/share/ldm/rc.d/K99_seguimiento_usuario
+	chmod 755 /etc/init.d/seguimiento_thinclient
 
 	/bin/mount /proc -t proc /proc
 	/usr/sbin/update-rc.d  -f seguimiento_thinclient remove
