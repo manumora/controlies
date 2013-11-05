@@ -59,10 +59,12 @@ response.menu+=[('Base de Datos', False, None,[
                 ('Portátiles por Grupo', False,URL( 'laptops_groups', 'index')),
                 ('Marcas', False,URL( 'laptops_trademarks', 'index'))  
                 ]),
-            ('Seguimiento Usuarios', False,URL( 'seguimiento', 'index')), 
-            ('Seguimiento Maquinas', False,URL( 'maquinas', 'index')), 
-            ('Seguimiento Thinclients', False, URL('maquinas', 'index_thinclients')),
-            ('Seguimiento Impresión', False, URL('logprinter', 'index')),    
+            ('Seguimiento', False, None, [            
+                ('Seguimiento Usuarios', False,URL( 'seguimiento', 'index')), 
+                ('Seguimiento Maquinas', False,URL( 'maquinas', 'index')), 
+                ('Seguimiento Thinclients', False, URL('maquinas', 'index_thinclients')),
+                ('Seguimiento Impresión', False, URL('logprinter', 'index'))
+                ]),
             ]
    )]
 

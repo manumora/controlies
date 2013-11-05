@@ -96,7 +96,9 @@ cdb.define_table(
     Field('logpkgsync','upload',autodelete=True),
     Field('ultimopuppet','datetime'),
     Field('estadopuppet'),
-    Field('logpuppet','upload', autodelete=True) )
+    Field('logpuppet','upload', autodelete=True),
+    Field('alert','integer', default=0) )
+    
 cdb.executesql('CREATE INDEX IF NOT EXISTS idxmaqhost ON maquinas (host);')
 cdb.executesql('CREATE INDEX IF NOT EXISTS idxmaqtime ON maquinas (ultimorefresco);')
   
@@ -115,7 +117,9 @@ cdb.define_table('config',
           Field('mail_sender','string'),
           Field('mail_user','string'),
           Field('mail_password','password'),
-          Field ('mail_receiver','string'))
+          Field ('mail_receiver','string'),
+          Field ('alert_thinclient','integer'),
+          Field ('list_email','integer'))
 
 
 cdb.define_table('logprinter',
@@ -133,3 +137,4 @@ cdb.define_table('logprinter',
 
 
                  
+
