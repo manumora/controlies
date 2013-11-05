@@ -272,31 +272,41 @@ Mayo-2013:
 
 5-Noviembre 2013:
 
-    -Hecho Merge con la rama principal, para incluir los últimos cambios de Manu Mora (portátiles, limpieza de
-     código de debug y mensajes traducidos).
+	-Hecho Merge con la rama principal, para incluir los últimos cambios de Manu Mora (portátiles, limpieza de
+	 código de debug y mensajes traducidos).
+
 	-Mejorada la gestión de envío de correos electrónicos, con verificaciones de la cuenta antes del envío.
+
 	-Envio de correos electrónicos ante determinados eventos:
 		-Uno de resumen de todas las indidencias encontradas en thinclients y resto de hosts. Se envía 
 		 de momento desde la configuración de correo, en el botón de prueba.
 		-Uno cada vez que se detecte una desconexión de teclado y/o ratón.
 		-Uno que se ejecute cada vez que se enciende una máquina determinada que queremos monitorizar.
+
 	-En el grid de seguimiento de equipos se añade una columna checkbox de "Alerta", que marca el equipo para que
 	cuando se encienda nos llegue un correo electrónico avisando.
+
 	-En el seguimiento de equipos incluido un icono para eliminar equipos antiguos (para limpiar portátiles
 	y equipos de años anteriores y desasignados).
+
 	-En Gestión/configuracion se añaden dos nuevas opciones: una para activar el envío de correos ante la 
 	desconexión de teclados y ratones, y otra activar el envío de correo resumen de las incidencias en las
 	máquinas del IES.
-	-La consulta de thinclients era muy lenta conforme va habiendo datos, ya que era demasiado compleja y
+
+	-La consulta de thinclients era muy lenta conforme van aumentando los datos, ya que era demasiado compleja y
 	sqlite no la resolvía bien. Solucionado diviendo la consulta en dos consultas mas pequeñas y poniendo
 	código python intermedio. Ahora va mucho mas rápida.
+
 	-Implementada idea de Ana Belén Cerezo: monitorizar teclado y ratón para clientes ligeros continuamente,
 	no solo en el arranque. Asi se detecta en que momento pierden la conexión. Es un script ejecutado por
 	crontab en los thinclients que mira estado de teclado y ratón, y lo compara con el estado anterior, mandando
 	un mensaje al momento de detectar cualquier variación. Por desgracia, solo funciona para teclados y ratones
 	USB, los PS/2 solo permiten detectar la conexión/desconexión en el arranque del sistema.
+
 	-Reorganizados los menús de seguimiento, tal como lo ha hecho Manu Mora.
 
+    -Actualizada tarea puppet con nuevos scripts.
+    
 5. TODO
 =======
 
