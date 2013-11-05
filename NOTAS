@@ -272,6 +272,8 @@ Mayo-2013:
 
 5-Noviembre 2013:
 
+    -Hecho Merge con la rama principal, para incluir los últimos cambios de Manu Mora (portátiles, limpieza de
+     código de debug y mensajes traducidos).
 	-Mejorada la gestión de envío de correos electrónicos, con verificaciones de la cuenta antes del envío.
 	-Envio de correos electrónicos ante determinados eventos:
 		-Uno de resumen de todas las indidencias encontradas en thinclients y resto de hosts. Se envía 
