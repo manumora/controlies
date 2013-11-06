@@ -1,0 +1,70 @@
+{{response.files.append(URL('static','js/utils.js'))}}
+
+{{extend 'layout.html'}}
+<script>
+    $(function() {
+        $("#tabsSearch").tabs().css("font-size","13px");
+        $("#buttonReport")
+        	.button({ icons: { primary: "ui-icon-document"}})
+        	.click( function(){ report(); });
+    })
+
+    function restartStyle(){
+        jQuery('#messageReport').html("");
+    }
+	
+	function report(){
+    	ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+		restartStyle();
+		jQuery.ajax({url:"report_printers",data:jQuery("#form_authorization").serialize()})
+			.done(function ( data ){
+				switch(data){
+					case 'noPeople':{
+						jQuery('#messageReport').html("No se han encontrado datos").effect("highlight", {"color":"yellow"}, 1000);
+						break
+					}
+					default: eval(data);
+				}
+			}
+		);	
+	}
+
+
+
+</script>
+<form id="form_authorization">
+   <table width="100%" cellspacing="12">
+    <tr>
+    <td>    
+        <div id="tabsSearch">
+            <ul>
+                <li><a href="#tabs-1"><span id="actions">Informes impresoras</span></a></li>
+            </ul>
+            <div id="tabs-1" style="padding:3px;">  
+                <table style="width:100%">
+                    <tr>
+                        <td>
+                        	Agrupado por<br>
+                        	<select id="group_by" name="group_by">
+                        		<option value="1">Nada</option>
+                        		<option value="impresora">Impresora</option>
+                        		<option value="3">Usuario</option>
+                        		<option value="4">Máquina</option>
+                        	</select>
+                        </td>
+                   </tr>
+                   <tr>
+                        <td colspan="4" style="text-align:center;">
+                        	<br><div id="messageReport" style="text-align:center; font-weight:bold; color:red; padding:3px; "></div>
+                        	<button type="button"  id="buttonReport">Generar informe</button>
+                        </td>
+                   </tr>
+                </table>
+            </div>
+        </div>              
+    </td>
+</tr>
+</table>
+</form>
+
+<div id="dialog-details"></div>

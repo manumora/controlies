@@ -8,11 +8,12 @@
 
 {{extend 'layout.html'}}  
 
-	  <div id="radio">
-	    <input type="radio" id="radio1" name="radio" value="current" checked="checked" onclick="javascript:jQuery('#list').trigger('reloadGrid');"/><label for="radio1">&nbsp;Situación actual&nbsp;</label>
-	    <input type="radio" id="radio2" name="radio" value="complete" onclick="javascript:jQuery('#list').trigger('reloadGrid');"/><label for="radio2">Historial completo</label>
-	  </div>
-
+	    <div style="text-align:center;">
+		  <div id="radio">
+		    <input type="radio" id="radio1" name="radio" value="current" checked="checked" onclick="javascript:jQuery('#list').trigger('reloadGrid');"/><label for="radio1">&nbsp;Situación actual&nbsp;</label>
+		    <input type="radio" id="radio2" name="radio" value="complete" onclick="javascript:jQuery('#list').trigger('reloadGrid');"/><label for="radio2">Historial completo</label>
+		  </div>
+		</div>
         <div id="tabla_clientes" class="centerGrid">
             <table id="list" width="100%"></table>
             <div id="pager" style=""></div> 
@@ -53,13 +54,14 @@
                     }
                 },
                 
-                colNames:['Marca','Modelo','Número Serie','Tipo','Login','Estado'],
+                colNames:['Marca','Modelo','Número Serie','Tipo','Login','Fecha/Hora','Estado'],
                 colModel:[ 
                     {name:'trademark',index:'trademark', width:60, align:"center"},
-                    {name:'model',index:'model', width:115, align:"center"},
+                    {name:'model',index:'model', width:70, align:"center"},
                     {name:'serial_number',index:'serial_number', width:115, align:"center"},
                     {name:'user_type',index:'user_type', width:50, align:"center", stype:'select', editoptions:{value:":Todos;Profesor:Profesores;Alumno:Alumnos;Ninguno:Ninguno"}},
-                    {name:'username',index:'username', width:115, align:"center"},
+                    {name:'username',index:'username', width:100, align:"center"},
+                    {name:'datetime',index:'datetime', width:80, align:"center"},
                     {name:'state',index:'state', width:65, align:"center", stype:'select', editoptions:{value:":Todos;Asignado:Asignado;En reparación:En reparación;Sin asignar:Sin asignar"}},
                 ], 
                 rowNum:25,

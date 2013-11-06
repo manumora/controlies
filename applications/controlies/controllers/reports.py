@@ -6,6 +6,12 @@ def laptops():
         redirect(URL(c='default',f='index'))
     return dict()
 
+def printers():
+    if not auth.user:
+        session.flash='Debe iniciar sesión'
+        redirect(URL(c='default',f='index'))
+    return dict()
+
 def users():
     if not auth.user:
         session.flash='Debe iniciar sesión'
@@ -128,7 +134,7 @@ def report():
     response.headers['Content-Type']='application/pdf'
     doc=pdf.output(dest='S')
     doc64=embed64(data=doc,extension='application/pdf')    
-    return 'window.location="%s";' % doc64     
+    return 'document.location="%s";' % doc64     
 
 def getDataStudents(classroom):
     from applications.controlies.modules.Groups import Groups
@@ -201,6 +207,84 @@ def getDataTeachers(search):
         teachers.append(serials[s])
 
     return teachers
+
+
+@auth.requires_login()      
+def report_printers():
+    from gluon.contrib.pyfpdf import FPDF, HTMLMixin
+                
+    title = "Informe de impresiones"
+    
+    head = THEAD(TR(TH("Fecha/Hora",_width="22%"), 
+                    TH("Impresora",_width="22%"),
+                    TH("Host",_width="19%"),
+                    TH("Usuario",_width="19%"),
+                    TH("Pág",_width="5%"), 
+                    TH("Cop",_width="5%"), 
+                    TH("Total",_width="8%"),  
+                    _bgcolor="#A0A0A0"))
+
+    totalsum = cdb.logprinter.total.sum().with_alias('totalsum')
+
+    rows=cdb(cdb.logprinter).select(cdb.logprinter.time,
+                                    cdb.logprinter.impresora,
+                                    cdb.logprinter.host,
+                                    cdb.logprinter.usuario,
+                                    cdb.logprinter.paginas,
+                                    cdb.logprinter.copias,
+                                    totalsum,
+                                    groupby=cdb.logprinter.usuario,
+                                    orderby=~cdb.logprinter.total.sum())
+    
+    rowsTable = []
+    i=0;
+    
+    fields = " TD(r['logprinter']['time'], _align='center'),"
+    fields+= " TD(r['logprinter']['impresora'], _align='center'),"
+    fields+= " TD(r['logprinter']['host'], _align='center'),"
+    fields+= " TD(r['logprinter']['usuario'], _align='center'),"
+    fields+= " TD(r['logprinter']['paginas'], _align='center'),"
+    fields+= " TD(r['logprinter']['copias'], _align='center'),"
+    fields+= " TD(r['totalsum'], _align='center')"
+    
+    for r in rows:
+        print r
+        col = i % 2 and "#F0F0F0" or "#FFFFFF"
+        """rowsTable.append(TR(TD(r['logprinter']['time'], _align="center"),
+                       TD(r['logprinter']['impresora'], _align="center"),
+                       TD(r['logprinter']['host'], _align="center"),
+                       TD(r['logprinter']['usuario'], _align="center"),
+                       TD(r['logprinter']['paginas'], _align="center"),
+                       TD(r['logprinter']['copias'], _align="center"),
+                       TD(r['totalsum'], _align="center"),
+                       _bgcolor=col))"""
+        rowsTable.append(TR(eval(fields), _bgcolor=col))
+        i+=1 
+
+    body = TBODY(*rowsTable)
+    table = TABLE(*[head, body], _border="1", _align="center", _width="100%")
+
+    class MyFPDF(FPDF, HTMLMixin):
+        def header(self):
+            self.set_font('Arial','B',15)
+            self.cell(0,10, title ,1,0,'C')
+            
+        def footer(self):
+            self.set_y(-15)
+            self.set_font('Arial','I',8)
+            self.cell(0,10,"IES Sta Eulalia",0,0,'L')
+            txt = 'Página %s de %s' % (self.page_no(), self.alias_nb_pages())
+            self.cell(0,10,txt,0,0,'R')
+                
+    pdf=MyFPDF()
+    pdf.add_page()
+    pdf.write_html(str(XML(table, sanitize=False)))        
+
+    response.headers['Content-Type']='application/pdf'
+    doc=pdf.output(dest='S')
+    doc64=embed64(data=doc,extension='application/pdf')    
+    return 'document.location="%s";' % doc64 
+
 
 def call():
     """
