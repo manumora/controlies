@@ -73,6 +73,7 @@ class LdapConnection(object):
             return False
         except ldap.CONFIDENTIALITY_REQUIRED:
             try:
+                print "llego"
                 #self.connection.set_option(ldap.OPT_X_TLS_DEMAND, True)
                 self.connection=ldap.initialize("ldaps://" +self.host)
                 self.connection.simple_bind_s("cn="+self.user+",ou=People,dc=instituto,dc=extremadura,dc=es",self.passwd)
