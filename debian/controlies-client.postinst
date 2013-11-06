@@ -7,58 +7,58 @@ set -e
 
 case "$1" in
     configure)
-	#####################################################
-	# Registro Post Session
-	DIR="gdm"
-	if [ -f "/etc/init.d/gdm3" ]; then
-	    DIR="gdm3"
-	fi
+    #####################################################
+    # Registro Post Session
+    DIR="gdm"
+    if [ -f "/etc/init.d/gdm3" ]; then
+        DIR="gdm3"
+    fi
 
-	if [ ! -f /etc/$DIR/PostSession/Default ]; then
-		echo "#!/bin/sh" >> /etc/$DIR/PostSession/Default
-	fi
+    if [ ! -f /etc/$DIR/PostSession/Default ]; then
+        echo "#!/bin/sh" >> /etc/$DIR/PostSession/Default
+    fi
 
-	sed -i.bak '/exit 0/d' /etc/$DIR/PostSession/Default
+    sed -i.bak '/exit 0/d' /etc/$DIR/PostSession/Default
 
-	if ! grep "/usr/share/controlies-client/PostSession \$LOGNAME" /etc/$DIR/PostSession/Default
-	then
-	  echo "/usr/share/controlies-client/PostSession \$LOGNAME" >> /etc/$DIR/PostSession/Default
-	fi
+    if ! grep "/usr/share/controlies-client/PostSession \$LOGNAME" /etc/$DIR/PostSession/Default
+    then
+      echo "/usr/share/controlies-client/PostSession \$LOGNAME" >> /etc/$DIR/PostSession/Default
+    fi
 
-	echo "exit 0" >> /etc/$DIR/PostSession/Default
-	chmod +x /etc/$DIR/PostSession/Default
-	chmod 755 /usr/share/controlies-client/PostSession
+    echo "exit 0" >> /etc/$DIR/PostSession/Default
+    chmod +x /etc/$DIR/PostSession/Default
+    chmod 755 /usr/share/controlies-client/PostSession
 
-	######################################################
-	# Seguimiento equipos
-	if ! grep "\*/57 \* \* \* \* root /usr/share/controlies-client/seguimiento_equipo" /etc/crontab
-	then
-		echo "*/57 * * * * root /usr/share/controlies-client/seguimiento_equipo" >> /etc/crontab
-	fi
-	chmod 755 /usr/share/controlies-client/seguimiento_equipo
-	service cron restart
+    ######################################################
+    # Seguimiento equipos
+    if ! grep "\*/57 \* \* \* \* root /usr/share/controlies-client/seguimiento_equipo" /etc/crontab
+    then
+        echo "*/57 * * * * root /usr/share/controlies-client/seguimiento_equipo" >> /etc/crontab
+    fi
+    chmod 755 /usr/share/controlies-client/seguimiento_equipo
+    service cron restart
 
-	######################################################
-	# Seguimiento usuario
-	chmod 755 /etc/X11/Xsession.d/99seguimiento_usuario
+    ######################################################
+    # Seguimiento usuario
+    chmod 755 /etc/X11/Xsession.d/99seguimiento_usuario
 
-	######################################################
-	# Seguimiento impresion
-	chmod 755 /usr/share/controlies-client/seguimiento_impresion
-	#chmod 644 /usr/share/pyshared/pkpgpdls/zjstream.py
-	chmod 644 /etc/cups/tea4cups.conf
-	chmod 700 /usr/lib/cups/backend/tea4cups
-	service cups restart
-   
-    
+    ######################################################
+    # Seguimiento impresion
+    chmod 755 /usr/share/controlies-client/seguimiento_impresion
+    #chmod 644 /usr/share/pyshared/pkpgpdls/zjstream.py
+    chmod 644 /etc/cups/tea4cups.conf
+    chmod 700 /usr/lib/cups/backend/tea4cups
+    service cups restart
+
+
     ###########################################################
-	# Limpieza scripts controlies antiguos, metidos por puppet
-    
+    # Limpieza scripts controlies antiguos, metidos por puppet
+
     #/etc/X11/Xsession.d/99seguimiento_usuario sigue siendo el mismo, no se toca
-    
-    
-    #/etc/gdm3|gdm/PostSession/Default debería limpiarse del código viejo
-    
+
+
+    #/etc/gdm3|gdm/PostSession/Default se limpia del código viejo
+
     if [ -f /etc/gdm3/PostSession/Default ]
     then
         sed -i.bak '/equipo=$(hostname -s)/,+5d' /etc/gdm3/PostSession/Default
@@ -70,16 +70,16 @@ case "$1" in
     fi
 
     #Script y cron de despierta_thinclients
-    test -f /root/scripts/despierta_thinclients | rm -f /root/scripts/despierta_thinclients
+    test -f /root/scripts/despierta_thinclients && rm -f /root/scripts/despierta_thinclients
     sed -i.bak '\/root\/scripts\/despierta_thinclients/d' /var/spool/cron/crontabs/root 
-    
+
     #Script de seguimiento de seguimiento_equipo
-    test -f /root/scripts/seguimiento_equipo | rm -f /root/scripts/seguimiento_equipo
+    test -f /root/scripts/seguimiento_equipo && rm -f /root/scripts/seguimiento_equipo
     sed -i.bak '\/root\/scripts\/seguimiento_equipo/d' /var/spool/cron/crontabs/root 
         
     #Script de seguimiento_impresion. tea4cups.conf y el backend de cups no se tocan
-    test -f /root/scripts/seguimiento_impresion | rm -f /root/scripts/seguimiento_impresion
-    
+    test -f /root/scripts/seguimiento_impresion && rm -f /root/scripts/seguimiento_impresion
+
     ;;
     
     abort-upgrade|abort-remove|abort-deconfigure)
