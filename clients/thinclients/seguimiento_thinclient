@@ -40,7 +40,11 @@ then
 else
   hayteclado="2"
 fi
+
+echo "${hayteclado}${hayraton}" > /tmp/kmwatchdog
+
 peticion="http://ldap.$dominio/controlies/init/registro/actualizathinclient?host=$equipo&raton=$hayraton&teclado=$hayteclado"
 actualiza=$(wget -q -O - $peticion 2>/dev/null)
+
 #echo "Equipo $equipo. Ratón $raton. Teclado $teclado"
 #echo "$peticion"

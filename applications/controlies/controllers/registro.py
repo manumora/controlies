@@ -4,6 +4,7 @@
 import datetime
 import yaml
 import StringIO
+from applications.controlies.modules.Config import Config
 
 def index(): return dict(message="hello from registro.py")
 
@@ -58,7 +59,16 @@ def doactualizahost(host,tipohost,ultimoarranque,ultimopkgsync,estadopaquetes):
       else:
            cdb.maquinas.insert(host=host,tipohost=tipohost,ultimorefresco=ahora,ultimoarranque=ultimoarranque)
     else:
-      if estadopaquetes!='':
+      
+      if fila.alert==1 and fila.ultimoarranque.strftime("%Y-%m-%d %H:%M")!=ultimoarranque[0:16]: 
+             # Si está activada la alerta para ese host y es un nuevo arranque, se envia el mensaje de correo de alerta de encendido.
+             # Para ver si es un nuevo arranque, comparamos las fechas de ultima arranque, desechando los segundos.
+            configuracion=Config(cdb)
+            configuracion.loadConfig()
+            mensaje="Alerta: ha sido encendido el host monitorizado "+host+" con fecha "+ahora.strftime("%d/%m/%Y %H:%M")+"\n"
+            configuracion.enviaMail("Encendido de "+host, mensaje)
+                       
+      if estadopaquetes!='':            
            fila.update_record(ultimorefresco=ahora, tipohost=tipohost, ultimopkgsync=ultimopkgsync,
                            ultimoarranque=ultimoarranque,
                            estadopaquetes=estadopaquetes)
@@ -193,7 +203,31 @@ def doactualizathinclient(host, raton, teclado):
 
     ahora=datetime.datetime.today()
     
-    fila=cdb(cdb.thinclients.host==host).select(orderby=~cdb.thinclients.time).first()
+    
+    #Ver si hay que mandar emails, siempre que traiga informacion
+    configuracion=Config(cdb)
+    configuracion.loadConfig()    
+    if (raton=="1" or teclado=="1") and configuracion.alert_thinclient: 
+        
+        #Busca ultimo estado que no sea "apagado", para comparar
+        
+        ultimo_estado=cdb((cdb.thinclients.host==host) & (cdb.thinclients.raton!="0") ).select(orderby=~cdb.thinclients.time).first()
+        if ultimo_estado==None:
+               ult_teclado="2"
+               ult_raton="2"
+        else:
+               ult_teclado=ultimo_estado.teclado
+               ult_raton=ultimo_estado.raton
+               
+        if (teclado=="1" and ult_teclado=="2") or (raton=="1" and ult_raton=="2"):
+               mensaje="Aviso fallo teclado/ratón en thinclient "+host+" ("+ahora.strftime("%d/%m/%Y %H:%M")+")\n\n"
+               est_teclado="Conectado" if teclado=="2" else "Desconectado"
+               est_raton="Conectado" if raton=="2" else "Desconectado"
+               mensaje=mensaje+"\tTeclado: "+est_teclado+"\n"
+               mensaje=mensaje+"\tRaton: "+est_raton+"\n"
+               configuracion.enviaMail('Aviso de thinclient '+host, mensaje)
+        
+    fila=cdb(cdb.thinclients.host==host).select(orderby=~cdb.thinclients.time).first()    
     if fila==None:
         cdb.thinclients.insert(host=host,time=ahora,raton=raton,teclado=teclado)  
     else:

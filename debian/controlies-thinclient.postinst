@@ -11,6 +11,9 @@ case "$1" in
 	chmod 644 /usr/share/ldm/rc.d/K99_seguimiento_usuario
 	chmod 755 /etc/init.d/seguimiento_thinclient
 
+	chmod 644 /etc/cron.d/kb_vigilante
+	chmod 755 /usr/bin/vigila_kb_thinclient
+
 	/bin/mount /proc -t proc /proc
 	/usr/sbin/update-rc.d  -f seguimiento_thinclient remove
 	/usr/sbin/update-rc.d  seguimiento_thinclient start 05 2 .

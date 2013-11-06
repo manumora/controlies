@@ -270,6 +270,43 @@ Mayo-2013:
    -Modificadas las cabeceras del script seguimiento_thinclient para que solo se ejecute en el nivel 2, al encendido, ya que ahora ha dejado de hacer caso 
     al update-rc y se mete en todos los niveles, generando llamadas repetidas a controlies. Solucionado por Paco da con la solucion y modifica script y tarea puppet.
 
+5-Noviembre 2013:
+
+	-Hecho Merge con la rama principal, para incluir los últimos cambios de Manu Mora (portátiles, limpieza de
+	 código de debug y mensajes traducidos).
+
+	-Mejorada la gestión de envío de correos electrónicos, con verificaciones de la cuenta antes del envío.
+
+	-Envio de correos electrónicos ante determinados eventos:
+		-Uno de resumen de todas las indidencias encontradas en thinclients y resto de hosts. Se envía 
+		 de momento desde la configuración de correo, en el botón de prueba.
+		-Uno cada vez que se detecte una desconexión de teclado y/o ratón.
+		-Uno que se ejecute cada vez que se enciende una máquina determinada que queremos monitorizar.
+
+	-En el grid de seguimiento de equipos se añade una columna checkbox de "Alerta", que marca el equipo para que
+	cuando se encienda nos llegue un correo electrónico avisando.
+
+	-En el seguimiento de equipos incluido un icono para eliminar equipos antiguos (para limpiar portátiles
+	y equipos de años anteriores y desasignados).
+
+	-En Gestión/configuracion se añaden dos nuevas opciones: una para activar el envío de correos ante la 
+	desconexión de teclados y ratones, y otra activar el envío de correo resumen de las incidencias en las
+	máquinas del IES.
+
+	-La consulta de thinclients era muy lenta conforme van aumentando los datos, ya que era demasiado compleja y
+	sqlite no la resolvía bien. Solucionado diviendo la consulta en dos consultas mas pequeñas y poniendo
+	código python intermedio. Ahora va mucho mas rápida.
+
+	-Implementada idea de Ana Belén Cerezo: monitorizar teclado y ratón para clientes ligeros continuamente,
+	no solo en el arranque. Asi se detecta en que momento pierden la conexión. Es un script ejecutado por
+	crontab en los thinclients que mira estado de teclado y ratón, y lo compara con el estado anterior, mandando
+	un mensaje al momento de detectar cualquier variación. Por desgracia, solo funciona para teclados y ratones
+	USB, los PS/2 solo permiten detectar la conexión/desconexión en el arranque del sistema.
+
+	-Reorganizados los menús de seguimiento, tal como lo ha hecho Manu Mora.
+
+    -Actualizada tarea puppet con nuevos scripts.
+    
 5. TODO
 =======
 
@@ -278,35 +315,13 @@ Mayo-2013:
 
 -El borrado nocturno mediante crontab del seguimiento de clientes no funciona. Averiguar la causa.
 
--Envio de correos electrónicos ante determinados eventos:
-	-Uno cada mañana de resumen de todas las indidencias encontradas en thinclients y resto de hosts.	
-    -Uno cada vez que se detecte una desconexión de teclado y/o ratón.
-    -Uno que se ejecute cada vez que se enciende una máquina determinada que queremos monitorizar.
-
--En el seguimiento de equipos incluir una opción para eliminar equipos antiguos (para limpiar portátiles de años anteriores y desasignados).
+-El correo resumen de estado de equipos debe enviarse tambien mediante un cron.
 
 -Integrar sarg: http://sourceforge.net/p/sarg/discussion/363374/thread/e95afce5/
-
--La consulta de thinclients es muy lenta conforme va habiendo datos. Ideas:
-
-            -Revisar consulta SQL: confirmar si existen indices descendente de equipo+fecha, equipo y fecha desc.
-
-            -Implementear la consulta por código:
-                bucle que saque los distinct thinclients que cumplan el filtro.
-                bucle que saque el first del order by fecha desc de cada thinclient que cumpla el filtro.
-                Devolver XML con el segundo bucle.
-
-            -Desnormalizar la tabla
-
-            -Abandonar sqlite y usar MySQL.
 
 -A veces al escribir en registro.py da error de database locked y falla alguna inserción de datos (visto en errors), ya que sqlite bloquea la base de datos 
 completa cuando está haciendo una consulta y si esta es muy pesada puede tardar un rato en desbloquearla. Meter en ese caso un temporizador aleatorio y 3 
 retries si observo que se repite con frecuencia.
-
--Posibilidad comentada por Ana Belén: monitorizar teclado y ratón para clientes ligeros continuamente, no solo en el arranque. Asi se detecta en que momento
-pierden la conexión. Seria un script ejecutado por crontab que miraría estado de teclado y ratón, y lo compararía con el estado anterior, mandando un mensaje
-al momento de detectar cualquier variación.
 
 -Posibilidad comentada por profesor del IES: hacer capturas de pantalla periódicas de un alumno concreto y guardarlas en un directorio seguro, para hacer 
 un seguimientovisual de lo que hace.
@@ -314,7 +329,8 @@ un seguimientovisual de lo que hace.
 -Llevar control de impresión también para los Windows. Hay que hacer un servicio en C# que monitorice los eventos de impresión, usando el ensamblado 
 PrintedPages....
 
--
+-Grid con informe de aulas en un día concreto...en desarrollo
+
 
 
 
