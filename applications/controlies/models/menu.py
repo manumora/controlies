@@ -43,10 +43,10 @@ response.menu+=[
 response.menu+=[('Gestión', False, None,[            
             ('Servidores de Aula', False,URL( 'gestion', 'servidores_aula')),   
             ('Importación de Rayuela', False, URL( 'gestion', 'rayuela')),
-            ('Mantenimiento de LDAP', False, None,[
-                ('Limpieza de grupos', False, URL('check_ldap','index')),
-                ('Detección de uid o gid duplicados', False, URL( 'gestion', 'duplicados')),
-                ]),
+#            ('Mantenimiento de LDAP', False, None,[
+#                ('Limpieza de grupos', False, URL('check_ldap','index')),
+#                ('Detección de uid o gid duplicados', False, URL( 'gestion', 'duplicados')),
+#                ]),
 #            ('Importación datos de Portátiles', False, URL( 'gestion', 'base_datos')),
             ('Configuración', False, URL( 'gestion', 'config')),
             ]
