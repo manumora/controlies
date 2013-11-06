@@ -1,5 +1,5 @@
-clients/thinclients/K99_seguimiento_usuario usr/share/ldm/rc.d/K99_seguimiento_usuario
-clients/thinclients/S99_seguimiento_usuario usr/share/ldm/rc.d/S99_seguimiento_usuario
-clients/thinclients/seguimiento_thinclient etc/init.d/seguimiento_thinclient
-clients/thinclients/vigila_kb_thinclient usr/bin/vigila_kb_thinclient
-clients/thinclients/kb_vigilante etc/cron.d/kb_vigilante
+clients/thinclients/K99_seguimiento_usuario usr/share/ldm/rc.d
+clients/thinclients/S99_seguimiento_usuario usr/share/ldm/rc.d
+clients/thinclients/seguimiento_thinclient etc/init.d
+clients/thinclients/vigila_kb_thinclient usr/bin
+clients/thinclients/kb_vigilante etc/cron.d
