@@ -70,7 +70,7 @@ response.menu+=[('Base de Datos', False, None,[
 
 response.menu+=[('Informes', False, None,[            
             ('Compromisos Portátiles', False,URL( 'reports', 'laptops')),
-            ('Impresoras', False,URL( 'reports', 'printers')),
+            #('Impresoras', False,URL( 'reports', 'printers')),
             #('Usuarios', False,URL( 'reports', 'users')),
             ]
    )]
