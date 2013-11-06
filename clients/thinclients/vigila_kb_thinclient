@@ -1,0 +1,58 @@
+#!/bin/bash
+#Se ejecuta cada X minutos y comprueba si teclado y/o ratón han cambiado de estado respecto
+#al estado anterio. Si es así, envía un mensaje a controlies para reflejar el cambio.
+#Nota: solo funciona bien con los dispositivos USB. Si se conecta o desconecta en caliente
+#un dispositivo PS/2, normalmente el estado proporcionado por /proc/bus/input/devices no cambia,
+#ya que los dispositivos PS/2 no suelen generar eventos en su conexión/desconexión.
+
+equipo=$(hostname -s)
+dominio=$(host -d -t CNAME servidor | grep domain | cut -f1 -d".")
+
+
+#En teclados Sweex USB, aparece mouse en devices, aun cuando no haya ratón 
+#conectado. Con el filtro grep -v kbd eliminamos esas lineas, para que solo
+#coja las corresponden a un ratón real.
+raton=$(cat /proc/bus/input/devices  | grep -i mouse | grep -v kbd | wc -l)
+
+
+#En teclados RML, la cadena es "keykoard" en lugar de "keyboard"
+teclado=$(cat /proc/bus/input/devices  | grep -i key[bk]oard | wc -l)
+
+#Valor "1": no detectado. Valor "2": detectado. Valor "0": desconocido, no revisado.
+if [ $raton -eq 0 ]
+then
+   hayraton="1"
+else
+   hayraton="2"
+fi
+
+if [ $teclado -eq 0 ]
+then
+  hayteclado="1"
+else
+  hayteclado="2"
+fi
+
+#Recupera el estado anterior de teclado y ratón.
+if [ -f /tmp/kmwatchdog ]
+then
+   km_anterior=$(cat /tmp/kmwatchdog)
+else
+   km_anterior=""   
+fi
+#Estado actual
+km_actual="${hayteclado}${hayraton}"
+
+#Si el estado ha cambiado, manda un aviso para actualizar el thinclient.
+if  [ "$km_anterior" != "$km_actual" ]
+then
+
+    peticion="http://ldap.$dominio/controlies/init/registro/actualizathinclient?host=$equipo&raton=$hayraton&teclado=$hayteclado"
+    actualiza=$(wget -q -O - $peticion 2>/dev/null)
+
+    #Queda el estado actual para la siguiente comprobación.
+    echo "${hayteclado}${hayraton}" > /tmp/kmwatchdog
+
+fi
+
+

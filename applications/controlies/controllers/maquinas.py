@@ -26,13 +26,13 @@ def index_thinclients():
 @auth.requires_login()
 def list():
 
-    fields = ['host','tipohost','ultimorefresco','ultimoarranque','ultimopkgsync','estadopaquetes','ultimopuppet','estadopuppet']
+    fields = ['host','tipohost','ultimorefresco','ultimoarranque','ultimopkgsync','estadopaquetes','ultimopuppet','estadopuppet','alert']
     rows = []
     page =  int(request.vars["page"])
     pagesize = int(request.vars["rows"])    
     offset = (page-1) * pagesize
             
-    sql="select id,host,tipohost,ultimorefresco,ultimoarranque,ultimopkgsync,estadopaquetes,ultimopuppet,estadopuppet from maquinas where 1=1"
+    sql="select id,host,tipohost,ultimorefresco,ultimoarranque,ultimopkgsync,estadopaquetes,ultimopuppet,estadopuppet,alert from maquinas where 1=1"
     where=""
     
     try:
@@ -112,9 +112,10 @@ def list():
     retorno=""
     for reg in consulta:
         retorno=retorno+reg[1]
+        alertar="true" if reg[9]==1 else "false"
         row = {
                 "id":reg[0],
-                "cell":[reg[1],reg[2],reg[3],reg[4],reg[5],reg[6],reg[7],reg[8]],
+                "cell":[reg[1],reg[2],reg[3],reg[4],reg[5],reg[6],reg[7],reg[8],alertar],
                 "host":reg[1],
                 "tipohost": reg[2],
                 "ultimorefresco":reg[3],
@@ -123,6 +124,7 @@ def list():
                 "estadopaquetes":reg[6],
                 "ultimopuppet":reg[7],
                 "estadopuppet":reg[8],
+                "alert":alertar
             }
         rows.append(row)
 
@@ -185,18 +187,19 @@ def list_thinclients_state():
     pagesize = int(request.vars["rows"])    
     offset = (page-1) * pagesize
         
-    sql="select id,host,time,teclado,raton from thinclients t1 where 1=1"
-    where=""
+    sql="select distinct host from thinclients where 1=1"
+    wherefiltro=""
+    wherefecha=""
     whereestado=""
     try:
        if str(request.vars['host']) != "None":
-             where = where+" and host like '%"+str(request.vars['host'])+"%'"
+             wherefiltro = wherefiltro+" and host like '%"+str(request.vars['host'])+"%'"
     except LookupError:
        pass
     
     try:
        if str(request.vars['time']) != "None":
-             where = where+" and time like '%"+str(request.vars['time'])+"%'"
+             wherefecha = wherefecha+" and time like '%"+str(request.vars['time'])+"%'"
     except LookupError:
        pass
        
@@ -213,9 +216,9 @@ def list_thinclients_state():
        pass          
 
     #Subconsulta para extraer el ultimo registro de cada rango.
-    wheresub=where+" and t1.id=(select id from thinclients t2 where t1.host=t2.host order by time desc limit 1)"
+    #wheresub=where+" and t1.id=(select id from thinclients t2 where t1.host=t2.host order by time desc limit 1)"
   
-    sql = sql + wheresub + whereestado +" order by "+request.vars['sidx']+" "+request.vars['sord'] + " limit "+str(pagesize)+" offset "+str(offset)
+    sql = sql + wherefiltro+wherefecha+whereestado +" order by host"
 
         
 #    file = open('/tmp/sql.txt', 'w')
@@ -225,19 +228,32 @@ def list_thinclients_state():
 
     consulta=cdb.executesql(sql)
 
+    posrecord=0
     for reg in consulta:
-        row = {
-                "id":reg[0],
-                "cell":[reg[1],reg[2],reg[3],reg[4]],
-                "host":reg[1],
-                "time":reg[2],
-                "teclado":reg[3],
-                "raton":reg[4]                
-            }
-        rows.append(row)
+        host=reg[0]
+        sqlultimo="select id,host,time,teclado,raton from thinclients where host='"+host+"'"+wherefecha+" order by time desc limit 1"   
+        sql="select id,host,time,teclado,raton from thinclients where host='"+host+"' "+wherefecha+whereestado+"   order by time desc limit 1"
+        consulta_ultimo=cdb.executesql(sqlultimo) #devuelve el ultimo valor de ese thinclient en la fecha indicada
+        consulta_host=cdb.executesql(sql) #devuelve una tupla o ninguna con el ultimo valor de ese thinclient
+                                          #en ese estado de ratón y teclado
+        if len(consulta_host)==1 :
+            reg=consulta_host[0]
+            reg_ultimo=consulta_ultimo[0]
+            if reg[0]==reg_ultimo[0] and (posrecord>=offset and posrecord<offset+pagesize) :
+                #Si el ultimo registro del thinclient en esa fecha coincide con el ultimo
+                #registro con ese estado de ratón y teclado, se incluye en la lista
+                row = {
+                        "id":reg[0],
+                        "cell":[reg[1],reg[2],reg[3],reg[4]],
+                        "host":reg[1],
+                        "time":reg[2],
+                        "teclado":reg[3],
+                        "raton":reg[4]                
+                    }
+                rows.append(row)
+                posrecord=posrecord+1
 
-    consulta=cdb.executesql("select count(*) as total,id from thinclients t1 where 1=1 "+wheresub+whereestado)
-    total = int(consulta[0][0])   
+    total = posrecord   
     pages = int(total/pagesize) + 1
     return { "page":page, "total":pages, "records":total, "rows":rows  } 
 
@@ -305,20 +321,88 @@ def list_thinclient_detail():
 
     consulta=cdb.executesql("select count(*) as total from ( "+ sqlthc + wherethc + " union "+ sqlses + whereses +")")
 
-    file = open('/tmp/sql.txt', 'w')
-    file.write("select count(*) as total from ( "+ sqlthc + wherethc + " union "+ sqlses + whereses +")")
-    file.close() 
+#    file = open('/tmp/sql.txt', 'w')
+#    file.write("select count(*) as total from ( "+ sqlthc + wherethc + " union "+ sqlses + whereses +")")
+#    file.close() 
 
-#    consulta=cdb.executesql("select count(*) as total from thinclients where 1=1 "+wherethc)
+    consulta=cdb.executesql("select count(*) as total from thinclients where 1=1 "+wherethc)
     total = int(consulta[0][0])
     pages = int(total/pagesize) + 1
     return { "page":page, "total":pages, "records":total, "rows":rows }
 
+@service.json
+@auth.requires_login()
+def matriz_aula():
+
+    aula = request.vars["prefijo"]
+    fecha = request.vars['fecha']
+        
+    sql="select distinct host from thinclients where host like '"+aula+"-%' order by host"
+                
+#    file = open('/tmp/sql.txt', 'w')
+#    file.write(sql)
+#    file.close()   
+
+
+    consulta=cdb.executesql(sql)
+    columnas=[]
+    columnas.append(aula+"-PRO")
+
+    #comprobar si es un servidor de aula???
+    
+    for reg in consulta:
+        host=reg[0]
+        columnas.append(host)
+        
+    #Ya tenemos la lista de thinclients + servidor aula
+    
+    horarios=[['08:15','11:15','Franja 1'],['11:15','11:30','Recreo'],['11:40','14:50','Franja 2']]
+    actividad={}
+    for clase in horarios:
+        hosts={}
+        for host in columnas:
+            datos=obtenerActividad(fecha,clase,host)
+            hosts[host]=datos
+        actividad[clase[0]]=hosts
+                    
+    return { "columnas": columnas, "horarios": horarios, "actividad":actividad } 
+
+def obtenerActividad(fecha,clase,host):
+
+    sqlthc="select id,host,time,teclado,raton from thinclients where 1=1"    
+    sqlses="select id,host,timelogin as time,usuario as teclado ,'' as raton from sesiones where 1=1"
+    wherethc=""
+    whereses=""
+    wherethc = wherethc+" and host ='"+host+"'"
+    whereses = whereses +" and host ='"+host+"'"
+    horaini=fecha+" "+clase[0]
+    horafin=fecha+" "+clase[1]
+    wherethc = wherethc+" and time between '"+horaini+"' and '"+horafin+"'"
+    whereses = whereses+" and time between '"+horaini+"' and '"+horafin+"'"
+    
+    sql = sqlthc + wherethc+ " union " + sqlses + whereses+" order by time"
+    
+    #    file = open('/tmp/sql.txt', 'w')
+    #    file.write(sql)
+    #    file.close()   
+
+    consulta=cdb.executesql(sql)
+
+    for reg in consulta:
+        row = {
+                "id":reg[0],
+                "cell":[reg[2],reg[3],reg[4]],
+                "host": reg[1],
+                "time":reg[2],
+                "teclado":reg[3],
+                "raton":reg[4]
+            }
+        rows.append(row)
+    
+    return rows
 
 def formatearFecha(fecha):
 	return fecha[6:]+"-"+fecha[3:5]+"-"+fecha[0:2]    
-
-
 
 @service.json
 def cleanthinclients():
@@ -336,7 +420,6 @@ def cleanthinclients():
         retorno="fail"
  
     return dict(response=retorno)
-
 
 @service.json
 def getUserData():
@@ -362,3 +445,38 @@ def call():
     session.forget()
     return service()
 
+
+@service.json
+def borrarHost():
+
+    retorno="OK"
+    idhost=request.vars['id']
+    try:
+       cdb(cdb.maquinas.id == int(idhost)).delete()
+       retorno="OK"
+    except:
+       retorno="fail"
+              
+    return dict(response=retorno)
+ 
+@service.json
+def toggleHostAlert():
+
+    retorno="OK"
+    idhost=request.vars['id']
+    stateAlert=request.vars['state']
+    #Ojo, en sqlite los boolean son integer
+    sql="update maquinas set alert="+stateAlert+"  where id="+idhost
+    
+    file = open('/tmp/sql.txt', 'w')
+    file.write(str(request.vars))
+    file.close()       
+
+    try:
+       cdb.executesql(sql)
+       retorno="OK"
+    except:
+       retorno="fail"
+    return dict(response=retorno)
+ 
+  

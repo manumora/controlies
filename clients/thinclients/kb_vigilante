@@ -1,0 +1,3 @@
+# Comprueba estado de teclado y ratón cada 2 minutos
+*/2 * * * *  root /usr/bin/vigila_kb_thinclient
+
