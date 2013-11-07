@@ -1,0 +1,36 @@
+Format: 1.8
+Date: Wed, 6 Nov 2013 10:47:00 +0200
+Source: controlies
+Binary: controlies controlies-client controlies-thinclient
+Architecture: source all
+Version: 0.6.5-2
+Distribution: unstable
+Urgency: low
+Maintainer: José L. Redrejo Rodríguez <jredrejo@debian.org>,Manuel Mora Gordillo <manuito@gmail.com>
+Changed-By: Manuel Mora Gordillo <manuito@gmail.com>
+Description: 
+ controlies - Gestión de LDAP para un centro educativo
+ controlies-client - Caracteristicas adicionales de controlies
+ controlies-thinclient - Caracteristicas adicionales de controlies para thinclients
+Changes: 
+ controlies (0.6.5-2) unstable; urgency=low
+ .
+   * Ultimos cambios de Alfonso Pastor
+Checksums-Sha1: 
+ 804d8f33bb46c73517d48369ecc50903507f8596 704 controlies_0.6.5-2.dsc
+ 5bc4bb73fdb380cdf2b09a4608a095b04249c8b0 10641770 controlies_0.6.5-2.tar.gz
+ 435cbe4bf4479f7c9aa2d396ba47e81f5bec1217 1030922 controlies_0.6.5-2_all.deb
+ c2d24171ca969d3dcf450aa62b72c19b0912c080 25246 controlies-client_0.6.5-2_all.deb
+ 02be404b1c477bb1fc16aab1a338f38785287a79 5782 controlies-thinclient_0.6.5-2_all.deb
+Checksums-Sha256: 
+ 7b4fa8f8a67dbcd1bc41111e232967281e40a4383d4978a9a5a14c0385df74de 704 controlies_0.6.5-2.dsc
+ 8f1912a224499937b31b65faa0e1a20e176a6b4fd33f832597c3ecda2cadce56 10641770 controlies_0.6.5-2.tar.gz
+ 8432f47cb573e7a182947f09d49e5aa447c04c3d13f34a083f9c4b8ea5196ac1 1030922 controlies_0.6.5-2_all.deb
+ aa9d7a65986cfe0f2380e7999f108dfd575195719c43bead9e8a322a23597bf5 25246 controlies-client_0.6.5-2_all.deb
+ 9ccc435b85da9a4d169bc13f4e497b2b0397129716fa81fd5c01d2b8f49a1a2d 5782 controlies-thinclient_0.6.5-2_all.deb
+Files: 
+ 8d4d113d7b0f85d715d421431a3f805d 704 python extra controlies_0.6.5-2.dsc
+ 8279b135157f3e975abea04a43a3c4dc 10641770 python extra controlies_0.6.5-2.tar.gz
+ 70ca6ce6c32862e1ad99c7a1e5495296 1030922 python extra controlies_0.6.5-2_all.deb
+ f95bc978641a2baf9742d4dedf89f4af 25246 python extra controlies-client_0.6.5-2_all.deb
+ 44ae551a754b97952c8b5de9a0410c9a 5782 python extra controlies-thinclient_0.6.5-2_all.deb
