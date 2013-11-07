@@ -50,36 +50,6 @@ case "$1" in
     chmod 700 /usr/lib/cups/backend/tea4cups
     service cups restart
 
-
-    ###########################################################
-    # Limpieza scripts controlies antiguos, metidos por puppet
-
-    #/etc/X11/Xsession.d/99seguimiento_usuario sigue siendo el mismo, no se toca
-
-
-    #/etc/gdm3|gdm/PostSession/Default se limpia del código viejo
-
-    if [ -f /etc/gdm3/PostSession/Default ]
-    then
-        sed -i.bak '/equipo=$(hostname -s)/,+5d' /etc/gdm3/PostSession/Default
-    fi
-
-    if [ -f /etc/gdm/PostSession/Default ]
-    then
-        sed -i.bak '/equipo=$(hostname -s)/,+5d' /etc/gdm/PostSession/Default
-    fi
-
-    #Script y cron de despierta_thinclients
-    test -f /root/scripts/despierta_thinclients && rm -f /root/scripts/despierta_thinclients
-    sed -i.bak '\/root\/scripts\/despierta_thinclients/d' /var/spool/cron/crontabs/root 
-
-    #Script de seguimiento de seguimiento_equipo
-    test -f /root/scripts/seguimiento_equipo && rm -f /root/scripts/seguimiento_equipo
-    sed -i.bak '\/root\/scripts\/seguimiento_equipo/d' /var/spool/cron/crontabs/root 
-        
-    #Script de seguimiento_impresion. tea4cups.conf y el backend de cups no se tocan
-    test -f /root/scripts/seguimiento_impresion && rm -f /root/scripts/seguimiento_impresion
-
     ;;
     
     abort-upgrade|abort-remove|abort-deconfigure)
