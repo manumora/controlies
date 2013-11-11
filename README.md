@@ -9,6 +9,7 @@ ControlIES
 LDAP Users management
 ----------------------
 ![alt text](https://raw.github.com/manumora/controlies/master/screenshots/controlies1.png "LDAP Users management")
+![alt text](https://raw.github.com/manumora/controlies/master/screenshots/controlies2.png "LDAP Users management")
 
 License
 -------
