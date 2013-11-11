@@ -6,11 +6,9 @@ ControlIES
 * Authors: Manuel Mora Gordillo, Francisco Damián Méndez Palma, Alfonso Pastor, José Luis Redrejo
 * Copyright: 2013 - Manuel Mora Gordillo
 
-Screenshots
------------
-
-#LDAP Users management
-![alt text](https://github.com/manumora/controlies/blob/master/screenshots/controlies1.png "LDAP Users management")
+LDAP Users management
+----------------------
+![alt text](https://raw.github.com/manumora/controlies/master/screenshots/controlies1.png "LDAP Users management")
 
 License
 -------
