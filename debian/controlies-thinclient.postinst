@@ -18,6 +18,7 @@ case "$1" in
 	/usr/sbin/update-rc.d  -f seguimiento_thinclient remove
 	/usr/sbin/update-rc.d  seguimiento_thinclient start 05 2 .
 	/bin/umount /proc
+    
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
