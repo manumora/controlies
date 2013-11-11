@@ -7,20 +7,29 @@ ControlIES
 * Copyright: 2013 - Manuel Mora Gordillo
 
 LDAP Users management
-----------------------
+---------------------
 ![alt text](https://raw.github.com/manumora/controlies/master/screenshots/controlies1.png "LDAP Users management")
 ![alt text](https://raw.github.com/manumora/controlies/master/screenshots/controlies2.png "LDAP Users management")
 
 LDAP Groups management
 ----------------------
 ![alt text](https://raw.github.com/manumora/controlies/master/screenshots/controlies3.png "LDAP Groups management")
-![alt text](https://raw.github.com/manumora/controlies/master/screenshots/controlies4.png "LDAP Groups management")
 
 LDAP Computers management
-----------------------
+-------------------------
+![alt text](https://raw.github.com/manumora/controlies/master/screenshots/controlies4.png "LDAP Computers management")
 ![alt text](https://raw.github.com/manumora/controlies/master/screenshots/controlies5.png "LDAP Computers management")
 
+Computer database and user assignment
+-------------------------------------
+![alt text](https://raw.github.com/manumora/controlies/master/screenshots/controlies6.png "Computer database and user assignment")
+![alt text](https://raw.github.com/manumora/controlies/master/screenshots/controlies7.png "LComputer database and user assignment")
 
+Logs: authentication, computers, printing
+-----------------------------------------
+![alt text](https://raw.github.com/manumora/controlies/master/screenshots/controlies8.png "Logs: authentication, computers, printing")
+![alt text](https://raw.github.com/manumora/controlies/master/screenshots/controlies9.png "Logs: authentication, computers, printing")
+![alt text](https://raw.github.com/manumora/controlies/master/screenshots/controlies10.png "Logs: authentication, computers, printing")
 
 License
 -------
