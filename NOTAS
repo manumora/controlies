@@ -4,7 +4,7 @@
 1.1. Instalación Servidor LDAP
 ==============================
 
-Instalar el paquete debian mediante dpkg -i.
+Instalar el paquete debian controlies-(version).deb mediante dpkg -i.
 
 1.2. Instalación en clientes linux. Tarea puppet
 ================================================
@@ -20,7 +20,8 @@ La tarea controlies es una tarea genérica que sirve para servidores de aula, th
 portátiles y workstations, ya que la tarea y los scripts determinan en que tipo de cliente estamos
 usando el facter "use" de puppet. Simplemente hay que instalarla /etc/puppet/modules y poner el
 include “controlies” en la clase específica correspondiente. Es la que se encarga de distribuir
-los scripts que comunican los ordenadores con el controlies para ir actualizando los datos.
+los scripts e instalar los paquetes controlies-client y controlies-thinclient que comunican los
+ordenadores con el controlies para ir actualizando los datos.
 
 -La tarea instala los siguientes procesos:
         Scripts que envian a controlies registro de los logines para todos los equipos.
@@ -37,9 +38,11 @@ los scripts que comunican los ordenadores con el controlies para ir actualizando
         Script para despertar los thinclient automaticamente a una hora del día (por ejemplo, antes del comienzo del 
         horario lectivo), para que se haga una revision automática de las aulas. Además de verificar el estado de 
         teclados y ratones, este script nos permite determinar que thinclients no se encienden o están bloqueados.
-		
-	    Para el seguimiento de impresión: se instala el filtro tea4cups, su configuracion y un script para recopilar
-	    los datos de los trabajos de impresión y mandarlos a controlies.
+
+        Para el seguimiento de impresión: se instala el filtro tea4cups, su configuracion y un script para recopilar
+        los datos de los trabajos de impresión y mandarlos a controlies.
+        
+        Diversas funciones para el envio de correos electrónicos automáticos ante determinados eventos.
 
 
 1.3. Instalación en clientes Windows (opcional)
@@ -93,7 +96,7 @@ La ubicación del fichero wpkg.js modificado es:
 1.4. Otras configuraciones adicionales para que todo funcione
 =============================================================
 
-1) En el servidor ldap: instalar a mano el paquete python-yaml y meterlo en el /etc/pkgsync/
+1) En el servidor ldap: meter el paquete python-yaml en el /etc/pkgsync/
 mayhave de ldap para evitar que se desinstale. Este mayhave no es sobreescrito desde
 Mérida.
 
@@ -112,9 +115,9 @@ Mérida.
         Ojo, cambiar el dominio ldap.vguadalupe por lo que corresponda según IES.
 
         En los mayhave del servidor puppet correspondientes a los equipos donde se aplica la tarea 
-        puppet controlies (servidores de aula, workstations y/o portátiles) meter el paquete curl, 
-        necesario para el correcto funcionamiento de los scripts, evitando así  que se desinstale 
-        automáticamente en el siguiente pkgsync.
+        puppet controlies (servidores de aula, workstations y/o portátiles) meter los paquete curl
+        y controlies-client, necesarios para el correcto funcionamiento de los scripts, evitando así  
+        que se desinstale  automáticamente en el siguiente pkgsync.
 
 3) En el servidor que se use como servidor puppet para los workstations, siempre que no sea el
 servidor nfs, hacer lo mismo que en el punto 2.
@@ -128,63 +131,67 @@ servidor nfs, hacer lo mismo que en el punto 2.
         
         En cada cola de impresión que queramos controlar hay que añadir el filtro tea4cups, para ello:
         
-		Editar el fichero /etc/cups/printers.conf, localizamos la cola en cuestión y en la linea
-		del DeviceURI anteponemos tea4cups:// al URI, delante del usb://, ipp://, socket://, etc.
-		Ejemplo:
-		
-			DeviceURI tea4cups://socket://192.168.1.100:9100
-				
-		Hay que tener cuidado con una cosa: si ponemos el filtro tea4cups en varias colas de impresión
-		conectadas en cascada a la misma impresora, en la contabilidad los trabajos apareceran
-		repetidos. El caso tipico es una impresora usb conectada a un PC y compartida hacia otros
-		PC. En ese caso el filtro tea4cups debe ponerse solamente en el PC conectado fisicamente a la
-		impresora, no en todos los demás.
+        Editar el fichero /etc/cups/printers.conf, localizamos la cola en cuestión y en la linea
+        del DeviceURI anteponemos tea4cups:// al URI, delante del usb://, ipp://, socket://, etc.
+        Ejemplo:
+        
+            DeviceURI tea4cups://socket://192.168.1.100:9100
+
+        Hay que tener cuidado con una cosa: si ponemos el filtro tea4cups en varias colas de impresión
+        conectadas en cascada a la misma impresora, en la contabilidad los trabajos apareceran
+        repetidos. El caso tipico es una impresora usb conectada a un PC y compartida hacia otros
+        PC. En ese caso el filtro tea4cups debe ponerse solamente en el PC conectado fisicamente a la
+        impresora, no en todos los demás.
 
 
 2. Funcionalidades añadidas de seguimiento de equipos, usuarios, clientes ligeros y documentos impresos
 =======================================================================================================
 
 Seguimiento de usuarios: histórico de los logines y logouts de los usuarios. Se aplica a : servidores de
-							 aula, worktations, portatiles, thinclients y, si queremos, a los windows.
-			 Pinchando sobre un usuario accedemos a sus datos con foto incluida.
+                             aula, worktations, portatiles, thinclients y, si queremos, a los windows.
+             Pinchando sobre un usuario accedemos a sus datos con foto incluida.
 
 Seguimiento de equipos: datos de cada equipo monitorizado (thinclient, workstation o servidor de aula),
 que se sobreescribe periodicamente. En los equipos con arranque dual windows/linux se muestra un registro
 por cada sistema operativo. Muestra los siguientes datos:
-			Fecha/hora de la actualización del registro
-			Fecha/hora del último arranque del equipo
-			Fecha/hora del último pkgsync ejecutado automáticamente.
-			Estado del sistema de paquetes y repositorios (OK o ERROR)
-			Log de los errores del sistema de paquetes.
-			Fecha/hora de la última sincronización puppet.
-			Resultado del último puppet (OK o ERROR)
-			Log del último puppet
-			Acceso al histórico de sesiones de usuario en ese equipo. Acceso a las fichas de los usuarios.
+        Fecha/hora de la actualización del registro
+        Fecha/hora del último arranque del equipo
+        Fecha/hora del último pkgsync ejecutado automáticamente.
+        Estado del sistema de paquetes y repositorios (OK o ERROR)
+        Log de los errores del sistema de paquetes.
+        Fecha/hora de la última sincronización puppet.
+        Resultado del último puppet (OK o ERROR)
+        Log del último puppet
+        Acceso al histórico de sesiones de usuario en ese equipo. Acceso a las fichas de los usuarios.
+        Borrado de los datos de seguimiento de un host antiguo.
+        Activacion de alerta, que nos enviará un correo electronico cuando ese equipo sea encendido.
 
 Seguimiento de thinclients:
-			Estado de teclado y raton en todos los arranques. Indica si ha sido desconectado o no detectado.
-			Histórico de sesiones de usuario en ese thinclient. Acceso a las fichas de los usuarios.
-			Sistema de arranques automáticos programables a ciertas horas para comprobar si hay clientes 
-			colgados y desconectados de la red o corriente.
-			Sistema de borrado automático de todos los registros anteriores a 30 días, ya que esta
-			tabla tiende a crecer mucho y a ralentizar el acceso.
+        Estado de teclado y raton en todos los arranques. Indica si ha sido desconectado o no detectado.
+        Histórico de sesiones de usuario en ese thinclient. Acceso a las fichas de los usuarios.
+        Sistema de arranques automáticos programables a ciertas horas para comprobar si hay clientes 
+            colgados y desconectados de la red o corriente.
+        Sistema de borrado automático de todos los registros anteriores a 30 días, ya que esta
+            tabla tiende a crecer mucho y a ralentizar el acceso.
 
 Seguimiento de impresión:
-			Listado de ordenes de impresión en las colas de CUPS configuradas para el seguimiento. Guarda
-			los siguientes datos:
-				Nombre impresora
-				Usuario
-				Host desde donde se imprime
-				Fecha y hora
-				Nombre del documento impreso
-				Jobid del trabajo en la cola de CUPS.
-				Paginas y nº de copias
-				Tamaño en bytes del trabajo
+            Listado de ordenes de impresión en las colas de CUPS configuradas para el seguimiento. Guarda
+            los siguientes datos:
+                Nombre impresora
+                Usuario
+                Host desde donde se imprime
+                Fecha y hora
+                Nombre del documento impreso
+                Jobid del trabajo en la cola de CUPS.
+                Paginas y nº de copias
+                Tamaño en bytes del trabajo
 
 Gestión/Configuracion:
-		Permite definir una cuenta de correo para enviar a través de ella correos automáticos de controlies.
-		De momento solo es de prueba, será usado en el futuro.
-		Ejemplo de configuracion para Gmail: http://microbuffer.wordpress.com/2012/03/28/enviar-email-con-python-y-gmail/
+        Permite definir una cuenta de correo para enviar a través de ella correos automáticos de controlies.
+           Ejemplo de configuracion para Gmail: http://microbuffer.wordpress.com/2012/03/28/enviar-email-con-python-y-gmail/
+        Activar el envío de alertas inmediatas por correo cuando se detecte un teclado/ratón desconectado en un thinclient.
+        Activar el envío de un informe de todos los hosts (ltsp, workstation, portátiles) y thinclients con problemas. Este
+            informe se enviará por correo desde la pantalla de configuración, dando al botón de "Probar correo".
 
 3. Instalación manual
 =====================
@@ -197,12 +204,12 @@ Mientras que no se genere el paquete debian, se copiará al directorio anterior 
 
 descargada de github. La descarga se realiza con los comandos:
 
-	git init
-	git clone https://github.com/japastor/controlies
+    git init
+    git clone https://github.com/japastor/controlies
 
-	Si no tenemos instalado el cliente git, pues hacemos como siempre:
+    Si no tenemos instalado el cliente git, pues hacemos como siempre:
 
-		apt-get install git
+        apt-get install git
 
 4. Registro de cambios
 =====================
@@ -222,7 +229,7 @@ descargada de github. La descarga se realiza con los comandos:
 
 Mayo-2013:
 
-	-Arreglo de varios bugs menores.
+    -Arreglo de varios bugs menores.
 
 17-junio-2013:
 
@@ -246,14 +253,14 @@ Mayo-2013:
     Con vistas a enviar informes periódicos automatizados al administrador. He añadido un botón para probar in situ si funciona.
 
    -Wpkg:
-		-Modificado wpkg.js para que las conexiones sean con user-agent Mozilla en lugar de Internet Explorer, de tal forma que el Squid no las bloquee.
-		-Entre los datos del informe enviado al Controlies se incluye la IP del equipo Windows en el momento de hacer enviar los datos.
-		-Puesto try..catch en todas las llamadas de envio de datos, para que si se produce un error de comunicación no se haga nada. Ahora sacaba una ventana de alert que 
-			 despistaba mucho al usuario. También se ha puesto en los scripts que controlan el login/logout de los usuarios Windows.
+        -Modificado wpkg.js para que las conexiones sean con user-agent Mozilla en lugar de Internet Explorer, de tal forma que el Squid no las bloquee.
+        -Entre los datos del informe enviado al Controlies se incluye la IP del equipo Windows en el momento de hacer enviar los datos.
+        -Puesto try..catch en todas las llamadas de envio de datos, para que si se produce un error de comunicación no se haga nada. Ahora sacaba una ventana de alert que 
+            despistaba mucho al usuario. También se ha puesto en los scripts que controlan el login/logout de los usuarios Windows.
    -Scripts instalados mediante puppet:
-		-Se modifican los scripts para que averiguen el dominio del IES (gracias, Paco), ya que había imágenes donde daba problemas de conexión si no se ponía el dominio.
-		-Al verificar el estado de paquetes en el script seguimiento_equipos se producía un "falso positivo" de error si en ese momento se está ejecutando el pkgsync en dicho ordenador.
-		Para evitarlo se comprueba si hay un pkgsync en marcha y, en caso afirmativo, se deja la comprobación del estado del sistema de paquetes para la siguiente revisión.
+        -Se modifican los scripts para que averiguen el dominio del IES (gracias, Paco), ya que había imágenes donde daba problemas de conexión si no se ponía el dominio.
+        -Al verificar el estado de paquetes en el script seguimiento_equipos se producía un "falso positivo" de error si en ese momento se está ejecutando el pkgsync en dicho ordenador.
+        Para evitarlo se comprueba si hay un pkgsync en marcha y, en caso afirmativo, se deja la comprobación del estado del sistema de paquetes para la siguiente revisión.
 
 12-julio-2013:
 
@@ -272,38 +279,38 @@ Mayo-2013:
 
 5-Noviembre 2013:
 
-	-Hecho Merge con la rama principal, para incluir los últimos cambios de Manu Mora (portátiles, limpieza de
-	 código de debug y mensajes traducidos).
+    -Hecho Merge con la rama principal, para incluir los últimos cambios de Manu Mora (portátiles, limpieza de
+        código de debug y mensajes traducidos).
 
-	-Mejorada la gestión de envío de correos electrónicos, con verificaciones de la cuenta antes del envío.
+    -Mejorada la gestión de envío de correos electrónicos, con verificaciones de la cuenta antes del envío.
 
-	-Envio de correos electrónicos ante determinados eventos:
-		-Uno de resumen de todas las indidencias encontradas en thinclients y resto de hosts. Se envía 
-		 de momento desde la configuración de correo, en el botón de prueba.
-		-Uno cada vez que se detecte una desconexión de teclado y/o ratón.
-		-Uno que se ejecute cada vez que se enciende una máquina determinada que queremos monitorizar.
+    -Envio de correos electrónicos ante determinados eventos:
+        -Uno de resumen de todas las indidencias encontradas en thinclients y resto de hosts. Se envía 
+         de momento desde la configuración de correo, en el botón de prueba.
+        -Uno cada vez que se detecte una desconexión de teclado y/o ratón.
+        -Uno que se ejecute cada vez que se enciende una máquina determinada que queremos monitorizar.
 
-	-En el grid de seguimiento de equipos se añade una columna checkbox de "Alerta", que marca el equipo para que
-	cuando se encienda nos llegue un correo electrónico avisando.
+    -En el grid de seguimiento de equipos se añade una columna checkbox de "Alerta", que marca el equipo para que
+    cuando se encienda nos llegue un correo electrónico avisando.
 
-	-En el seguimiento de equipos incluido un icono para eliminar equipos antiguos (para limpiar portátiles
-	y equipos de años anteriores y desasignados).
+    -En el seguimiento de equipos incluido un icono para eliminar equipos antiguos (para limpiar portátiles
+    y equipos de años anteriores y desasignados).
 
-	-En Gestión/configuracion se añaden dos nuevas opciones: una para activar el envío de correos ante la 
-	desconexión de teclados y ratones, y otra activar el envío de correo resumen de las incidencias en las
-	máquinas del IES.
+    -En Gestión/configuracion se añaden dos nuevas opciones: una para activar el envío de correos ante la 
+    desconexión de teclados y ratones, y otra activar el envío de correo resumen de las incidencias en las
+    máquinas del IES.
 
-	-La consulta de thinclients era muy lenta conforme van aumentando los datos, ya que era demasiado compleja y
-	sqlite no la resolvía bien. Solucionado diviendo la consulta en dos consultas mas pequeñas y poniendo
-	código python intermedio. Ahora va mucho mas rápida.
+    -La consulta de thinclients era muy lenta conforme van aumentando los datos, ya que era demasiado compleja y
+    sqlite no la resolvía bien. Solucionado diviendo la consulta en dos consultas mas pequeñas y poniendo
+    código python intermedio. Ahora va mucho mas rápida.
 
-	-Implementada idea de Ana Belén Cerezo: monitorizar teclado y ratón para clientes ligeros continuamente,
-	no solo en el arranque. Asi se detecta en que momento pierden la conexión. Es un script ejecutado por
-	crontab en los thinclients que mira estado de teclado y ratón, y lo compara con el estado anterior, mandando
-	un mensaje al momento de detectar cualquier variación. Por desgracia, solo funciona para teclados y ratones
-	USB, los PS/2 solo permiten detectar la conexión/desconexión en el arranque del sistema.
+    -Implementada idea de Ana Belén Cerezo: monitorizar teclado y ratón para clientes ligeros continuamente,
+    no solo en el arranque. Asi se detecta en que momento pierden la conexión. Es un script ejecutado por
+    crontab en los thinclients que mira estado de teclado y ratón, y lo compara con el estado anterior, mandando
+    un mensaje al momento de detectar cualquier variación. Por desgracia, solo funciona para teclados y ratones
+    USB, los PS/2 solo permiten detectar la conexión/desconexión en el arranque del sistema.
 
-	-Reorganizados los menús de seguimiento, tal como lo ha hecho Manu Mora.
+    -Reorganizados los menús de seguimiento, tal como lo ha hecho Manu Mora.
 
     -Actualizada tarea puppet con nuevos scripts.
     
@@ -313,7 +320,8 @@ Mayo-2013:
 -Cambiar los scripts y hacerlos en python. El envio de datos debe ser por xmlrpc. Dejar el envio de datos por wget solo para puppet (no hay otra opción) y 
  para windows (no hay otra opción).
 
--El borrado nocturno mediante crontab del seguimiento de clientes no funciona. Averiguar la causa.
+-El borrado nocturno mediante crontab del seguimiento de clientes no funciona. Averiguar la causa. Parece ser que va con la configuración
+ del crontab de web2py.
 
 -El correo resumen de estado de equipos debe enviarse tambien mediante un cron.
 
