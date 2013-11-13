@@ -234,6 +234,27 @@ def getLTSPServers():
     l.close()
     return dict(response=response)
 
+
+@service.json   
+@auth.requires_login()    
+def getWorkstations():
+    l=conecta()
+    h = Hosts (l,"","","","workstation-hosts")    
+    response = h.getListTriplets()
+    l.close()
+    return dict(response=response)
+
+
+@service.json   
+@auth.requires_login()    
+def getLaptops():
+    l=conecta()
+    h = Hosts (l,"","","","laptop-hosts")    
+    response = h.getListTriplets()
+    l.close()
+    return dict(response=response)
+
+
 @service.json   
 @auth.requires_login()    
 def getLTSPStatus():
