@@ -13,3 +13,4 @@ rm -rf debian/controlies.substvars
 rm -rf debian/controlies-thinclient.substvars
 rm -rf debian/controlies-client.substvars
 rm -rf debian/files
+find ./ -iname "*.pyc" -print0 | xargs -0 rm -rf

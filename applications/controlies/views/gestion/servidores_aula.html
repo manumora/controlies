@@ -4,10 +4,16 @@
     #selectable { list-style-type: none; margin: 0; padding: 0; }
     #selectable li { margin: 3px 3px 3px 0; padding: 1px; float: left; width: 80px; height: 95px; font-size: 1px; text-align: center; cursor:pointer; }
 
-    #selectableStudents .ui-selecting { background: #FECA40; }
-    #selectableStudents .ui-selected { background: #F39814; color: white; }
-    #selectableStudents { list-style-type: none; margin: 0; padding: 0; }
-    #selectableStudents li { margin: 3px 3px 3px 0; padding: 1px; float: left; width: 80px; height: 95px; font-size: 1px; text-align: center; cursor:pointer; } 
+    #selectableWorkstations .ui-selecting { background: #FECA40; }
+    #selectableWorkstations .ui-selected { background: #F39814; color: white; }
+    #selectableWorkstations { list-style-type: none; margin: 0; padding: 0; }
+    #selectableWorkstations li { margin: 3px 3px 3px 0; padding: 1px; float: left; width: 80px; height: 95px; font-size: 1px; text-align: center; cursor:pointer; } 
+
+    #selectableLaptops .ui-selecting { background: #FECA40; }
+    #selectableLaptops .ui-selected { background: #F39814; color: white; }
+    #selectableLaptops { list-style-type: none; margin: 0; padding: 0; }
+    #selectableLaptops li { margin: 3px 3px 3px 0; padding: 1px; float: left; width: 80px; height: 95px; font-size: 1px; text-align: center; cursor:pointer; }
+
 </style>
 
 
@@ -45,21 +51,40 @@
             .button({ icons: { primary: "ui-icon-circle-close"}})
             .click(function(){ getClassroomDetails(); });       
         
-        $( "#selectable" ).selectable();        
+        $( "#selectable" ).selectable();
+        $( "#selectableWorkstations" ).selectable();        
 
         getLTSPServers();
+        getWorkstations();
+        getLaptops();
     });
     
     function getLTSPServers(){
         jQuery.post('call/json/getLTSPServers', function(result) {                                                            
             jQuery.each(result.response, function(i, l){
                 jQuery('#selectable').append('<li class="ui-state-default" id="selectable-'+l+'"><div id="pcName" style="font-size:11px;">'+l+'</div>{{=IMG(_src=URL(r=request,c="static",f="images/turnOff.png"),_class="thumb-image")}}<div id="userName" style="font-size:11px;"></div></li>');               
+            });            
+        });
+    }
+
+    function getWorkstations(){
+        jQuery.post('call/json/getWorkstations', function(result) {                                                            
+            jQuery.each(result.response, function(i, l){
+                jQuery('#selectableWorkstations').append('<li class="ui-state-default" id="selectableWorkstations-'+l+'"><div id="pcNameWorkstation" style="font-size:11px;">'+l+'</div>{{=IMG(_src=URL(r=request,c="static",f="images/turnOff.png"),_class="thumb-image")}}<div id="userNameWorkstation" style="font-size:11px;"></div></li>');               
+            });            
+        });
+    }
+
+    function getLaptops(){
+        jQuery.post('call/json/getLaptops', function(result) {                                                            
+            jQuery.each(result.response, function(i, l){
+                jQuery('#selectableLaptops').append('<li class="ui-state-default" id="selectableLaptops-'+l+'"><div id="pcNameLaptop" style="font-size:11px;">'+l+'</div>{{=IMG(_src=URL(r=request,c="static",f="images/turnOff.png"),_class="thumb-image")}}<div id="userNameLaptop" style="font-size:11px;"></div></li>');               
             });
             
             getLTSPStatus();
         });
     }
-   
+
    
     function getLTSPStatus(){
         
@@ -71,23 +96,28 @@
             
             jQuery.each(result.computers, function(i, l){                
                 jQuery('#selectable #selectable-'+l+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/turnOn.png")}}');           
+                jQuery('#selectableWorkstations #selectableWorkstations-'+l+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/turnOn.png")}}');
+                jQuery('#selectableLaptops #selectableLaptops-'+l+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/turnOn.png")}}');
             });
 
             $.each(result.teachers, function(i, l){
                 var teacher = l.split(".");
                 var computer = teacher[0].split("@");
                 jQuery('#selectable #selectable-'+computer[1]+' #userName').html(computer[0]);
-               jQuery('#selectable #selectable-'+computer[1]+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/nobody.png")}}');
-            });
+                jQuery('#selectable #selectable-'+computer[1]+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/nobody.png")}}');
 
-            //getLTSPClients();
+                jQuery('#selectableWorkstations #selectableWorkstations-'+computer[1]+' #userNameWorkstation').html(computer[0]);
+                jQuery('#selectableWorkstations #selectableWorkstations-'+computer[1]+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/nobody.png")}}');
+
+                jQuery('#selectableLaptops #selectableLaptops-'+computer[1]+' #userNameLaptop').html(computer[0]);
+                jQuery('#selectableLaptops #selectableLaptops-'+computer[1]+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/nobody.png")}}');
+
+            });
             
             setTimeout("getLTSPStatus()",10000);            
         });
     }
     
-
-
 
 </script>
 <!--
@@ -123,6 +153,8 @@
         <div id="tabsServers">
             <ul>
                 <li><a href="#tabs-1"><span id="actions">Servidores</span></a></li>
+                <li><a href="#tabs-2"><span id="actions">Workstations</span></a></li>
+                <li><a href="#tabs-3"><span id="actions">Port&aacute;tiles</span></a></li>
             </ul>
             <div id="tabs-1" style="padding:3px;">  
                 <table>
@@ -133,7 +165,25 @@
                     </tr>
                 </table>
             </div>
-        </div>              
+            <div id="tabs-2" style="padding:3px;">  
+                <table>
+                    <tr>
+                        <td id="tableSelectableWorkstations">
+                            <ol id="selectableWorkstations" style="width:870px;"></ol>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div id="tabs-3" style="padding:3px;">  
+                <table>
+                    <tr>
+                        <td id="tableSelectableLaptops">
+                            <ol id="selectableLaptops" style="width:870px;"></ol>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>       
     </td>
 </tr>
 </table>
