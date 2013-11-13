@@ -50,6 +50,9 @@ case "$1" in
     chmod 700 /usr/lib/cups/backend/tea4cups
     service cups restart
 
+    ######################################################
+    # Avahi server
+    chmod 755 /usr/bin/controlies
     ;;
     
     abort-upgrade|abort-remove|abort-deconfigure)
