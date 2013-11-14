@@ -9,6 +9,7 @@ rm -rf debian/controlies-client
 rm -rf debian/controlies.debhelper.log
 rm -rf debian/controlies-thinclient.debhelper.log
 rm -rf debian/controlies-client.debhelper.log
+rm -rf debian/*.debhelper
 rm -rf debian/controlies.substvars
 rm -rf debian/controlies-thinclient.substvars
 rm -rf debian/controlies-client.substvars
