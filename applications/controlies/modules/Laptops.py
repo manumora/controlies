@@ -111,7 +111,7 @@ class Laptops(object):
             
     def list(self,args):
 
-        sql = "SELECT l.id_laptop, lt.trademark, lt.model, l.serial_number, ut.user_type, lh.username, s.state"
+        sql = "SELECT l.id_laptop, lt.trademark, lt.model, l.serial_number, ut.user_type, lh.username, lh.datetime, s.state"
         sql = sql+" FROM laptops l, laptops_historical lh"
         sql = sql+" LEFT JOIN laptops_trademarks lt ON l.id_trademark=lt.id_trademark "        
         #sql = sql+" INNER JOIN laptops_historical lh ON l.id_laptop=lh.id_laptop"
@@ -173,13 +173,14 @@ class Laptops(object):
         for reg in result:
             row = {
 				"id":reg[0],
-				"cell":[reg[1],reg[2],reg[3],reg[4],reg[5],reg[6]],
+				"cell":[reg[1],reg[2],reg[3],reg[4],reg[5],reg[6],reg[7]],
 				"trademark":reg[1],
 				"model":reg[2],
 				"serial_number":reg[3],
                 "user_type":reg[4],
                 "username":reg[5],
-                "state":reg[6],
+                "datetime":reg[6],
+                "state":reg[7],
             }
             rows.append(row)
 
