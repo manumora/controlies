@@ -30,7 +30,8 @@ import tempfile
 #import memcache
 
 typeComputers = "_workstation._tcp"
-typeTeachers = "_controlaula._udp"
+#typeTeachers = "_controlaula._udp"
+typeTeachers = "_controlies._udp"
 
 """fs = tempfile.NamedTemporaryFile(delete=False, prefix='controlies_')
 ft = tempfile.NamedTemporaryFile(delete=False, prefix='controlies_')
