@@ -284,6 +284,16 @@ def getLTSPStatus():
 
     return dict(computers=computers,teachers=teachers)
 
+@service.json   
+@auth.requires_login()    
+def wakeup():
+    l=conecta()
+    
+    for i in request.vars["pclist[]"]:
+        h = Hosts(l,i,"","","")
+        h.wakeup()
+
+    return response.json({'success':'true'})
 
 @auth.requires_login()
 def config():
