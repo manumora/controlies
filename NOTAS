@@ -313,6 +313,14 @@ Mayo-2013:
     -Reorganizados los menús de seguimiento, tal como lo ha hecho Manu Mora.
 
     -Actualizada tarea puppet con nuevos scripts.
+
+
+18-Noviembre 2013
+
+    -Arreglado bug en la generación del grid de estado de thinclients: solo se mostraba la primera paǵina, no las
+     sucesivas. Detectado por Francisco Rodrigo (IES García Téllez).
+
+
     
 5. TODO
 =======
