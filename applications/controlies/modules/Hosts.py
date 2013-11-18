@@ -30,6 +30,7 @@ import time
 from math import floor
 from operator import itemgetter
 from Utils import ValidationUtils
+import applications.controlies.modules.NetworkUtils as NetworkUtils
 
 class Hosts(object):
 
@@ -309,8 +310,7 @@ class Hosts(object):
         return "OK"     
 
     def wakeup(self):
-        from Plugins import NetworkUtils
-        NetworkUtils.startup(self.mac)
+        NetworkUtils.startup(self.getMAC())
     
     def existsHostname(self):
         if self.name in self.getListTriplets():

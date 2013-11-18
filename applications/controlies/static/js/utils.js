@@ -20,21 +20,25 @@
 # 
 ############################################################################## */
 
-function selectAll(){
-	$("#tabsClassroom").tabs("select","tabsClassroom-1");
-	$("#selectable li").addClass("ui-selected");
+function getActiveTab(){
+	var active = $('#tabsHosts').tabs('option','selected');
+	return active;
+}
+
+function selectAll(){	
+	$("#selectable"+getActiveTab()+" li").addClass("ui-selected");
 }
 
 function selectNone(){
-	$("#tabsClassroom").tabs("select","tabsClassroom-1");
-	$("#selectable li").removeClass("ui-selected");
+	$("#selectable"+getActiveTab()+" li").removeClass("ui-selected");
 }
 
 function computersSelected(){
-	var selected = Array();
+	var selected = []; // = Array();
+	var activeTab = getActiveTab();
 	var j=0;
 	
-	$("#selectable li").each(function(i, item){
+	$("#selectable"+activeTab+" li").each(function(i, item){
 		if($("#"+item.id).hasClass('ui-selected')==true){
 			selected[j] = $("#"+item.id + ":eq(0) > #pcName").html();
 			j++;
@@ -43,22 +47,44 @@ function computersSelected(){
 	return selected;
 }
 
+function connection(url,data,action){
+
+	$.ajax({ 
+		url : url , 
+		type: 'POST',
+		data : data,
+		dataType: 'json',
+		success: function (result) { 
+			switch(result.success){
+				case "true":{
+					break;
+				}
+			}
+		},
+      error:function (result){
+			if(url!="errorLog"){
+				modalAlert("Surgi&oacute; un error");
+				setTimeout('$( "#dialogAlert" ).dialog( "close" )',1000);
+			}
+		} 
+  });
+}
+
 function sendOrderSelected(url,args,action){
 
-	var selected = computersSelected(url);
-
+	var selected = computersSelected();
 	if(selected.length==0){
 		modalAlert("Para realizar la acci&oacute;n debe seleccionar al menos un equipo");
 		return;
 	}
 
-	var classroom = {
-		"pclist" : selected,
-		"args" : args
+	var hosts = {
+		pclist : selected,
+		args : args
 	}
-
-	var dataString = $.JSON.encode(classroom)
-	connection(url,dataString,action);
+	
+	//var dataString = $.JSON.encode(hosts)
+	connection(url,hosts,action);
 }
 
 function sendOrder(url,args,action){

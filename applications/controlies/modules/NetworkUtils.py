@@ -257,11 +257,11 @@ def startup(address):
     try:
         s.sendto(msg, ('<broadcast>', 9))
         s.sendto(msg, ('<broadcast>', 7))
-        s.sendto(msg, ('192.168.0.255', 9))
-        s.sendto(msg, ('192.168.0.255', 7))   
+        s.sendto(msg, ('172.23.39.255', 9))
+        s.sendto(msg, ('172.23.39.255', 7))   
     except:
         s.sendto(msg, ('<broadcast>', 2000))
-        s.sendto(msg, ('192.168.0.255', 2000))
+        s.sendto(msg, ('172.23.39.255', 2000))
     s.close()
 
 def defaultGW():

@@ -234,6 +234,27 @@ def getLTSPServers():
     l.close()
     return dict(response=response)
 
+
+@service.json   
+@auth.requires_login()    
+def getWorkstations():
+    l=conecta()
+    h = Hosts (l,"","","","workstation-hosts")    
+    response = h.getListTriplets()
+    l.close()
+    return dict(response=response)
+
+
+@service.json   
+@auth.requires_login()    
+def getLaptops():
+    l=conecta()
+    h = Hosts (l,"","","","laptop-hosts")    
+    response = h.getListTriplets()
+    l.close()
+    return dict(response=response)
+
+
 @service.json   
 @auth.requires_login()    
 def getLTSPStatus():
@@ -263,6 +284,16 @@ def getLTSPStatus():
 
     return dict(computers=computers,teachers=teachers)
 
+@service.json   
+@auth.requires_login()    
+def wakeup():
+    l=conecta()
+    
+    for i in request.vars["pclist[]"]:
+        h = Hosts(l,i,"","","")
+        h.wakeup()
+
+    return response.json({'success':'true'})
 
 @auth.requires_login()
 def config():

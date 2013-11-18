@@ -1,13 +1,19 @@
 <style>
-    #selectable .ui-selecting { background: #FECA40; }
-    #selectable .ui-selected { background: #F39814; color: white; }
-    #selectable { list-style-type: none; margin: 0; padding: 0; }
-    #selectable li { margin: 3px 3px 3px 0; padding: 1px; float: left; width: 80px; height: 95px; font-size: 1px; text-align: center; cursor:pointer; }
+    #selectable0 .ui-selecting { background: #FECA40; }
+    #selectable0 .ui-selected { background: #F39814; color: white; }
+    #selectable0 { list-style-type: none; margin: 0; padding: 0; }
+    #selectable0 li { margin: 3px 3px 3px 0; padding: 1px; float: left; width: 80px; height: 95px; font-size: 1px; text-align: center; cursor:pointer; }
 
-    #selectableStudents .ui-selecting { background: #FECA40; }
-    #selectableStudents .ui-selected { background: #F39814; color: white; }
-    #selectableStudents { list-style-type: none; margin: 0; padding: 0; }
-    #selectableStudents li { margin: 3px 3px 3px 0; padding: 1px; float: left; width: 80px; height: 95px; font-size: 1px; text-align: center; cursor:pointer; } 
+    #selectable1 .ui-selecting { background: #FECA40; }
+    #selectable1 .ui-selected { background: #F39814; color: white; }
+    #selectable1 { list-style-type: none; margin: 0; padding: 0; }
+    #selectable1 li { margin: 3px 3px 3px 0; padding: 1px; float: left; width: 80px; height: 95px; font-size: 1px; text-align: center; cursor:pointer; } 
+
+    #selectable2 .ui-selecting { background: #FECA40; }
+    #selectable2 .ui-selected { background: #F39814; color: white; }
+    #selectable2 { list-style-type: none; margin: 0; padding: 0; }
+    #selectable2 li { margin: 3px 3px 3px 0; padding: 1px; float: left; width: 80px; height: 95px; font-size: 1px; text-align: center; cursor:pointer; }
+
 </style>
 
 
@@ -18,7 +24,7 @@
 <script>
     $(function() {
         $("#tabsActions").tabs().css("font-size","13px");
-        $("#tabsServers").tabs().css("font-size","13px");
+        $("#tabsHosts").tabs().css("font-size","13px");
         
         $( "#selectAll" )
             .css("font-size","11px")
@@ -33,7 +39,7 @@
         $( "#turnOn" )
             .css("font-size","11px")        
             .button({ icons: { primary: "ui-icon-power"}})
-            .click(function(){ alert("En desarrollo");/*sendOrderSelected("wakeup","","cambiaconfig");*/ });
+            .click(function(){ sendOrderSelected("wakeup","",""); });
 
         $( "#turnOff" )
             .css("font-size","11px")        
@@ -45,21 +51,43 @@
             .button({ icons: { primary: "ui-icon-circle-close"}})
             .click(function(){ getClassroomDetails(); });       
         
-        $( "#selectable" ).selectable();        
-
+        $( "#selectable0" ).selectable();
+        $( "#selectable1" ).selectable();
+        $( "#selectable2" ).selectable();
+        
+		$("#dialogAlert").dialog({ autoOpen: false });
+		
         getLTSPServers();
+        getWorkstations();
+        getLaptops();
     });
     
     function getLTSPServers(){
         jQuery.post('call/json/getLTSPServers', function(result) {                                                            
             jQuery.each(result.response, function(i, l){
-                jQuery('#selectable').append('<li class="ui-state-default" id="selectable-'+l+'"><div id="pcName" style="font-size:11px;">'+l+'</div>{{=IMG(_src=URL(r=request,c="static",f="images/turnOff.png"),_class="thumb-image")}}<div id="userName" style="font-size:11px;"></div></li>');               
+                jQuery('#selectable0').append('<li class="ui-state-default" id="selectable-'+l+'"><div id="pcName" style="font-size:11px;">'+l+'</div>{{=IMG(_src=URL(r=request,c="static",f="images/turnOff.png"),_class="thumb-image")}}<div id="userName" style="font-size:11px;"></div></li>');               
+            });            
+        });
+    }
+
+    function getWorkstations(){
+        jQuery.post('call/json/getWorkstations', function(result) {                                                            
+            jQuery.each(result.response, function(i, l){
+                jQuery('#selectable1').append('<li class="ui-state-default" id="selectableWorkstations-'+l+'"><div id="pcNameWorkstation" style="font-size:11px;">'+l+'</div>{{=IMG(_src=URL(r=request,c="static",f="images/turnOff.png"),_class="thumb-image")}}<div id="userNameWorkstation" style="font-size:11px;"></div></li>');               
+            });            
+        });
+    }
+
+    function getLaptops(){
+        jQuery.post('call/json/getLaptops', function(result) {                                                            
+            jQuery.each(result.response, function(i, l){
+                jQuery('#selectable2').append('<li class="ui-state-default" id="selectableLaptops-'+l+'"><div id="pcNameLaptop" style="font-size:11px;">'+l+'</div>{{=IMG(_src=URL(r=request,c="static",f="images/turnOff.png"),_class="thumb-image")}}<div id="userNameLaptop" style="font-size:11px;"></div></li>');               
             });
             
             getLTSPStatus();
         });
     }
-   
+
    
     function getLTSPStatus(){
         
@@ -70,72 +98,103 @@
             jQuery('#selectable li #userName').html('');
             
             jQuery.each(result.computers, function(i, l){                
-                jQuery('#selectable #selectable-'+l+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/turnOn.png")}}');           
+                jQuery('#selectable0 #selectable-'+l+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/turnOn.png")}}');           
+                jQuery('#selectable1 #selectableWorkstations-'+l+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/turnOn.png")}}');
+                jQuery('#selectable2 #selectableLaptops-'+l+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/turnOn.png")}}');
             });
 
             $.each(result.teachers, function(i, l){
                 var teacher = l.split(".");
                 var computer = teacher[0].split("@");
-                jQuery('#selectable #selectable-'+computer[1]+' #userName').html(computer[0]);
-               jQuery('#selectable #selectable-'+computer[1]+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/nobody.png")}}');
-            });
+                jQuery('#selectable0 #selectable-'+computer[1]+' #userName').html(computer[0]);
+                jQuery('#selectable0 #selectable-'+computer[1]+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/nobody.png")}}');
 
-            //getLTSPClients();
+                jQuery('#selectable1 #selectableWorkstations-'+computer[1]+' #userNameWorkstation').html(computer[0]);
+                jQuery('#selectable1 #selectableWorkstations-'+computer[1]+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/nobody.png")}}');
+
+                jQuery('#selectable2 #selectableLaptops-'+computer[1]+' #userNameLaptop').html(computer[0]);
+                jQuery('#selectable2 #selectableLaptops-'+computer[1]+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/nobody.png")}}');
+
+            });
             
             setTimeout("getLTSPStatus()",10000);            
         });
     }
     
 
-
-
 </script>
-<!--
-<table width="100" cellspacing="12">
+<table width="100%" cellspacing="12">
 <tr>
-    <td style="vertical-align:top;" >
-        <div id="tabsActions">
-            <ul>
-                <li><a href="#tabs-1"><span id="actions">Acciones</span></a></li>
-            </ul>
-            <div id="tabs-1" style="padding:3px;">
-                <table width="100%">
-                    <tr>
-                        <td style="text-align:center;"><button id="selectAll" style="width:123px;">Selecc. Todo</button></td>
-                        <td style="text-align:center;"><button id="selectNone" style="width:123px;">Selecc. Ninguno</button></td>                       
-                    </tr>
-                    <tr>
-                        <td style="text-align:center;"><button id="turnOn" style="width:123px;">Encender</button></td>
-                        <td style="text-align:center;"><button id="turnOff" style="width:123px;">Apagar</button></td>
-                    </tr>
-                    <tr>
-                        <td style="text-align:center;"><button id="classroomDetails" style="width:123px;">Mostrar Aula</button></td>
-                        <td style="text-align:center;"></td>
-                    </tr>                   
-                </table>
-            </div>
+	<td>
+		<div id="tabsActions">
+        <ul>
+            <li><a href="#tabsActions-1"><span id="actions">Acciones</span></a></li>
+        </ul>
+        <div id="tabsActions-1" style="padding:1px;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td style="text-align:center;"><button id="selectAll" style="width:123px;">Selec. Todo</button></td>
+                </tr>
+                <tr>
+                    <td style="text-align:center;"><button id="selectNone" style="width:123px;">Deselec. Todo</button></td>                       
+                </tr>
+                <tr>
+                    <td style="text-align:center;"><button id="turnOn" style="width:123px;">Encender</button></td>
+                </tr>
+                <tr>
+                    <td style="text-align:center;"><button id="turnOff" style="width:123px;">Apagar</button></td>
+                </tr>
+                <!--<tr>
+                    <td style="text-align:center;"><button id="classroomDetails" style="width:123px;">Mostrar Aula</button></td>
+                </tr>-->                   
+            </table>
         </div>
-    </td></tr>
-    </table>-->
-    <table width="100%" cellspacing="12">
-    <tr>
-    <td>    
-        <div id="tabsServers">
-            <ul>
-                <li><a href="#tabs-1"><span id="actions">Servidores</span></a></li>
-            </ul>
-            <div id="tabs-1" style="padding:3px;">  
-                <table>
-                    <tr>
-                        <td id="tableSelectable">
-                            <ol id="selectable" style="width:870px;"></ol>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        </div>              
-    </td>
+    </div>
+	</td>
+	<td>    
+	    <div id="tabsHosts">
+	        <ul>
+	            <li><a href="#tabsHosts1"><span id="actions">Servidores</span></a></li>
+	            <li><a href="#tabsHosts2"><span id="actions">Workstations</span></a></li>
+	            <li><a href="#tabsHosts3"><span id="actions">Port&aacute;tiles</span></a></li>
+	        </ul>
+	        <div id="tabsHosts1" style="padding:3px;">  
+	            <table>
+	                <tr>
+	                    <td id="tableSelectable0">
+	                        <ol id="selectable0" style="width:700px;"></ol>
+	                    </td>
+	                </tr>
+	            </table>
+	        </div>
+	        <div id="tabsHosts2" style="padding:3px;">  
+	            <table>
+	                <tr>
+	                    <td id="tableSelectable1">
+	                        <ol id="selectable1" style="width:700px;"></ol>
+	                    </td>
+	                </tr>
+	            </table>
+	        </div>
+	        <div id="tabsHosts3" style="padding:3px;">  
+	            <table>
+	                <tr>
+	                    <td id="tableSelectable2">
+	                        <ol id="selectable2" style="width:700px;"></ol>
+	                    </td>
+	                </tr>
+	            </table>
+	        </div>
+	    </div>       
+	</td>
 </tr>
 </table>
 
 <div id="dialog-details"></div>
+
+<div id="dialogAlert" title="Atenci&oacute;n">
+        <p>
+                <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 7px 0;"></span>
+                <span id="dialogAlertMessage"></span>
+        </p>
+</div>
