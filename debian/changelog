@@ -2,6 +2,7 @@ controlies (0.6.5-3) unstable; urgency=low
 
   * Publicacion avahi de usuarios en clientes
   * En gestion dos nuevas pestanias: workstations y portatiles
+  * Arreglado bug del grid seguimiento thinclients
 
  -- Manuel Mora Gordillo <manuito@gmail.com>  Wed, 13 Nov 2013 11:26:00 +0200
 
