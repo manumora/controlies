@@ -1,7 +1,8 @@
-# coding: utf8
+# -*- coding: utf-8 -*-
 
 from applications.controlies.modules.Users import Users
 from applications.controlies.modules.Utils import Utils
+from applications.controlies.modules.Hosts import Hosts
 
 def index():
     if not auth.user:
@@ -17,6 +18,17 @@ def index_thinclients():
         redirect(URL(c='default'))
 
     return dict()
+
+def index_aulas():
+    if not auth.user:
+        session.flash='Debe iniciar sesión'
+        redirect(URL(c='default'))
+
+    return dict()
+
+def form_user():
+    return dict()
+        
 
 
 ################## SEGUIMIENTO  ####################
@@ -226,10 +238,9 @@ def list_thinclients_state():
 #    file.close()   
 
 
-    consulta=cdb.executesql(sql)
-
+    consulta=cdb.executesql(sql)    
     posrecord=0
-    for reg in consulta:
+    for reg in consulta:        
         host=reg[0]
         sqlultimo="select id,host,time,teclado,raton from thinclients where host='"+host+"'"+wherefecha+" order by time desc limit 1"   
         sql="select id,host,time,teclado,raton from thinclients where host='"+host+"' "+wherefecha+whereestado+"   order by time desc limit 1"
@@ -239,24 +250,32 @@ def list_thinclients_state():
         if len(consulta_host)==1 :
             reg=consulta_host[0]
             reg_ultimo=consulta_ultimo[0]
-            if reg[0]==reg_ultimo[0] and (posrecord>=offset and posrecord<offset+pagesize) :
-                #Si el ultimo registro del thinclient en esa fecha coincide con el ultimo
-                #registro con ese estado de ratón y teclado, se incluye en la lista
-                row = {
-                        "id":reg[0],
-                        "cell":[reg[1],reg[2],reg[3],reg[4]],
-                        "host":reg[1],
-                        "time":reg[2],
-                        "teclado":reg[3],
-                        "raton":reg[4]                
-                    }
-                rows.append(row)
+            if reg[0]==reg_ultimo[0]:
+                if (posrecord>=offset and posrecord<offset+pagesize) :
+                    #Si el ultimo registro del thinclient en esa fecha coincide con el ultimo
+                    #registro con ese estado de ratón y teclado, se incluye en la lista
+                    row = {
+                            "id":reg[0],
+                            "cell":[reg[1],reg[2],reg[3],reg[4]],
+                            "host":reg[1],
+                            "time":reg[2],
+                            "teclado":reg[3],
+                            "raton":reg[4]                
+                        }
+                    rows.append(row)
                 posrecord=posrecord+1
 
     total = posrecord   
-    pages = int(total/pagesize) + 1
+    pages = int(total/pagesize) + 1    
+        
     return { "page":page, "total":pages, "records":total, "rows":rows  } 
 
+
+def traza(texto):
+    
+    file = open('/tmp/salida.txt', 'a')    
+    file.write(texto)
+    file.close()      
 
 @service.json
 @auth.requires_login()
@@ -307,7 +326,7 @@ def list_thinclient_detail():
 #    file.close()   
 
     consulta=cdb.executesql(sql)
-
+    
     for reg in consulta:
         row = {
                 "id":reg[0],
@@ -334,43 +353,66 @@ def list_thinclient_detail():
 @auth.requires_login()
 def matriz_aula():
 
-    aula = request.vars["prefijo"]
-    fecha = request.vars['fecha']
-        
-    sql="select distinct host from thinclients where host like '"+aula+"-%' order by host"
-                
-#    file = open('/tmp/sql.txt', 'w')
-#    file.write(sql)
-#    file.close()   
+    aula = request.vars["prefijo"].upper()
+    fecha = formatearFecha(request.vars['fecha'])
 
-
+    ltsp=aula+"-PRO"
+    
+    sql="select * from maquinas where upper(host)='" + ltsp + "' and tipohost='LTSP'"
     consulta=cdb.executesql(sql)
-    columnas=[]
-    columnas.append(aula+"-PRO")
-
-    #comprobar si es un servidor de aula???
     
-    for reg in consulta:
-        host=reg[0]
-        columnas.append(host)
+    if len(consulta) == 0:
         
-    #Ya tenemos la lista de thinclients + servidor aula
-    
-    horarios=[['08:15','11:15','Franja 1'],['11:15','11:30','Recreo'],['11:40','14:50','Franja 2']]
-    actividad={}
-    for clase in horarios:
-        hosts={}
-        for host in columnas:
-            datos=obtenerActividad(fecha,clase,host)
-            hosts[host]=datos
-        actividad[clase[0]]=hosts
-                    
-    return { "columnas": columnas, "horarios": horarios, "actividad":actividad } 
+        retorno= {"codigo": "ERROR", "mensaje": "El aula "+aula +" no corresponde con un servidor de aula"}
+        
+    else:
+
+        
+        sql="select distinct host from thinclients where host like '"+aula+"-%' order by host"
+        consulta=cdb.executesql(sql)
+        
+        filas=[]
+        filas.append(aula+"-PRO")
+        
+        for reg in consulta:
+            host=reg[0]
+            filas.append(host)
+            
+        #Ya tenemos la lista de thinclients + servidor aula
+        
+        horarios=[['08:15','09:25','1Hora'],['09:26','10:20','2Hora'],['10:21','11:15','3Hora'],
+                  ['11:16','11:40','Recreo'], ['11:41','12:35','4Hora'],['12:36','13:30','5Hora'],
+                  ['13:31','14:25','6Hora'],['14:26','21:00','7Hora']]
+        rows=[]
+        idrow=0
+        for host in filas:
+            celda=[]        
+            row={"id":idrow, "host": host}
+            for clase in horarios: 
+                idclase=clase[2]
+                datos=obtenerActividad(fecha,clase,host)
+                #contenido=""
+                #for entrada in datos:
+                #    contenido=contenido+entrada["time"]+"-"+entrada["teclado"]+"-"+entrada["raton"]+"\n"
+                celda.append(datos)
+                row[idclase]=datos
+                
+            row["cell"]= celda 
+            rows.append(row)
+            idrow=idrow+1
+            
+        userdata={ "columnas": horarios} 
+        retorno= {"codigo": "OK", "page":1, "total":1, "records": len(horarios), "rows":rows, "userdata": userdata }
+        
+    return retorno
+
+#Este es el formato a devolver: http://www.trirand.com/jqgridwiki/doku.php?id=wiki:retrieving_data#json_data
+
 
 def obtenerActividad(fecha,clase,host):
 
-    sqlthc="select id,host,time,teclado,raton from thinclients where 1=1"    
-    sqlses="select id,host,timelogin as time,usuario as teclado ,'' as raton from sesiones where 1=1"
+    sqlthc="select id,host,time,teclado,raton, 'thinclient' as tipo from thinclients where 1=1"    
+    sqlses="select id,host,timelogin as time,usuario as teclado ,timelogout as raton, 'sesion' as tipo from sesiones where 1=1"
     wherethc=""
     whereses=""
     wherethc = wherethc+" and host ='"+host+"'"
@@ -387,19 +429,32 @@ def obtenerActividad(fecha,clase,host):
     #    file.close()   
 
     consulta=cdb.executesql(sql)
+    rows=[]
 
     for reg in consulta:
+        
+        hora=reg[2][11:16]
+        if reg[5]=="thinclient":
+            valor=reg[4]
+        else:
+            if reg[4]!= None:
+                valor=reg[4][11:16]
+            else:
+                valor=""
+                
         row = {
                 "id":reg[0],
-                "cell":[reg[2],reg[3],reg[4]],
+                "cell":[reg[1],hora,reg[3],valor,reg[5]],
                 "host": reg[1],
-                "time":reg[2],
+                "time":hora,
                 "teclado":reg[3],
-                "raton":reg[4]
+                "raton":valor,
+                "tipo": reg[5]
             }
         rows.append(row)
     
     return rows
+
 
 def formatearFecha(fecha):
 	return fecha[6:]+"-"+fecha[3:5]+"-"+fecha[0:2]    
