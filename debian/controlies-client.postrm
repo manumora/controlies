@@ -21,6 +21,10 @@ case "$1" in
 	# Seguimiento equipos
 	sed -i.bak '/\*\/57 \* \* \* \* root \/usr\/share\/controlies-client\/seguimiento_equipo/d' /etc/crontab
 	service cron restart
+
+	######################################################
+	# Servicio RPC
+	update-rc.d controlies-client remove
     ;;
     upgrade|abort-upgrade|abort-remove|abort-deconfigure)
     ;;

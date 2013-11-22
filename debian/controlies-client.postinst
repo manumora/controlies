@@ -53,6 +53,14 @@ case "$1" in
     ######################################################
     # Avahi server
     chmod 755 /usr/bin/controlies
+
+    ######################################################
+    # RPC server
+    chmod +x /etc/init.d/controlies-client
+
+    update-rc.d controlies-client start 25 2 3 4 5 . stop 25 0 1 6 .
+    /etc/init.d/controlies-client restart
+
     ;;
     
     abort-upgrade|abort-remove|abort-deconfigure)

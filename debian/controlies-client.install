@@ -7,3 +7,5 @@ clients/tea4cups usr/lib/cups/backend
 clients/avahi/controlies usr/bin
 clients/avahi/controlies.desktop etc/xdg/autostart
 clients/avahi/sessionControl.py usr/share/controlies-client
+clients/rpc/RPCServer.py usr/share/controlies-client
+clients/rpc/controlies-client etc/init.d

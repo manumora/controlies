@@ -5,9 +5,11 @@ import applications.controlies.modules.Utils.LdapUtils as LdapUtils
 from applications.controlies.modules.SQLiteConnection import SQLiteConnection
 from applications.controlies.modules.Laptops import Laptops
 from applications.controlies.modules.LaptopsHistory import LaptopsHistory
-from gluon.tools import Mail
 from applications.controlies.modules.Config import Config
 
+import xmlrpclib
+import gluon.contrib.simplejson
+from gluon.tools import Mail
 
 @service.json   
 @auth.requires_login()
@@ -287,13 +289,35 @@ def getLTSPStatus():
 @service.json   
 @auth.requires_login()    
 def wakeup():
+    data = gluon.contrib.simplejson.loads(request.body.read())
+
     l=conecta()
-    
-    for i in request.vars["pclist[]"]:
+    for i in data["pclist"]:
         h = Hosts(l,i,"","","")
         h.wakeup()
 
     return response.json({'success':'true'})
+
+@service.json  
+@auth.requires_login()     
+def shutdown():
+    try:
+        server = xmlrpclib.ServerProxy("http://"+request.vars["host"]+":6800")
+        s = server.shutdown()
+        return dict(response="OK", host=request.vars["host"], message=s)
+    except:
+        return dict(response="fail", host=request.vars["host"], message="Surgió un error")
+    
+
+@service.json  
+@auth.requires_login()   
+def executeCommand():
+    try:
+        server = xmlrpclib.ServerProxy("http://"+request.vars["host"]+":6800")
+        s = server.exec_command(request.vars["command"])
+        return dict(response="OK", host=request.vars["host"], message=s)
+    except:
+        return dict(response="fail", host=request.vars["host"], message="Surgió un error")
 
 @auth.requires_login()
 def config():
@@ -327,8 +351,11 @@ def sendMail():
     configuracion=Config(cdb)
     configuracion.loadConfig()
     configuracion.sendListReport()
-
     return configuracion.enviaMail('Desde controlies', 'Este es un mensaje enviado desde Controlies. Si le ha llegado es que todo esta correcto.')
+
+
+def execCommand():
+    return dict()
 
 
 def call():

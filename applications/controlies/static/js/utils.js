@@ -34,7 +34,7 @@ function selectNone(){
 }
 
 function computersSelected(){
-	var selected = []; // = Array();
+	var selected = Array();
 	var activeTab = getActiveTab();
 	var j=0;
 	
@@ -49,10 +49,12 @@ function computersSelected(){
 
 function connection(url,data,action){
 
+	var dataString = $.JSON.encode(data);
+//	alert(dataString);
 	$.ajax({ 
 		url : url , 
 		type: 'POST',
-		data : data,
+		data : dataString,
 		dataType: 'json',
 		success: function (result) { 
 			switch(result.success){
@@ -82,8 +84,6 @@ function sendOrderSelected(url,args,action){
 		pclist : selected,
 		args : args
 	}
-	
-	//var dataString = $.JSON.encode(hosts)
 	connection(url,hosts,action);
 }
 
@@ -96,6 +96,7 @@ function sendOrder(url,args,action){
 	var dataString = $.JSON.encode(classroom);
 	connection(url,dataString,action);
 }
+
 
 
 function modalAlert(message){
