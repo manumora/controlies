@@ -1,0 +1,94 @@
+<script language="javascript">
+
+    $(function() {
+        $("#command").focus();
+        $("#execButton").button({ icons: { primary: "ui-icon-disk"}});
+        $("#cancelButton")
+            .button({ icons: { primary: "ui-icon-close"}})
+            .click( function(){ $('#dialog-form').dialog('close'); });
+    });
+
+    function restartStyle(){
+        $("#form_data p span").css("color","black");
+        $('#message').html("");
+    }
+
+    function send(command){
+    	ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+    	
+        restartStyle();
+
+		var selected = computersSelected();
+				
+		jQuery("#execButton").attr("disabled", "disabled");
+		jQuery('#command').attr('readonly', true);
+    	$("#progressbar").progressbar({value:0});
+		
+		if(command=="shutdown"){
+			var data="";
+		}else{			
+			var data=jQuery("#form_data").serialize();			
+		}
+		
+		var each = 100/selected.length;		
+		var completed=0;
+		
+		for(i=0;i<selected.length;i++){						
+	        jQuery.post('call/json/'+command, "&host="+selected[i]+"&"+data, function(result) {
+	        	jQuery("#response").append("<br><h4><b>"+result.host+"</b></h4>");
+	            switch(result.response){
+	                case "OK":{
+						jQuery("#response").append(result.message.replace(/\n/g, "<br/>")+"<br/>");						
+	                    break;
+	                }
+	                case "fail":{
+						jQuery("#response").append("<span style='color:red;'>"+result.message+"</span><br>");
+	                    break;
+	                }
+	            }
+	            
+				var objDiv = document.getElementById("response");
+				objDiv.scrollTop = objDiv.scrollHeight;
+				
+	            completed++;
+	            
+	            if(completed==selected.length){
+	            	jQuery("#execButton").removeAttr("disabled");
+	            	jQuery('#command').attr('readonly', false);
+	            	$("#progressbar").progressbar({value:100});
+	            	$(".progress-label").text( "100%" );
+	            }else{
+	            	percent = Math.round(each*completed);	
+	            	jQuery("#progressbar").progressbar({value:percent});
+	            	jQuery(".progress-label").text( percent + "%" );      	
+	            }
+	        });
+			
+		}		
+        return false;
+    }
+
+</script>
+
+  <style>
+  .ui-progressbar {
+    position: relative;
+    weight:10px;
+  }
+  .progress-label {
+    position: absolute;
+    left: 50%;
+    top: 4px;
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #fff;
+  }
+  </style>
+
+<form id="form_data" onsubmit="return send('executeCommand');">
+	<p><span id="serial_numberTag">Comando</span><input type="text" id="command" name="command" size="55"/><button id="execButton" type="submit" style="width:100px;">Ejecutar</button><span id="loading" style"float:right;"></span></p>
+</form>
+
+<p><div id="progressbar"><div class="progress-label"></div></div></p>	
+<div id="message" style="text-align:center; font-weight:bold; color:red; padding:3px; "></div>
+<div id="response" style="height:400px; overflow:auto; background-color: #000; color:#EEE; padding-left: 1em;"></div>
+<div style="text-align:center;"><button type="button" id="cancelButton" style="width:100px;">Cerrar</button></div>

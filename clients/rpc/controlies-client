@@ -1,0 +1,69 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          controlies-client
+# Required-Start:    $local_fs $remote_fs hostname
+# Required-Stop:     $local_fs $remote_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: ControlIES RPC server daemon
+# Description:       Debian init script for ControlIES Client
+### END INIT INFO
+#
+# Author:	Manuel Mora Gordillo <manuito at gmail.com>
+#                                                                                                                                      
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+NAME=RPCServer
+message="ControlIES Client RPC-Server daemon"
+
+rundir=/var/run 
+pidfile=$rundir/controlies-client/RPCServer.pid
+logfile=/var/log/controlies-client.log
+daemon="/usr/bin/python"
+application=/usr/share/controlies-client/RPCServer.py
+
+test -x $DAEMON || exit 0
+test -r $application || exit 0
+
+. /lib/lsb/init-functions
+
+if [ ! -d /var/run/controlies-client ]; then
+	rm -rf /var/run/controlies-client
+	mkdir -p /var/run/controlies-client
+fi
+
+case "$1" in
+    start)
+		log_daemon_msg "Starting $message"
+		[ ! -f $logfile ] && touch $logfile
+		start-stop-daemon --start --quiet --pidfile=$pidfile --make-pidfile --exec $daemon $application &
+		log_end_msg 0
+		;;
+	
+    stop)
+		log_daemon_msg "Stopping $message"
+		start-stop-daemon --stop --quiet --pidfile $pidfile
+		log_end_msg 0
+		;;
+	
+    reload)
+    	log_daemon_msg "Reloading $message"
+		start-stop-daemon --stop --quiet --signal HUP --pidfile $pidfile &
+    	log_end_msg 0
+    	;;
+    	
+    restart|force-reload)
+		#log_daemon_msg "Restarting $message"
+		$0 stop
+		sleep 1
+		$0 start
+		log_end_msg 0
+		;;
+	*)
+		log_success_msg "Usage: $0 {start|stop|restart|force-reload|reload}"
+		exit 1
+		;;
+esac
+
+exit 0
