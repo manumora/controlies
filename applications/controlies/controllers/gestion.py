@@ -250,10 +250,14 @@ def getWorkstations():
 @service.json   
 @auth.requires_login()    
 def getLaptops():
-    l=conecta()
-    h = Hosts (l,"","","","laptop-hosts")    
-    response = h.getListTriplets()
-    l.close()
+    try:
+        l=conecta()
+        h = Hosts (l,"","","","laptop-hosts")    
+        response = h.getListTriplets()
+        l.close()
+    except:
+        response=[]
+
     return dict(response=response)
 
 

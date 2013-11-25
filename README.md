@@ -18,7 +18,11 @@ LDAP Groups management
 LDAP Computers management
 -------------------------
 ![alt text](https://raw.github.com/manumora/controlies/master/screenshots/controlies4.png "LDAP Computers management")
-![alt text](https://raw.github.com/manumora/controlies/master/screenshots/controlies5.png "LDAP Computers management")
+
+Mass command execution
+-------------------------
+![alt text](https://raw.github.com/manumora/controlies/master/screenshots/massExecution1.png "Mass command execution")
+![alt text](https://raw.github.com/manumora/controlies/master/screenshots/massExecution2.png "Mass command execution")
 
 Computer database and user assignment
 -------------------------------------
