@@ -79,7 +79,7 @@
     function getWorkstations(){
         jQuery.post('call/json/getWorkstations', function(result) {                                                            
             jQuery.each(result.response, function(i, l){
-                jQuery('#selectable1').append('<li class="ui-state-default" id="selectableWorkstations-'+l+'"><div id="pcNameWorkstation" style="font-size:11px;">'+l+'</div>{{=IMG(_src=URL(r=request,c="static",f="images/turnOff.png"),_class="thumb-image")}}<div id="userNameWorkstation" style="font-size:11px;"></div></li>');               
+                jQuery('#selectable1').append('<li class="ui-state-default" id="selectableWorkstations-'+l+'"><div id="pcName" style="font-size:11px;">'+l+'</div>{{=IMG(_src=URL(r=request,c="static",f="images/turnOff.png"),_class="thumb-image")}}<div id="userNameWorkstation" style="font-size:11px;"></div></li>');               
             });            
         });
     }
@@ -87,7 +87,7 @@
     function getLaptops(){
         jQuery.post('call/json/getLaptops', function(result) {                                                            
             jQuery.each(result.response, function(i, l){
-                jQuery('#selectable2').append('<li class="ui-state-default" id="selectableLaptops-'+l+'"><div id="pcNameLaptop" style="font-size:11px;">'+l+'</div>{{=IMG(_src=URL(r=request,c="static",f="images/turnOff.png"),_class="thumb-image")}}<div id="userNameLaptop" style="font-size:11px;"></div></li>');               
+                jQuery('#selectable2').append('<li class="ui-state-default" id="selectableLaptops-'+l+'"><div id="pcName" style="font-size:11px;">'+l+'</div>{{=IMG(_src=URL(r=request,c="static",f="images/turnOff.png"),_class="thumb-image")}}<div id="userNameLaptop" style="font-size:11px;"></div></li>');               
             });
             
             getLTSPStatus();

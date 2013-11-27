@@ -36,6 +36,7 @@ function selectNone(){
 function computersSelected(){
 	var selected = Array();
 	var activeTab = getActiveTab();
+	
 	var j=0;
 	
 	$("#selectable"+activeTab+" li").each(function(i, item){

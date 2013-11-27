@@ -1,3 +1,9 @@
+controlies (0.6.5-5) unstable; urgency=low
+
+  * Solucion de un bug en el envio de comandos
+
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Wed, 27 Nov 2013 13:35:00 +0200
+
 controlies (0.6.5-4) unstable; urgency=low
 
   * Conexion RPC con los clientes
