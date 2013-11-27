@@ -37,6 +37,7 @@ clear_cache(){
 	rm -rf debian/controlies-client.substvars
 	rm -rf debian/files
 	find ./ -iname "*.pyc" -print0 | xargs -0 rm -rf
+	find ./ -iname "*.*~" -print0 | xargs -0 rm -rf
 }
 
 clear_packages(){
@@ -61,6 +62,7 @@ mv ../controlies*.deb ./packages
 git add ./packages/*.deb -v
 
 clear_packages
+clear_cache
 
 git rm ./puppet/instala_controlies/files/*.deb
 #rm ./puppet/instala_controlies/files/*.deb
@@ -72,6 +74,7 @@ git add ./puppet/instala_controlies/files/*.deb -v
 VERSION=`echo ./packages/controlies_* | cut -d'_' -f2`
 sed -i.bak "s/version=\".*\"/version=\"${VERSION}\"/g" ./puppet/instala_controlies/manifests/init.pp
 rm ./puppet/instala_controlies/manifests/init.pp.bak
+
 rm ./puppet/instala_controlies.zip
 cd ./puppet
 fzip instala_controlies
