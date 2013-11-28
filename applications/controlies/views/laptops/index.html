@@ -10,7 +10,7 @@
 
 	    <div style="text-align:center;">
 		  <div id="radio">
-		    <input type="radio" id="radio1" name="radio" value="current" checked="checked" onclick="javascript:jQuery('#list').trigger('reloadGrid');"/><label for="radio1">&nbsp;Situación actual&nbsp;</label>
+		    <input type="radio" id="radio1" name="radio" value="current" checked="checked" onclick="javascript:jQuery('#list').trigger('reloadGrid');"/><label for="radio1">Situación actual</label>
 		    <input type="radio" id="radio2" name="radio" value="complete" onclick="javascript:jQuery('#list').trigger('reloadGrid');"/><label for="radio2">Historial completo</label>
 		  </div>
 		</div>
@@ -274,6 +274,6 @@
 <script type="text/javascript">
   jQuery(document).ready(function(){
   	print_grid();
-  	$( "#radio" ).buttonset();
+  	$( "#radio" ).buttonset().find('label').width(150);
   }); 
 </script>

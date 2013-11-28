@@ -27,8 +27,24 @@ def list():
     page =  int(request.vars["page"])
     pagesize = int(request.vars["rows"])    
     offset = (page-1) * pagesize
-            
-    sql="select id,time,impresora,jobid,usuario,host,trabajo,paginas,copias,total,tamanio from logprinter where 1=1"
+    
+    groupBy=""
+
+    if(request.vars["groupBy"]=="without"):
+        sql="select id,time,impresora,jobid,usuario,host,trabajo,paginas,copias,total,tamanio from logprinter where 1=1"
+        
+    if(request.vars["groupBy"]=="print"):
+        sql="select '' as id,'' as time,impresora,'' as jobid,'' as usuario,'' as host,'' as trabajo,'' as paginas,'' as copias, SUM(total) AS total,'' as tamanio from logprinter where 1=1"
+        groupBy=" GROUP BY impresora"
+
+    if(request.vars["groupBy"]=="user"):
+        sql="select '' AS id, '' AS time, '' AS impresora, '' AS jobid, usuario, '' AS host, '' AS trabajo, '' AS paginas, '' AS copias, SUM(total) AS total, '' AS tamanio from logprinter where 1=1"
+        groupBy=" GROUP BY usuario"
+
+    if(request.vars["groupBy"]=="host"):
+        sql="select '' AS id, '' AS time, '' AS impresora, '' AS jobid, '' AS usuario, host, '' AS trabajo, '' AS paginas, '' AS copias, SUM(total) AS total, '' AS tamanio from logprinter where 1=1"
+        groupBy=" GROUP BY host"
+
     where=""
     
     
@@ -92,17 +108,20 @@ def list():
     except LookupError:
        pass
 
+    print request.vars['fechaini']
     fechaini='01-01-2000'
     try:
        if len(str(request.vars['fechaini'])) > 0 :
-             fechaini=str(request.vars['fechaini'])
+             #fechaini=str.replace("request.vars['fechaini'])
+             fechaini=request.vars['fechaini'].replace("/","-")
     except LookupError:
        pass
       
     fechafin='01-01-2100'   
     try:
        if len(str(request.vars['fechafin'])) > 0 :
-             fechafin=str(request.vars['fechafin'])
+             fechafin=request.vars['fechafin'].replace("/","-")
+             #fechafin=str(request.vars['fechafin'])
     except LookupError:
        pass
 
@@ -110,16 +129,11 @@ def list():
     fechafin = formatearFecha(fechafin)
     
     where=where+ " and time between '"+fechaini+"' and date('"+fechafin+"','+24 hours')"
-    sql = sql + where+" order by "+request.vars['sidx']+" "+request.vars['sord'] + " limit "+str(pagesize)+" offset "+str(offset)   
-    
- #   file = open('/tmp/sql.txt', 'w')
- #   file.write(sql)
- #   file.close()   
-
+    sql = sql + where + groupBy +" order by "+request.vars['sidx']+" "+request.vars['sord'] + " limit "+str(pagesize)+" offset "+str(offset)   
+    print sql
     consulta=cdb.executesql(sql)
-    retorno=""
+
     for reg in consulta:
-        retorno=retorno+reg[1]
         row = {
                 "id":reg[0],
                 "cell":[reg[1],reg[2],reg[3],reg[4],reg[5],reg[6],reg[7],reg[8],reg[9],reg[10]],

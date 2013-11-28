@@ -1,37 +1,42 @@
-{{response.files.append(URL('static','js/multiselect/jquery.multiselect.css'))}}
-{{response.files.append(URL('static','js/multiselect/jquery.multiselect.min.js'))}}
-{{response.files.append(URL('static','js/multiselect/jquery.multiselect.es.js'))}}
-{{#response.files.append(URL('static','css/helper.css'))}}
-{{#response.files.append(URL('static','css/dropdown.css'))}}
-{{#response.files.append(URL('static','css/default.advanced.css'))}}
- 
-
 {{extend 'layout.html'}}
-       
-        <form action="" enctype="multipart/form-data" method="post" id="form_maquinas">
-            Fecha inicio: <input class="date" id="fechaini" name="fechaini" type="date" />
-            Fecha fin: <input class="date" id="fechafin" name="fechafin" type="date" />
-            <input type="button" value="Actualizar" onclick="javascript:$('#list').trigger('reloadGrid')">            
-            
-        </form>
-        <br/>
-        <div id="tabla_logprinter">
-          <table id="list" width="100%"></table>                        
-            <div id="pager" style=""></div> 
-            <div id="filter" style="margin-left:30%;display:none">Buscar nada</div>
-        </div>
 
-        <div id="dialog-form"></div>
+    <div>
+		<div id="radio" style="float: right;">
+	    	<input type="radio" id="radio1" name="radio" value="without" checked="checked" onclick="javascript:jQuery('#list').trigger('reloadGrid');"/><label for="radio1">Sin agrupar</label>
+	    	<input type="radio" id="radio2" name="radio" value="print" onclick="javascript:jQuery('#list').trigger('reloadGrid');" style="width:200 em"/><label for="radio2">Impresora</label>
+	    	<input type="radio" id="radio3" name="radio" value="user" onclick="javascript:jQuery('#list').trigger('reloadGrid');"/><label for="radio3">Usuario</label>
+	    	<input type="radio" id="radio4" name="radio" value="host" onclick="javascript:jQuery('#list').trigger('reloadGrid');"/><label for="radio4">Host</label>
+	  	</div>
+	    <form action="#" enctype="multipart/form-data" method="post" id="form_logprinter">
+	        Fecha inicio: <input id="fechaini" name="fechaini" style="text-align:center; width:80px"/>&nbsp;
+	        Fecha fin: <input id="fechafin" name="fechafin" style="text-align:center; width:80px"/>
+	        <button type="button" id="clear" style="vertical-align: middle;"></button>                                
+	    </form>
+	</div>
+    <div id="tabla_logprinter">
+      <table id="list" width="100%"></table>                        
+        <div id="pager" style=""></div> 
+        <div id="filter" style="margin-left:30%;display:none">Buscar nada</div>
+    </div>
 
-        <div id="dialog-alert" title="Atención" style="display:none;">
-            <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>Para operar sobre un registro debe seleccionarlo previamente.</p>
-        </div>
+    <div id="dialog-form"></div>
+
+    <div id="dialog-alert" title="Atención" style="display:none;">
+        <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>Para operar sobre un registro debe seleccionarlo previamente.</p>
+    </div>
          
 
 <script type="text/javascript">    
 
    jQuery(function() {
         jQuery("#dialog-alert").dialog({ autoOpen: false });
+        jQuery( "#radio" ).buttonset().find('label').width(100);
+		jQuery( "#clear" )
+			.button({icons: {primary: "ui-icon-cancel"},text: false })
+			.click( function(){
+				jQuery(':input','#form_logprinter').not(':button').val('');
+				jQuery('#list').trigger('reloadGrid') 
+			});
     });
     
                 
@@ -41,7 +46,8 @@
                 url:"{{=URL(c='logprinter',f='call',args=['json','list'])}}",
                 data: "{}",
                 postData: { fechaini: function() { return $("#fechaini").val();} , 
-                            fechafin: function() { return $("#fechafin").val();} },
+                            fechafin: function() { return $("#fechafin").val();} ,
+                            groupBy: function() { return $('input[name=radio]:checked').val();}},
                 datatype: 'json',
                 mtype: 'GET',
                 contentType: "application/json; charset=utf-8",
@@ -54,9 +60,9 @@
                 onSelectRow: function (id) { verUsuario(id); },                       
                 colNames:['Fecha','Impresora','Jobid','Usuario','Host','Nombre','Pág.','Cop.','Tot.','Bytes'],
                 colModel:[                  
-                    {name:'time',index:'time', width:40, align:"left"},
+                    {name:'time',index:'time', width:40, align:"center"},
                     {name:'impresora',index:'impresora', width:40, align:"left"},
-                    {name:'jobid',index:'jobid', width:12, align:"left"},
+                    {name:'jobid',index:'jobid', width:12, align:"right"},
                     {name:'usuario',index:'usuario', width:30, align:"left"},
                     {name:'host',index:'host', width:30, align:"left"},
                     {name:'trabajo',index:'trabajo', width:60, align:"left"},
@@ -82,7 +88,7 @@
           jQuery("#list").jqGrid('filterToolbar'); 
           
           jQuery("#list").jqGrid('navButtonAdd','#pager',{
-                    caption: " Exportar todo a fichero CVS ",
+                    caption: "Exportar CVS",
                     buttonicon :'ui-icon-calculator',
                     onClickButton : function (){               
 						   window.open("{{=URL(c='logprinter',f='export_csv',args=['run'])}}");
@@ -174,22 +180,48 @@ function verUsuario(id){
                         });               
                     });
     }
-    
-    function convertirFecha(strFecha) {
 
-       anio=strFecha.substr(0,4);
-       mes=strFecha.substr(5,2);
-       dia=strFecha.substr(8,2);
-       hora=strFecha.substr(11,2);
-       minuto=strFecha.substr(14,2);
-       segundos=strFecha.substr(17,2);
-
-       return new Date(anio,mes,dia,hora,minuto,segundos);
-
-    }
-   
-           
 </script>
 <script type="text/javascript">
-   jQuery(document).ready(function(){  print_grid();}); 
+   jQuery(document).ready(function(){
+   		print_grid();
+
+	    jQuery( "#fechaini" ).datepicker({
+	      changeMonth: true,
+	      changeYear: true,
+	      onClose: function( selectedDate ) {
+	        $( "#fechafin" ).datepicker( "option", "minDate", selectedDate );
+	      },
+	      onSelect: function(){ $('#list').trigger('reloadGrid'); }
+	    });
+	    
+	    jQuery( "#fechafin" ).datepicker({
+	      changeMonth: true,
+	      changeYear: true,
+	      onClose: function( selectedDate ) {
+          	$( "#fechaini" ).datepicker( "option", "maxDate", selectedDate );
+      	  },
+	      onSelect: function(){ $('#list').trigger('reloadGrid'); }
+	    });	    
+
+	    $.datepicker.regional['es'] = {
+	        closeText: 'Cerrar',
+	        prevText: '<Ant',
+	        nextText: 'Sig>',
+	        currentText: 'Hoy',
+	        monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+	        monthNamesShort: ['Ene','Feb','Mar','Abr', 'May','Jun','Jul','Ago','Sep', 'Oct','Nov','Dic'],
+	        dayNames: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+	        dayNamesShort: ['Dom','Lun','Mar','Mié','Juv','Vie','Sáb'],
+	        dayNamesMin: ['Do','Lu','Ma','Mi','Ju','Vi','Sá'],
+	        weekHeader: 'Sm',
+	        dateFormat: 'dd/mm/yy',
+	        firstDay: 1,
+	        isRTL: false,
+	        showMonthAfterYear: false,
+	        yearSuffix: ''
+	    };
+	    $.datepicker.setDefaults($.datepicker.regional['es']);
+
+   	});         
 </script>

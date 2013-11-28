@@ -134,7 +134,8 @@ def report():
     response.headers['Content-Type']='application/pdf'
     doc=pdf.output(dest='S')
     doc64=embed64(data=doc,extension='application/pdf')    
-    return 'document.location="%s";' % doc64     
+    #return 'document.location="%s";' % doc64     
+    return 'window.open("%s");' % doc64
 
 def getDataStudents(classroom):
     from applications.controlies.modules.Groups import Groups

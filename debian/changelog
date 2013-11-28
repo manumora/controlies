@@ -1,6 +1,7 @@
 controlies (0.6.5-5) unstable; urgency=low
 
   * Solucion de un bug en el envio de comandos
+  * Nuevas opciones en seguimiento de impresion
 
  -- Manuel Mora Gordillo <manuito@gmail.com>  Wed, 27 Nov 2013 13:35:00 +0200
 
