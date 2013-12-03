@@ -1,20 +1,11 @@
-{{response.files.append(URL('static','js/multiselect/jquery.multiselect.css'))}}
-{{response.files.append(URL('static','js/multiselect/jquery.multiselect.min.js'))}}
-{{response.files.append(URL('static','js/multiselect/jquery.multiselect.es.js'))}}
-{{#response.files.append(URL('static','css/helper.css'))}}
-{{#response.files.append(URL('static','css/dropdown.css'))}}
-{{#response.files.append(URL('static','css/default.advanced.css'))}}
- 
-
+{{response.files.append(URL('static','js/utils.js'))}}
 {{extend 'layout.html'}}
        
-        <form action="" enctype="multipart/form-data" method="post" id="form_maquinas">
-            Fecha inicio: <input class="date" id="fechaini" name="fechaini" type="date" />
-            Fecha fin: <input class="date" id="fechafin" name="fechafin" type="date" />
-            <input type="button" value="Actualizar" onclick="javascript:$('#list').trigger('reloadGrid')">            
-            
-        </form>
-        <br/>
+	    <form action="#" enctype="multipart/form-data" method="post" id="form_logprinter">
+	        Fecha inicio: <input id="fechaini" name="fechaini" style="text-align:center; width:80px"/>&nbsp;
+	        Fecha fin: <input id="fechafin" name="fechafin" style="text-align:center; width:80px"/>
+	        <button type="button" id="clear" style="vertical-align: middle;" title="Limpiar fechas"></button>                                
+	    </form>
         <div id="tabla_maquinas">
           <table id="list" width="100%"></table>
             <div id="pager" style=""></div> 
@@ -32,6 +23,30 @@
 
    jQuery(function() {
         jQuery("#dialog-alert").dialog({ autoOpen: false });
+		jQuery( "#clear" )
+			.button({icons: {primary: "ui-icon-cancel"},text: false })
+			.click( function(){
+				jQuery(':input','#form_logprinter').not(':button').val('');
+				jQuery('#list').trigger('reloadGrid') 
+			});
+
+	    jQuery( "#fechaini" ).datepicker({
+	      changeMonth: true,
+	      changeYear: true,
+	      onClose: function( selectedDate ) {
+	        $( "#fechafin" ).datepicker( "option", "minDate", selectedDate );
+	      },
+	      onSelect: function(){ $('#list').trigger('reloadGrid'); }
+	    });
+	    
+	    jQuery( "#fechafin" ).datepicker({
+	      changeMonth: true,
+	      changeYear: true,
+	      onClose: function( selectedDate ) {
+          	$( "#fechaini" ).datepicker( "option", "maxDate", selectedDate );
+      	  },
+	      onSelect: function(){ $('#list').trigger('reloadGrid'); }
+	    });	   
     });
     
                 

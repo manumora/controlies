@@ -2,10 +2,26 @@
 
     $(function() {
         $("#purpose").focus();
-        $("#deleteButton").button({ icons: { primary: "ui-icon-transferthick-e-w"}});
+        $("#deleteButton").button({ icons: { primary: "ui-icon-trash"}});
         $("#cancelButton")
             .button({ icons: { primary: "ui-icon-close"}})
             .click( function(){ $('#dialog-form-borrado').dialog('close'); });
+
+	    jQuery( "#fechainiborrado" ).datepicker({
+	      changeMonth: true,
+	      changeYear: true,
+	      onClose: function( selectedDate ) {
+	        $( "#fechafinborrado" ).datepicker( "option", "minDate", selectedDate );
+	      },
+	    });
+	    
+	    jQuery( "#fechafinborrado" ).datepicker({
+	      changeMonth: true,
+	      changeYear: true,
+	      onClose: function( selectedDate ) {
+	      	$( "#fechainiborrado" ).datepicker( "option", "maxDate", selectedDate );
+	  	  },
+	    });
     });
 
     function restartStyle(){
@@ -48,9 +64,6 @@
 
         return false;
     }
-  
-  
-  
     
 </script>
  
@@ -60,10 +73,10 @@
     <div>
 		<table width="100%">
 		<tr>
-			<td>Fecha inicio: </td><td> <input class="date" id="fechainiborrado" name="fechainiborrado" type="date" style="width: 90px"/></td>
+			<td>Fecha inicio: </td><td> <input id="fechainiborrado" name="fechainiborrado" style="text-align:center; width:80px"/></td>
 		</tr>
 		<tr>
-			<td> Fecha fin: </td><td> <input class="date" id="fechafinborrado" name="fechafinborrado" type="date" style="width: 90px"/></td>				
+			<td>Fecha fin: </td><td> <input id="fechafinborrado" name="fechafinborrado" style="text-align:center; width:80px"/></td>				
 		</tr>
 		</table>
 	</div>

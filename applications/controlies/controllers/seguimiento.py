@@ -108,34 +108,34 @@ def borrarsesiones():
     
     fechainiborrado='01-01-2000'
     try:
-       if len(str(request.vars['fechainiborrado'])) > 0 :
-             fechainiborrado=str(request.vars['fechainiborrado'])             
+        if len(str(request.vars['fechainiborrado'])) > 0 :
+            fechainiborrado=request.vars['fechainiborrado'].replace("/","-")         
     except LookupError:
-       pass
+        pass
         
     try:
-       if len(str(request.vars['fechafinborrado'])) > 0 :
-          fechafinborrado=str(request.vars['fechafinborrado'])
-       else:
-		   retorno="fechafin"
+        if len(str(request.vars['fechafinborrado'])) > 0 :
+            fechafinborrado=request.vars['fechafinborrado'].replace("/","-")
+        else:
+            retorno="fechafin"
     except LookupError:
-	   retorno="fechafin"
+        retorno="fechafin"
 
     if retorno=="OK":
-      if validarFecha(fechafinborrado) and validarFecha(fechainiborrado):
-          fechainiborrado = formatearFecha(fechainiborrado)
-          fechafinborrado = formatearFecha(fechafinborrado)
-          sql="delete from sesiones where timelogin between '"+fechainiborrado+"' and date('"+fechafinborrado+"','+24 hours')"           
-          file = open('/tmp/sql.txt', 'w')
-          file.write(sql)
-          file.close()       
-          try:
-              cdb.executesql(sql)
-              retorno="OK"
-          except:
-              retorno="fail"
-      else:
-          retorno="format"
+        if validarFecha(fechafinborrado) and validarFecha(fechainiborrado):
+            fechainiborrado = formatearFecha(fechainiborrado)
+            fechafinborrado = formatearFecha(fechafinborrado)
+            sql="delete from sesiones where timelogin between '"+fechainiborrado+"' and date('"+fechafinborrado+"','+24 hours')"           
+            file = open('/tmp/sql.txt', 'w')
+            file.write(sql)
+            file.close()       
+            try:
+                cdb.executesql(sql)
+                retorno="OK"
+            except:
+                retorno="fail"
+        else:
+            retorno="format"
               
     return dict(response=retorno)
     

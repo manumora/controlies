@@ -99,14 +99,14 @@ def list():
     fechaini='01-01-2000'
     try:
        if len(str(request.vars['fechaini'])) > 0 :
-             fechaini=str(request.vars['fechaini'])
+             fechaini=request.vars['fechaini'].replace("/","-")
     except LookupError:
        pass
       
     fechafin='01-01-2100'   
     try:
        if len(str(request.vars['fechafin'])) > 0 :
-             fechafin=str(request.vars['fechafin'])
+             fechafin=request.vars['fechafin'].replace("/","-")
     except LookupError:
        pass
 
@@ -115,7 +115,6 @@ def list():
     
     where=where+ " and ultimorefresco between '"+fechaini+"' and date('"+fechafin+"','+24 hours')"
     sql = sql + where+" order by "+request.vars['sidx']+" "+request.vars['sord'] + " limit "+str(pagesize)+" offset "+str(offset)   
-    
 #    file = open('/tmp/sql.txt', 'w')
 #    file.write(sql)
 #    file.close()   
@@ -141,9 +140,9 @@ def list():
         rows.append(row)
 
     consulta=cdb.executesql("select count(*) as total from maquinas where 1=1 "+where)
-    total = int(consulta[0][0])   
+    total = int(consulta[0][0])
     pages = int(total/pagesize) + 1
-    return { "page":page, "total":pages, "records":total, "rows":rows  } 
+    return { "page":page, "total":pages, "records":total, "rows":rows } 
     
 @service.json
 def getFicheroPkgSync():

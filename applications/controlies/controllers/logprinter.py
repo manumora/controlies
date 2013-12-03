@@ -108,11 +108,9 @@ def list():
     except LookupError:
        pass
 
-    print request.vars['fechaini']
     fechaini='01-01-2000'
     try:
        if len(str(request.vars['fechaini'])) > 0 :
-             #fechaini=str.replace("request.vars['fechaini'])
              fechaini=request.vars['fechaini'].replace("/","-")
     except LookupError:
        pass
@@ -121,7 +119,6 @@ def list():
     try:
        if len(str(request.vars['fechafin'])) > 0 :
              fechafin=request.vars['fechafin'].replace("/","-")
-             #fechafin=str(request.vars['fechafin'])
     except LookupError:
        pass
 
