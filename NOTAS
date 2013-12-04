@@ -107,6 +107,9 @@ Mayo-2013:
     -La tarea puppet se divide en tres subtareas, para permitir actualizaciones mas cómodas y puntuales.
     -Se mejora la gestión de portátiles.
     -Se incluyen agrupamientos en el grid de registro de impresión.
+    -Arreglado bug en la visualización de equipos en tiempo real, necesitaba la rama laptop_hosts en ldap.
+    -Incluida funcionalidad que permite la ejecución de comandos remotos en tiempo real sobre las maquinas 
+     seleccionadas.
     -Se cambian los calendarios para que usen el de jquery, con mas funcionalidades y mas homogéneos con el resto.
     
 TODO
