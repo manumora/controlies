@@ -1,11 +1,3 @@
-<!-- Libreria Multiselect -->
-{{response.files.append(URL('static','js/multiselect/jquery.multiselect.css'))}}
-{{response.files.append(URL('static','js/multiselect/jquery.multiselect.min.js'))}}
-{{response.files.append(URL('static','js/multiselect/jquery.multiselect.es.js'))}}
-{{#response.files.append(URL('static','css/helper.css'))}}
-{{#response.files.append(URL('static','css/dropdown.css'))}}
-{{#response.files.append(URL('static','css/default.advanced.css'))}}
-
 {{extend 'layout.html'}}  
 
 	    <div style="text-align:center;">
@@ -40,6 +32,8 @@
     
                 
     function print_grid(){  
+    	  //var states = $.ajax({url:"{{=URL(c='laptops',f='call',args=['json','getAllStatesGrid'])}}", async: false }).responseText;
+			
           jQuery("#list").jqGrid({
                 url:"{{=URL(c='laptops',f='call',args=['json','list'])}}",
                 data: "{}",
@@ -53,7 +47,6 @@
                         thegrid.addJSONData(JSON.parse(jsondata.responseText).d);
                     }
                 },
-                
                 colNames:['Marca','Modelo','Número Serie','Tipo','Login','Fecha/Hora','Estado'],
                 colModel:[ 
                     {name:'trademark',index:'trademark', width:60, align:"center"},
@@ -62,7 +55,7 @@
                     {name:'user_type',index:'user_type', width:50, align:"center", stype:'select', editoptions:{value:":Todos;Profesor:Profesores;Alumno:Alumnos;Ninguno:Ninguno"}},
                     {name:'username',index:'username', width:100, align:"center"},
                     {name:'datetime',index:'datetime', width:80, align:"center"},
-                    {name:'state',index:'state', width:65, align:"center", stype:'select', editoptions:{value:":Todos;Asignado:Asignado;En reparación:En reparación;Sin asignar:Sin asignar"}},
+                    {name:'state',index:'state', width:65, align:"center", stype:'select', editoptions:{value:":Todos;Asignado:Asignado;En reparación:En reparación;Desaparecido:Desaparecido;Sin asignar:Sin asignar"}},   
                 ], 
                 rowNum:25,
                 height:335,
