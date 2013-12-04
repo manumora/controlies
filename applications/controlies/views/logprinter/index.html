@@ -2,15 +2,15 @@
 
     <div>
 		<div id="radio" style="float: right;">
-	    	<input type="radio" id="radio1" name="radio" value="without" checked="checked" onclick="javascript:jQuery('#list').trigger('reloadGrid');"/><label for="radio1">Sin agrupar</label>
-	    	<input type="radio" id="radio2" name="radio" value="print" onclick="javascript:jQuery('#list').trigger('reloadGrid');" style="width:200 em"/><label for="radio2">Impresora</label>
-	    	<input type="radio" id="radio3" name="radio" value="user" onclick="javascript:jQuery('#list').trigger('reloadGrid');"/><label for="radio3">Usuario</label>
-	    	<input type="radio" id="radio4" name="radio" value="host" onclick="javascript:jQuery('#list').trigger('reloadGrid');"/><label for="radio4">Host</label>
+	    	<input type="radio" id="radio1" name="radio" value="without" checked="checked" onclick="javascript:jQuery('#list').trigger('reloadGrid');"/><label for="radio1" title="Registros sin agrupar">Sin agrupar</label>
+	    	<input type="radio" id="radio2" name="radio" value="print" onclick="javascript:jQuery('#list').trigger('reloadGrid');"/><label for="radio2" title="Agrupado por Impresora">Impresora</label>
+	    	<input type="radio" id="radio3" name="radio" value="user" onclick="javascript:jQuery('#list').trigger('reloadGrid');"/><label for="radio3" title="Agrupado por Usuario">Usuario</label>
+	    	<input type="radio" id="radio4" name="radio" value="host" onclick="javascript:jQuery('#list').trigger('reloadGrid');"/><label for="radio4" title="Agrupado por Host">Host</label>
 	  	</div>
 	    <form action="#" enctype="multipart/form-data" method="post" id="form_logprinter">
 	        Fecha inicio: <input id="fechaini" name="fechaini" style="text-align:center; width:80px"/>&nbsp;
 	        Fecha fin: <input id="fechafin" name="fechafin" style="text-align:center; width:80px"/>
-	        <button type="button" id="clear" style="vertical-align: middle;"></button>                                
+	        <button type="button" id="clear" style="vertical-align: middle;" title="Limpiar fechas"></button>                                
 	    </form>
 	</div>
     <div id="tabla_logprinter">
@@ -203,25 +203,5 @@ function verUsuario(id){
       	  },
 	      onSelect: function(){ $('#list').trigger('reloadGrid'); }
 	    });	    
-
-	    $.datepicker.regional['es'] = {
-	        closeText: 'Cerrar',
-	        prevText: '<Ant',
-	        nextText: 'Sig>',
-	        currentText: 'Hoy',
-	        monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-	        monthNamesShort: ['Ene','Feb','Mar','Abr', 'May','Jun','Jul','Ago','Sep', 'Oct','Nov','Dic'],
-	        dayNames: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
-	        dayNamesShort: ['Dom','Lun','Mar','Mié','Juv','Vie','Sáb'],
-	        dayNamesMin: ['Do','Lu','Ma','Mi','Ju','Vi','Sá'],
-	        weekHeader: 'Sm',
-	        dateFormat: 'dd/mm/yy',
-	        firstDay: 1,
-	        isRTL: false,
-	        showMonthAfterYear: false,
-	        yearSuffix: ''
-	    };
-	    $.datepicker.setDefaults($.datepicker.regional['es']);
-
    	});         
 </script>

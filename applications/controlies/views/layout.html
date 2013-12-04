@@ -25,6 +25,7 @@
     <!-- All JavaScript at the bottom, except for Modernizr which enables HTML5 elements & feature detects -->
     <script src="{{=URL('static','js/modernizr-1.7.min.js')}}"></script>
 
+{{response.files.append(URL('static','js/utils.js'))}}
 {{response.files.append(URL('static','js/jquery/jquery.json.js'))}}
 {{response.files.append(URL('static','js/jdgrid/css/ui.jqgrid.css'))}}
 {{response.files.append(URL('static','js/jquery/jquery.dropdown.js'))}}
