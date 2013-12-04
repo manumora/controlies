@@ -12,7 +12,7 @@ class actualizaciones_controlies {
 
 		file { "/usr/share/controlies-client/despierta_thinclients":
 			owner => root, group => root, mode => 755,
-			source => "puppet:///controlies/despierta_thinclients",
+			source => "puppet:///actualizaciones_controlies/despierta_thinclients",
 		}
 
 		cron { revision-matinal:
@@ -22,19 +22,20 @@ class actualizaciones_controlies {
 			minute  => 15
 		}
 
-		cron { revision-recreo:
-		   command => "/usr/share/controlies-client/despierta_thinclients",
-		   user    => root,
-		   hour    => 11,
-		   minute  => 25
-		}
+#		cron { revision-recreo:
+#		   command => "/usr/share/controlies-client/despierta_thinclients",
+#		   user    => root,
+#		   hour    => 11,
+#		   minute  => 25
+#		}
 
-		cron { revision-vespertina:
-		   command => "/usr/share/controlies-client/despierta_thinclients",
-		   user    => root,
-		   hour    => 14,
-		   minute  => 45
-		}
+#		cron { revision-vespertina:
+#		   command => "/usr/share/controlies-client/despierta_thinclients",
+#		   user    => root,
+#		   hour    => 14,
+#		   minute  => 45
+#		}
+
 	}
 	default: {}
     }
@@ -42,7 +43,7 @@ class actualizaciones_controlies {
     #Seguimiento impresión, parchea un bug en pkpgcounter.
     file {"/usr/share/pyshared/pkpgpdls/zjstream.py":
     	owner => root, group => root, mode => 644,
-    	source => "puppet:///controlies/zjstream.py",
+    	source => "puppet:///actualizaciones_controlies/zjstream.py",
     }        
 }
 
