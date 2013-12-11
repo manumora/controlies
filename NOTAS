@@ -111,6 +111,18 @@ Mayo-2013:
     -Incluida funcionalidad que permite la ejecución de comandos remotos en tiempo real sobre las maquinas 
      seleccionadas.
     -Se cambian los calendarios para que usen el de jquery, con mas funcionalidades y mas homogéneos con el resto.
+
+11-Diciembre 2013
+
+    -Definidos stages en las tareas puppet, para que primero se ejecute instala_controlies y despues 
+     actualizaciones_controlies
+    -Corregido bug informado por Francisco Lancharro: los campos boolean de la configuración no se procesaban
+     como enteros (sqlite los guarda internamente como enteros) y los checkbox de la vista correspondiente no
+     aparecian como marcados cuando el valor en la tabla era True.
+    -Corregido bug informado por Manolo Vadillo: modificado paquete controlies-client para que se llame a
+     script seguimiento-equipos inmediatemente en cada reboot, mediante @reboot en crontab. De esta manera la
+     hora de ultimo arranque del equipo se actaliza ipso-facto en el arranque y no cuando lo llame el crontab.
+
     
 TODO
 ====
@@ -138,4 +150,6 @@ PrintedPages....
 -Grid con informe detallado de un aula en un día concreto...en desarrollo
 
 -Integrar el script de actualización de fotos desde Rayuela de desarrollo.educarex.es
+
+
 
