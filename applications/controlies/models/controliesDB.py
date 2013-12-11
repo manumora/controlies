@@ -62,6 +62,11 @@ try:
 except:
     pass
 
+try:
+    cdb.states.insert(id_state='4',state='Desaparecido')
+except:
+    pass
+
 cdb.define_table('printers',
                  Field ('id_printer','integer'),
                  Field('id_printer_trademark','integer'),

@@ -2,6 +2,7 @@
 
 from applications.controlies.modules.Users import Users
 from applications.controlies.modules.Utils import Utils
+from math import floor
 import gluon.contenttype
 import cStringIO
 
@@ -23,7 +24,6 @@ def list():
 
        
     fields = ['time','impresora','jobid','usuario','host','trabajo','paginas','copias','total','tamanio']
-    rows = []
     page =  int(request.vars["page"])
     pagesize = int(request.vars["rows"])    
     offset = (page-1) * pagesize
@@ -127,9 +127,10 @@ def list():
     
     where=where+ " and time between '"+fechaini+"' and date('"+fechafin+"','+24 hours')"
     sql = sql + where + groupBy +" order by "+request.vars['sidx']+" "+request.vars['sord'] + " limit "+str(pagesize)+" offset "+str(offset)   
-    print sql
-    consulta=cdb.executesql(sql)
 
+    consulta=cdb.executesql(sql)
+    
+    rows = []
     for reg in consulta:
         row = {
                 "id":reg[0],
@@ -147,16 +148,27 @@ def list():
             }
         rows.append(row)
 
-    consulta=cdb.executesql("select count(*) as numregistros from logprinter where 1=1 "+where)
-    totalreg = int(consulta[0][0])   
-    pages = int(totalreg/pagesize) + 1
-    
+    consulta=cdb.executesql("select id from logprinter where 1=1 "+where + groupBy)
+    totalreg = len(consulta)   
+
+    # grid parameters
+    if totalreg > 0:
+        totalPages = floor( totalreg / pagesize )
+        module = totalreg % pagesize
+        if module > 0:
+            totalPages = totalPages+1
+    else:
+        totalPages = 0
+
+    if page > totalPages:
+        page = totalPages
+
     consulta=cdb.executesql("select sum(total) as totalpag from logprinter where 1=1 "+where)
     totalpag= int(consulta[0][0])   
     
-    return { "page":page, "total":pages, "records":totalreg, "rows":rows, "userdata": {"trabajo": "Total................", "total": totalpag }} 
-    
-    
+    return { "page":page, "total":totalPages, "records":totalreg, "rows":rows, "userdata": {"trabajo": "Total................", "total": totalpag }} 
+
+
 @service.run
 @auth.requires_login()   
 def export_csv():

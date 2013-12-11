@@ -12,6 +12,19 @@ def index():
         
     return dict()
 
+################## GRID ####################
+
+@auth.requires_login()
+def getAllStatesGrid():
+    l = LaptopsHistory(cdb,"","","","","","","","")
+    r = l.getAllStates()
+    
+    text=""
+    for i in r:
+        text+= i["id_state"]+":"+i["state"]+";"
+    text = "2:hola"
+    return text #{"States":{"Content":text}}
+
 ################## LAPTOPS ####################
 
 @service.json
