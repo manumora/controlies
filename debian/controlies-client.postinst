@@ -35,6 +35,11 @@ case "$1" in
     then
         echo "*/57 * * * * root /usr/share/controlies-client/seguimiento_equipo" >> /etc/crontab
     fi
+    if ! grep "@reboot root /usr/share/controlies-client/seguimiento_equipo" /etc/crontab
+    then
+        echo "@reboot root /usr/share/controlies-client/seguimiento_equipo" >> /etc/crontab
+    fi
+    
     chmod 755 /usr/share/controlies-client/seguimiento_equipo
     service cron restart
 
