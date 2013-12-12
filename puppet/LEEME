@@ -1,0 +1,12 @@
+
+"instala_controlies": para instalar los paquetes en los clients y thinclients de forma masiva.
+
+
+TAREAS OPCIONALES:
+
+"controlies_borrar_antiguos":
+- antes de empaquetar "controlies-client" y "controlies-thinclient" se introducían los ficheros en los clientes por puppet. Ahora que ya está empaquetado es aconsejable eliminar dichos ficheros. Si no probaste la Beta de los clientes de controlies, no es necesario que hagas uso de esta tarea.
+
+"actualizaciones_controlies":
+- si tras configurar printers.conf no te funciona el registro de impresión es posible que tengas que actualizar el fichero zjstream.py (debido a un bug del paquete pkpgcounter). Si el registro de impresión te funciona correctamente no es necesario que hagas uso de esta tarea.
+- también introduce en el cron que a primera hora se despierten todos los thinclients para comprobar los teclados/ratones. Si por ahorro energético o alguna otra cuestión no lo ves necesario, no hagas uso de esta tarea.
