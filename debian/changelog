@@ -3,6 +3,7 @@ controlies (0.6.5-7) unstable; urgency=low
   * Encender Thinclients
   * Bug cliente RPC, cogia IP local
   * Refrescar servicio RPC con nueva IP
+  * Bugs notificados por los compañeros
 
  -- Manuel Mora Gordillo <manuito@gmail.com>  Fri, 13 Dec 2013 08:43:00 +0200
 
