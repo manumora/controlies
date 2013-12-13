@@ -78,6 +78,28 @@ def getClassroomGroupsWithUsers(ldap):
 	classrooms.sort()
 	return { "classrooms":classrooms }
 
+
+def getThinclientsFromClassroom(ldap,classroom):
+	search = ldap.search("cn=THINCLIENTS,cn=DHCP Config","cn=*",["cn","dhcpHWAddress"])
+		
+	num = classroom.split("-pro")[0]
+	
+	rows=[]
+	for i in search:
+		host = i[0][1]["cn"][0]
+		try:
+			mac = i[0][1]["dhcpHWAddress"][0].replace("ethernet ","")
+		except:
+			mac = ""
+		
+		if mac != "" and host.startswith(num):
+			row = {
+				"cn":host,
+				"dhcpHWAddress":mac,
+			}			 
+			rows.append(row)
+	return rows
+
 def getAllRanges(ldap):
 	myRange = []
 	mySubRange = []	
@@ -114,6 +136,17 @@ def getMaxID(ldap):
 
     return maxID
 
+def getBroadcast(ldap):
+	result = ldap.search("cn=DHCP Config","cn=INTERNAL",["dhcpOption"])
+
+	record = [i for i in result[0][0][1]['dhcpOption'] if i.startswith('broadcast')]
+	try:
+		broadcast =record[0].split(" ")[1]
+	except:
+		broadcast=""
+
+	return broadcast
+	
 def whatHome(type):
 	
 	if type == "teacher":

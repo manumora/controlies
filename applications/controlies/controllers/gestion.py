@@ -6,6 +6,7 @@ from applications.controlies.modules.SQLiteConnection import SQLiteConnection
 from applications.controlies.modules.Laptops import Laptops
 from applications.controlies.modules.LaptopsHistory import LaptopsHistory
 from applications.controlies.modules.Config import Config
+import applications.controlies.modules.Utils.LdapUtils as LdapUtils
 
 import xmlrpclib
 import gluon.contrib.simplejson
@@ -295,12 +296,29 @@ def getLTSPStatus():
 def wakeup():
     data = gluon.contrib.simplejson.loads(request.body.read())
 
-    l=conecta()
+    l=conecta()    
+    broadcast = LdapUtils.getBroadcast(l)
+    return response.json({'success':'true'})    
     for i in data["pclist"]:
-        h = Hosts(l,i,"","","")
-        h.wakeup()
+        h = Hosts(l,i,"","","")        
+        h.wakeup(broadcast)
 
     return response.json({'success':'true'})
+
+
+@service.json   
+@auth.requires_login()    
+def wakeupThinclients():
+    l=conecta()
+    rows = LdapUtils.getThinclientsFromClassroom(l, request.vars["host"])
+
+    try:
+        server = xmlrpclib.ServerProxy("http://"+request.vars["host"]+":6800")
+        s = server.wakeupThinclients(rows)
+        return dict(response="OK", host=request.vars["host"], message=s)
+    except:
+        return dict(response="fail", host=request.vars["host"], message="Surgió un error")
+
 
 @service.json  
 @auth.requires_login()     
@@ -322,6 +340,7 @@ def executeCommand():
         return dict(response="OK", host=request.vars["host"], message=s)
     except:
         return dict(response="fail", host=request.vars["host"], message="Surgió un error")
+  
 
 @auth.requires_login()
 def config():
@@ -361,6 +380,8 @@ def sendMail():
 def execCommand():
     return dict()
 
+def wakeupThin():
+    return dict()
 
 def call():
     """

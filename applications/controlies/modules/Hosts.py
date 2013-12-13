@@ -309,8 +309,8 @@ class Hosts(object):
 
         return "OK"     
 
-    def wakeup(self):
-        NetworkUtils.startup(self.getMAC())
+    def wakeup(self,broadcast):
+        NetworkUtils.startup(self.getMAC(),broadcast)
     
     def existsHostname(self):
         if self.name in self.getListTriplets():

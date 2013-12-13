@@ -240,7 +240,7 @@ def getUsableTCPPort(address,port):
     return freeport
 
 
-def startup(address):
+def startup(address,broadcast):
 
     addr_byte = address.split(':')
     hw_addr = struct.pack('BBBBBB', int(addr_byte[0], 16),
@@ -257,11 +257,11 @@ def startup(address):
     try:
         s.sendto(msg, ('<broadcast>', 9))
         s.sendto(msg, ('<broadcast>', 7))
-        s.sendto(msg, ('172.23.39.255', 9))
-        s.sendto(msg, ('172.23.39.255', 7))   
+        s.sendto(msg, (broadcast, 9))
+        s.sendto(msg, (broadcast, 7))   
     except:
-        s.sendto(msg, ('<broadcast>', 2000))
-        s.sendto(msg, ('172.23.39.255', 2000))
+        s.sendto(msg, (broadcast, 2000))
+        s.sendto(msg, (broadcast, 2000))
     s.close()
 
 def defaultGW():

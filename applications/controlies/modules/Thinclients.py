@@ -260,7 +260,7 @@ class Thinclients(object):
             return True
                 
         return False
-        
+    
 
     def getFreeGroup (self):
         freeGroup = []

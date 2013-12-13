@@ -14,7 +14,7 @@ Description: Gestión de LDAP para un centro educativo
 
 Package: controlies-client
 Architecture: all
-Depends: curl, cups, pkpgcounter, python-avahi
+Depends: curl, cups, pkpgcounter, python-avahi, python-netifaces
 Conflicts: controlies
 Description: Caracteristicas adicionales de controlies
 

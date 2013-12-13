@@ -1,8 +1,16 @@
+controlies (0.6.5-7) unstable; urgency=low
+
+  * Encender Thinclients
+  * Bug cliente RPC, cogia IP local
+  * Refrescar servicio RPC con nueva IP
+
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Fri, 13 Dec 2013 08:43:00 +0200
+
 controlies (0.6.5-6) unstable; urgency=low
 
   * Cambio de calendarios en seguimiento
   * Bug en el total de registros de logimpresion
-  * Bus tareas puppet
+  * Bug tareas puppet
 
  -- Manuel Mora Gordillo <manuito@gmail.com>  Wed, 4 Dec 2013 11:04:00 +0200
 

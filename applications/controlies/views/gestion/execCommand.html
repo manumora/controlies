@@ -22,6 +22,8 @@
 				
 		jQuery("#execButton").attr("disabled", "disabled");
 		jQuery('#command').attr('readonly', true);
+
+    	jQuery(".progress-label").text( "0%" );
     	$("#progressbar").progressbar({value:0});
 		
 		if(command=="shutdown"){
