@@ -1,0 +1,75 @@
+<script language="javascript">
+
+    $(function() {
+		sendWakeup();
+
+        $("#cancelButton")
+            .button({ icons: { primary: "ui-icon-close"}})
+            .click( function(){ $('#dialog-form').dialog('close'); });
+    });
+
+    function restartStyle(){
+        $('#message').html("");
+    }
+
+
+    function sendWakeup(){
+    	ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session    	
+
+		var selected = computersSelected();
+
+    	jQuery("#progressbar").progressbar({value:0});
+    	jQuery(".progress-label").text( "0%" );
+		var each = 100/selected.length;		
+		var completed=0;
+		
+		for(i=0;i<selected.length;i++){
+	        jQuery.post('call/json/wakeupThinclients',"&host="+selected[i], function(result) {
+	        	jQuery("#response").append("<br><h4><b>"+result.host+"</b></h4>");
+	            switch(result.response){
+	                case "OK":{
+	                	jQuery("#response").append(result.message);						
+	                    break;
+	                }
+	                case "fail":{
+						jQuery("#response").append("<span style='color:red;'>"+result.message+"</span><br>");
+	                    break;
+	                }
+	            }
+				var objDiv = document.getElementById("response");
+				objDiv.scrollTop = objDiv.scrollHeight;
+				
+	            completed++;
+	            
+	            if(completed==selected.length){
+	            	$("#progressbar").progressbar({value:100});
+	            	$(".progress-label").text( "100%" );
+	            }else{
+	            	percent = Math.round(each*completed);	
+	            	jQuery("#progressbar").progressbar({value:percent});
+	            	jQuery(".progress-label").text( percent + "%" );      	
+	            }
+			});
+		}
+	}
+
+</script>
+
+  <style>
+  .ui-progressbar {
+    position: relative;
+    weight:10px;
+  }
+  .progress-label {
+    position: absolute;
+    left: 50%;
+    top: 4px;
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #fff;
+  }
+  </style>
+
+<p><div id="progressbar"><div class="progress-label"></div></div></p>	
+<div id="message" style="text-align:center; font-weight:bold; color:red; padding:3px; "></div>
+<div id="response" style="height:400px; overflow:auto; background-color: #000; color:#EEE; padding-left: 1em;"></div>
+<div style="text-align:center;"><button type="button" id="cancelButton" style="width:100px;">Cerrar</button></div>

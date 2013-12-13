@@ -1,0 +1,4 @@
+#!/bin/sh
+
+#restart controlies-client to get new network addresses
+invoke-rc.d controlies-client restart
