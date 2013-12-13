@@ -1,4 +1,10 @@
 
+stage { [final]: }
+
+Stage[main] -> Stage[final]
+
+class { actualizaciones_controlies: stage => final }
+
 class actualizaciones_controlies {
 
   case $use {

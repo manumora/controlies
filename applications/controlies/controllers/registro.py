@@ -207,7 +207,7 @@ def doactualizathinclient(host, raton, teclado):
     #Ver si hay que mandar emails, siempre que traiga informacion
     configuracion=Config(cdb)
     configuracion.loadConfig()    
-    if (raton=="1" or teclado=="1") and configuracion.alert_thinclient: 
+    if (raton=="1" or teclado=="1") and (configuracion.alert_thinclient==1): 
         
         #Busca ultimo estado que no sea "apagado", para comparar
         
