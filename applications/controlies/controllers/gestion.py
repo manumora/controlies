@@ -331,14 +331,16 @@ def config():
     configuracion=Config(cdb)
     configuracion.loadConfig()
        
+    
+       
     form=SQLFORM.factory(
           Field('m_server',type='string', label="Servidor correo (nombre:puerto)", length=50, default=configuracion.mail_server),
           Field('m_sender',type='string', label="Email de envio" , length=50, default=configuracion.mail_sender),
           Field('m_user', type='string', label="Usuario correo", length=50, default=configuracion.mail_user),
           Field('m_password',type='string',label="Contraseña correo" , length=30, default=configuracion.mail_password),
           Field ('m_receiver',type='string', label="Email receptor", length=50, default=configuracion.mail_receiver),
-          Field ('a_thinclient',type='boolean', label="Alertar teclado/ratón thinclients", length=50, default=configuracion.alert_thinclient),
-          Field ('l_email',type='boolean', label="Envio de correo resumen", length=50, default=configuracion.list_email),
+          Field ('a_thinclient',type='boolean', label="Alertar teclado/ratón thinclients", length=50, default=True if configuracion.alert_thinclient==1 else False),
+          Field ('l_email',type='boolean', label="Envio de correo resumen", length=50, default=True if configuracion.list_email==1 else False) ,
           submit_button='Guardar Datos Configuración')
 
     if form.accepts(request.vars, session):
