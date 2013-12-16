@@ -229,7 +229,7 @@ def list_thinclients_state():
     #Subconsulta para extraer el ultimo registro de cada rango.
     #wheresub=where+" and t1.id=(select id from thinclients t2 where t1.host=t2.host order by time desc limit 1)"
   
-    sql = sql + wherefiltro+wherefecha+whereestado +" order by host"
+    sql = sql + wherefiltro+wherefecha+whereestado +" order by "+request.vars['sidx']+" "+request.vars['sord'] 
 
         
 #    file = open('/tmp/sql.txt', 'w')

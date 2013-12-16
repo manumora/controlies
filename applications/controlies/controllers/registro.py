@@ -207,7 +207,7 @@ def doactualizathinclient(host, raton, teclado):
     #Ver si hay que mandar emails, siempre que traiga informacion
     configuracion=Config(cdb)
     configuracion.loadConfig()    
-    if (raton=="1" or teclado=="1") and (configuracion.alert_thinclient==1): 
+    if (raton=="1" or teclado=="1") and (configuracion.alert_teclado==1 or configuracion.alert_raton==1): 
         
         #Busca ultimo estado que no sea "apagado", para comparar
         
@@ -219,7 +219,7 @@ def doactualizathinclient(host, raton, teclado):
                ult_teclado=ultimo_estado.teclado
                ult_raton=ultimo_estado.raton
                
-        if (teclado=="1" and ult_teclado=="2") or (raton=="1" and ult_raton=="2"):
+        if (teclado=="1" and ult_teclado=="2" and configuracion.alert_teclado==1) or (raton=="1" and ult_raton=="2" and configuracion.alert_raton==1):
                mensaje="Aviso fallo teclado/ratón en thinclient "+host+" ("+ahora.strftime("%d/%m/%Y %H:%M")+")\n\n"
                est_teclado="Conectado" if teclado=="2" else "Desconectado"
                est_raton="Conectado" if raton=="2" else "Desconectado"
@@ -261,5 +261,43 @@ def actualizalogprinter():
 def dologprinter(impresora,jobid,usuario,host,trabajo,paginas,copias,total,tamanio):
 
     cdb.logprinter.insert(impresora=impresora,jobid=jobid,usuario=usuario,host=host,trabajo=trabajo,paginas=paginas,copias=copias,total=total, tamanio=tamanio)
+    return "OK"
+
+
+def checkapagado():
+    session.forget(response)
+    host=request.vars["host"]
+    docheckapagado(host)
+    
+@service.xmlrpc
+def docheckapagado(host):
+
+    ahora=datetime.datetime.today()
+    
+    #Ver si hay que mandar emails, siempre que traiga informacion
+    configuracion=Config(cdb)
+    configuracion.loadConfig()    
+    if (configuracion.alert_apagado==1): 
+    
+        enviar_mensaje=False
+        ultimos_estados=cdb(cdb.thinclients.host==host).select(orderby=~cdb.thinclients.time, limitby=(0, 2)).as_list()
+        
+        #Si hay algun estado anterior.... miramos si ha pasado de encendido->apagado.       
+        if len(ultimos_estados)>0 :
+            #Si el ultimo vale 0, estaba apagado.
+            if (ultimos_estados[0]["raton"]=="0"):
+               if len(ultimos_estados)>1:    #Si hay penultimo
+                   #Si no vale 0, estaba encendido y ahora apagado. Hay que avisar de que está apagado.
+                   if (ultimos_estados[1]["raton"]!="0"):
+                       enviar_mensaje=True
+               else:
+                   #Si no hay penúltimo, avisamos de que está apagado.
+                   enviar_mensaje=True           
+                   
+            if enviar_mensaje: 
+                  mensaje="El thinclient "+host+" parece apagado o bloqueado ("+ahora.strftime("%d/%m/%Y %H:%M")+")\n\n"
+                  configuracion.enviaMail('Aviso de thinclient '+host+" apagado", mensaje)
+
+			
     return "OK"
 

@@ -6,9 +6,11 @@ equipo=$(hostname -s)
 aula=${equipo%-[Pp][Rr][Oo]}
 dominio=$(host -d -t CNAME servidor | grep domain | cut -f1 -d".")
 
+#Extrae de ldap la lista de thinclients de ese aula.
+thinclients=$(ldapsearch -xLLL -h ldap -b cn=THINCLIENTS,cn=DHCP\ Config,dc=instituto,dc=extremadura,dc=es "cn" | grep -i "cn: $aula-O"  | cut -f2 -d" ")
 
-#Extrae de ldap la lista de thinclients de se aula.
-for thinclient in $(ldapsearch -xLLL -h ldap -b cn=THINCLIENTS,cn=DHCP\ Config,dc=instituto,dc=extremadura,dc=es "cn" | grep -i "cn: $aula-O"  | cut -f2 -d" ") ; do
+for thinclient in $thinclients 
+do
   mac=$(ldapsearch -xLLL -h ldap -b cn=THINCLIENTS,cn=DHCP\ Config,dc=instituto,dc=extremadura,dc=es "cn=$thinclient" "dhcpHWAddress" | grep ethernet | grep -v '00:00:00:00:00:00' | cut -f3 -d " ")
   echo "Despertando $thinclient con mac $mac"
 
@@ -25,3 +27,13 @@ for thinclient in $(ldapsearch -xLLL -h ldap -b cn=THINCLIENTS,cn=DHCP\ Config,d
 
 done
 
+#Espera 6 minutos
+sleep 360 
+
+for thinclient in $thinclients 
+do
+  peticion="http://ldap.$dominio/controlies/init/registro/checkapagado?host=$thinclient"
+  actualiza=$(wget -q -O - $peticion 2>/dev/null)
+  sleep 1
+
+done

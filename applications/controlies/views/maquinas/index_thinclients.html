@@ -155,8 +155,8 @@
                 colNames:['Hora','Teclado','Raton'],
                 colModel:[
                     {name:'time',index:'time', width:50, align:"center"},
-                    {name:'teclado',index:'teclado', width:40, align:"center",stype:'select', formatter: formatColumna,  cellattr: attrCellTeclado, editoptions:{value:":Todos;0:Apagado;1:Desconectado;2:Conectado"}},
-                    {name:'raton',index:'raton', width:40, align:"center",stype:'select', formatter: formatColumna , editoptions:{value:":Todos;0:Apagado;1:Desconectado;2:Conectado"}}
+                    {name:'teclado',index:'teclado', width:40, align:"center", sortable: false, stype:'select', formatter: formatColumna,  cellattr: attrCellTeclado, editoptions:{value:":Todos;0:Apagado;1:Desconectado;2:Conectado"}},
+                    {name:'raton',index:'raton', width:40, align:"center", sortable: false, stype:'select', formatter: formatColumna , editoptions:{value:":Todos;0:Apagado;1:Desconectado;2:Conectado"}}
                 ],
                 rowNum:15,
                 height:335,

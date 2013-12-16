@@ -13,7 +13,9 @@ class Config(object):
         self.mail_user = ""        
         self.mail_password = ""
         self.mail_receiver = ""
-        self.alert_thinclient=False
+        self.alert_teclado=False
+        self.alert_raton=False
+        self.alert_apagado=False
         self.list_email=False           
 
 
@@ -26,7 +28,9 @@ class Config(object):
            self.mail_user = ""        
            self.mail_password = ""
            self.mail_receiver = ""
-           self.alert_thinclient=False
+           self.alert_teclado=False
+           self.alert_raton=False
+           self.alert_apagado=False          
            self.list_email=False           
         else:
            self.mail_server = fila["mail_server"]
@@ -34,7 +38,9 @@ class Config(object):
            self.mail_user = fila["mail_user"]
            self.mail_password = fila["mail_password"]
            self.mail_receiver = fila["mail_receiver"]
-           self.alert_thinclient=fila["alert_thinclient"]
+           self.alert_teclado=fila["alert_teclado"]
+           self.alert_raton=fila["alert_raton"]          
+           self.alert_apagado=fila["alert_apagado"]          
            self.list_email=fila["list_email"]
 
     def enviaMail(self, asunto, mensaje):
@@ -83,28 +89,32 @@ class Config(object):
             "mail_user": self.mail_user,
             "mail_password": self.mail_password,
             "mail_receiver": self.mail_receiver,            
-            "alert_thinclient": self.alert_thinclient,
+            "alert_teclado": self.alert_teclado,
+            "alert_raton": self.alert_raton,
+            "alert_apagado": self.alert_apagado,                  
             "list_email": self.list_email
           }
          
           return dataUser
          
 
-    def saveConfig(self,m_server,m_sender,m_user,m_password,m_receiver,alert_thinclient,list_email):
+    def saveConfig(self,m_server,m_sender,m_user,m_password,m_receiver,alert_teclado,alert_raton,alert_apagado,list_email):
 
 		self.mail_server = m_server
 		self.mail_sender = m_sender
 		self.mail_user = m_user
 		self.mail_password = m_password
 		self.mail_receiver = m_receiver
-		self.alert_thinclient = alert_thinclient
+		self.alert_teclado = alert_teclado
+		self.alert_raton = alert_raton
+		self.alert_apagado = alert_apagado		
 		self.list_email = list_email
 
 		fila=self.DB(self.DB.config).select().first()
 		if fila==None:
-			self.DB.config.insert(mail_server=self.mail_server, mail_sender=self.mail_sender, mail_user=self.mail_user, mail_password=self.mail_password, mail_receiver=self.mail_receiver, alert_thinclient=self.alert_thinclient, list_email= self.list_email)
+			self.DB.config.insert(mail_server=self.mail_server, mail_sender=self.mail_sender, mail_user=self.mail_user, mail_password=self.mail_password, mail_receiver=self.mail_receiver, alert_teclado=self.alert_teclado, alert_raton=self.alert_raton, alert_apagado=self.alert_apagado, list_email= self.list_email)
 		else:
-			fila.update_record(mail_server=self.mail_server, mail_sender=self.mail_sender, mail_user=self.mail_user, mail_password=self.mail_password, mail_receiver=self.mail_receiver, alert_thinclient=self.alert_thinclient, list_email= self.list_email)
+			fila.update_record(mail_server=self.mail_server, mail_sender=self.mail_sender, mail_user=self.mail_user, mail_password=self.mail_password, mail_receiver=self.mail_receiver, alert_teclado=self.alert_teclado, alert_raton=self.alert_raton, alert_apagado=self.alert_apagado, list_email= self.list_email)
 	
     
     def sendListReport(self):

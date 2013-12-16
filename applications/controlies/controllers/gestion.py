@@ -6,7 +6,6 @@ from applications.controlies.modules.SQLiteConnection import SQLiteConnection
 from applications.controlies.modules.Laptops import Laptops
 from applications.controlies.modules.LaptopsHistory import LaptopsHistory
 from applications.controlies.modules.Config import Config
-import applications.controlies.modules.Utils.LdapUtils as LdapUtils
 
 import xmlrpclib
 import gluon.contrib.simplejson
@@ -296,29 +295,12 @@ def getLTSPStatus():
 def wakeup():
     data = gluon.contrib.simplejson.loads(request.body.read())
 
-    l=conecta()    
-    broadcast = LdapUtils.getBroadcast(l)
-    return response.json({'success':'true'})    
+    l=conecta()
     for i in data["pclist"]:
-        h = Hosts(l,i,"","","")        
-        h.wakeup(broadcast)
+        h = Hosts(l,i,"","","")
+        h.wakeup()
 
     return response.json({'success':'true'})
-
-
-@service.json   
-@auth.requires_login()    
-def wakeupThinclients():
-    l=conecta()
-    rows = LdapUtils.getThinclientsFromClassroom(l, request.vars["host"])
-
-    try:
-        server = xmlrpclib.ServerProxy("http://"+request.vars["host"]+":6800")
-        s = server.wakeupThinclients(rows)
-        return dict(response="OK", host=request.vars["host"], message=s)
-    except:
-        return dict(response="fail", host=request.vars["host"], message="Surgió un error")
-
 
 @service.json  
 @auth.requires_login()     
@@ -340,7 +322,6 @@ def executeCommand():
         return dict(response="OK", host=request.vars["host"], message=s)
     except:
         return dict(response="fail", host=request.vars["host"], message="Surgió un error")
-  
 
 @auth.requires_login()
 def config():
@@ -358,13 +339,15 @@ def config():
           Field('m_user', type='string', label="Usuario correo", length=50, default=configuracion.mail_user),
           Field('m_password',type='string',label="Contraseña correo" , length=30, default=configuracion.mail_password),
           Field ('m_receiver',type='string', label="Email receptor", length=50, default=configuracion.mail_receiver),
-          Field ('a_thinclient',type='boolean', label="Alertar teclado/ratón thinclients", length=50, default=True if configuracion.alert_thinclient==1 else False),
+          Field ('a_teclado',type='boolean', label="Alertar teclado thinclients", length=50, default=True if configuracion.alert_teclado==1 else False),
+          Field ('a_raton',type='boolean', label="Alertar raton thinclients", length=50, default=True if configuracion.alert_raton==1 else False),
+          Field ('a_apagado',type='boolean', label="Alertar thinclients apagados", length=50, default=True if configuracion.alert_apagado==1 else False),
           Field ('l_email',type='boolean', label="Envio de correo resumen", length=50, default=True if configuracion.list_email==1 else False) ,
           submit_button='Guardar Datos Configuración')
 
     if form.accepts(request.vars, session):
           response.flash = 'Procesando datos, espere'                    
-          configuracion.saveConfig(form.vars.m_server,form.vars.m_sender, form.vars.m_user, form.vars.m_password, form.vars.m_receiver, form.vars.a_thinclient, form.vars.l_email)          
+          configuracion.saveConfig(form.vars.m_server,form.vars.m_sender, form.vars.m_user, form.vars.m_password, form.vars.m_receiver, form.vars.a_teclado, form.vars.a_raton, form.vars.a_apagado, form.vars.l_email)          
           redirect( URL( 'gestion', 'config')) 
 
     return dict(form=form)
@@ -382,8 +365,6 @@ def sendMail():
 def execCommand():
     return dict()
 
-def wakeupThin():
-    return dict()
 
 def call():
     """

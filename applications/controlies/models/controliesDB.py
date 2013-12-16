@@ -123,7 +123,9 @@ cdb.define_table('config',
           Field('mail_user','string'),
           Field('mail_password','password'),
           Field ('mail_receiver','string'),
-          Field ('alert_thinclient','integer'),
+          Field ('alert_teclado','integer'),
+          Field ('alert_raton','integer'),
+          Field ('alert_apagado','integer'),
           Field ('list_email','integer'))
 
 
