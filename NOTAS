@@ -123,6 +123,15 @@ Mayo-2013:
      script seguimiento-equipos inmediatemente en cada reboot, mediante @reboot en crontab. De esta manera la
      hora de ultimo arranque del equipo se actaliza ipso-facto en el arranque y no cuando lo llame el crontab.
 
+16 Diciembre 2013
+
+    -Configurado un control independiente de las alertas de teclado, ratón y apagado en thinclients. En la
+     vista de configuración pueden activarse por separado.
+    -Mejorada la detección de thinclients apagados, pero sigue dando falsos positivos en ocasiones. Es
+     díficil hacer un sistema infalible, ya que siempre se detectan por medios indirectos.
+    -Arreglados bugs en grid de thinclients, no dejaban ordenador por columnas de fecha y estados
+     de teclado y ratón. En el grid histórico de un thinclient se desactiva la ordenación, no es
+     necesaria.
     
 TODO
 ====
