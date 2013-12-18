@@ -42,8 +42,8 @@ def user():
             #tengo que cambiar los parámetros con los que se llama a la función de logueo:
             new_parameters=list(con_parameters)
             new_parameters[0]=request.vars["host"]
-            if request.vars["username"] != 'admin' : new_parameters[3]='uid'
-            auth.settings.login_methods[0].func_defaults=tuple(new_parameters)
+            #if request.vars["username"] != 'admin' : new_parameters[3]='uid'
+            #auth.settings.login_methods[0].func_defaults=tuple(new_parameters)
 
 
     return dict(form=auth())
