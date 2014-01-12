@@ -126,12 +126,22 @@ Mayo-2013:
 16 Diciembre 2013
 
     -Configurado un control independiente de las alertas de teclado, ratón y apagado en thinclients. En la
-     vista de configuración pueden activarse por separado.
+     pantalla de configuración pueden activarse por separado.
     -Mejorada la detección de thinclients apagados, pero sigue dando falsos positivos en ocasiones. Es
      díficil hacer un sistema infalible, ya que siempre se detectan por medios indirectos.
     -Arreglados bugs en grid de thinclients, no dejaban ordenador por columnas de fecha y estados
      de teclado y ratón. En el grid histórico de un thinclient se desactiva la ordenación, no es
      necesaria.
+
+20 Diciembre 2013
+
+    -Modificado seguimiento de impresión para que los filtros aplicados al grid se apliquen tambien al 
+     generar el csv para descargar.
+    -Modificado seguimiento de impresión para generar directamente informes con PDF, totales y agrupados
+     por usuario. Se aplican los mismos filtros que hay en el grid.
+
+
+
     
 TODO
 ====
