@@ -38,6 +38,7 @@
 				jQuery('#list').trigger('reloadGrid') 
 			});
     });
+   
     
                 
     function print_grid(){  
@@ -88,17 +89,91 @@
           jQuery("#list").jqGrid('filterToolbar'); 
           
           jQuery("#list").jqGrid('navButtonAdd','#pager',{
-                    caption: "Exportar CVS",
+                    caption: "CSV",
                     buttonicon :'ui-icon-calculator',
                     onClickButton : function (){               
-						   window.open("{{=URL(c='logprinter',f='export_csv',args=['run'])}}");
+						
+                        //jQuery("#gs_time").val() -> es el filtro de la columna "time". Es mas facil obtenerlo todo junto de postData
+                        //Se aplican los valores del filtro aplicado en la última consulta del grid. Si luego se han cambiado, pero no se
+                        //actualizado el grid, no se actualizan. Es decir, el CSV se carga con lo mismo que hay en el grid.
+                        
+                        filtro=jQuery.param($("#list").getGridParam("postData"));
+                        
+                        jQuery.ajax({url:"export_csv",data: filtro})
+                            .done(function ( data ){
+                                switch(data){
+                                    case 'noPeople':{
+                                        jQuery('#messageReport').html("No se han encontrado datos").effect("highlight", {"color":"yellow"}, 1000);
+                                        break
+                                    }
+                                    default: eval(data);
+                                }
+                            }
+ 
+ 
+                        );	
   		            } 
           }); 
-
+          
+          jQuery("#list").jqGrid('navButtonAdd','#pager',{
+                    caption: "PDF",
+                    buttonicon :'ui-icon-calculator',
+                    onClickButton : function (){               
+						
+                        //jQuery("#gs_time").val() -> es el filtro de la columna "time". Es mas facil obtenerlo todo junto de postData
+                        //Se aplican los valores del filtro aplicado en la última consulta del grid. Si luego se han cambiado, pero no se
+                        //actualizado el grid, no se actualizan. Es decir, el CSV se carga con lo mismo que hay en el grid.
+                        
+                        filtro=jQuery.param($("#list").getGridParam("postData"));
+                        
+                        jQuery.ajax({url:"export_pdf",data: filtro})
+                            .done(function ( data ){
+                                switch(data){
+                                    case 'noPeople':{
+                                        jQuery('#messageReport').html("No se han encontrado datos").effect("highlight", {"color":"yellow"}, 1000);
+                                        break
+                                    }
+                                    default: eval(data);
+                                }
+                            }
+ 
+ 
+                        );	
+  		            } 
+          }); 
+          
+          jQuery("#list").jqGrid('navButtonAdd','#pager',{
+                    caption: "PDF Usuarios",
+                    buttonicon :'ui-icon-calculator',
+                    onClickButton : function (){               
+						
+                        //jQuery("#gs_time").val() -> es el filtro de la columna "time". Es mas facil obtenerlo todo junto de postData
+                        //Se aplican los valores del filtro aplicado en la última consulta del grid. Si luego se han cambiado, pero no se
+                        //actualizado el grid, no se actualizan. Es decir, el CSV se carga con lo mismo que hay en el grid.
+                        
+                        filtro=jQuery.param($("#list").getGridParam("postData"));
+                        
+                        jQuery.ajax({url:"export_pdf_user",data: filtro})
+                            .done(function ( data ){
+                                switch(data){
+                                    case 'noPeople':{
+                                        jQuery('#messageReport').html("No se han encontrado datos").effect("highlight", {"color":"yellow"}, 1000);
+                                        break
+                                    }
+                                    default: eval(data);
+                                }
+                            }
+ 
+ 
+                        );	
+  		            } 
+          }); 
           
           
        
     }
+
+
 
 function verUsuario(id){
    
