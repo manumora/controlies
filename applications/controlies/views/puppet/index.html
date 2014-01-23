@@ -1,0 +1,145 @@
+{{response.files.append(URL('static','js/multiselect/jquery.multiselect.css'))}}
+{{response.files.append(URL('static','js/multiselect/jquery.multiselect.min.js'))}}
+{{response.files.append(URL('static','js/multiselect/jquery.multiselect.es.js'))}}
+{{#response.files.append(URL('static','css/helper.css'))}}
+{{#response.files.append(URL('static','css/dropdown.css'))}}
+{{#response.files.append(URL('static','css/default.advanced.css'))}}
+ 
+
+{{extend 'layout.html'}}
+       
+        <form action="" enctype="multipart/form-data" method="post" id="form_maquinas">
+            <input type="button" value="Actualizar" onclick="javascript: reloadGrid()">            
+        </form>
+        <br/>
+        <div id="tabla_clases" style="float:left;">
+            <table id="list" width="100%"></table>
+            <div id="pager" style=""></div> 
+            <div id="filter" style="margin-left:30%;display:none">Buscar nada</div>
+        </div>
+        <div id="tabla_maquinas" style="float:right;">
+            <table id="list_maquinas" width="100%"></table>
+            <div id="pager_maquinas" style=""></div>
+            <div id="filter_maquinas" style="margin-left:30%;display:none">Buscar nada</div>
+        </div>
+
+   
+
+<script type="text/javascript">    
+ 
+
+   function print_grid(){  
+          jQuery("#list").jqGrid({
+                url:"{{=URL(c='puppet',f='call',args=['json','list'])}}",
+                data: "{}",
+                datatype: 'json',
+                mtype: 'GET',
+                contentType: "application/json; charset=utf-8",
+                complete: function(jsondata, stat) {
+                    if (stat == "success") {
+                        var thegrid = jQuery("#list")[0];
+                        thegrid.addJSONData(JSON.parse(jsondata.responseText).d);
+                    }
+                },
+                onSelectRow: function (id) { showGridMaquinas(id); },
+                colNames:['Id', 'Clase','Tipo Host','Fecha aparición','Total', 'Error'],
+                colModel:[                  
+                    {name:'id',index:'id', hidden:true, align:"left"},
+                    {name:'clase',index:'clase', width:70, align:"left"},
+                    {name:'tipohost',index:'tipohost', width:40, align:"center",stype:'select', editoptions:{value:":TODOS;WORKSTATION:WORKSTATION;LTSP:LTSP;PORTATIL:PORTATIL"}},
+                    {name:'time_aparicion',index:'time_aparicion', width:50, align:"center"},
+                    {name:'total',index:'total', width:15, align:"center", search: false},                    
+                    {name:'error',index:'error', width:15, align:"center", search: false}
+                ], 
+                rowNum:15,
+                height:335,
+                width: 500,
+                rowList:[15,30,45],  
+                pager: '#pager', 
+                sortname: 'time_aparicion', 
+                autowidth: false,
+                viewrecords: true, 
+                sortorder: "asc", 
+                caption:"Tareas puppet aplicadas"            
+          }); 
+          jQuery("#list").jqGrid('navGrid','#pager',{add:false,edit:false,del:false,search:false,refresh:false});
+          jQuery("#list").css("cursor","pointer");        
+          jQuery("#list").jqGrid('filterToolbar'); 
+          $("tr.ui-search-toolbar").height(30);
+          jQuery("#tabla_clases").find("select").height("99%");
+    }
+
+   
+   function showGridMaquinas(id) {
+
+         data=jQuery("#list").jqGrid('getRowData',id); 
+         id_clase=data.id;
+         clase=data.clase;
+         $('#tabla_maquinas').show();
+         print_grid_maquinas(id_clase, clase);
+   }
+
+   function reloadGrid() {
+
+        $('#list').trigger('reloadGrid');
+        $('#tabla_maquinas').hide();
+
+   }
+ 
+   function print_grid_maquinas(id_clase, clase){
+
+          jQuery("#list_maquinas").jqGrid('GridUnload');
+ 
+          jQuery("#list_maquinas").jqGrid({
+                url:"{{=URL(c='puppet',f='call',args=['json','list_clase'])}}",
+                data: "{}",
+                postData: { id_clase: function () { return id_clase;} },
+                datatype: 'json',
+                jsonReader: {
+                        root: 'rows',
+                        page: 'page',
+                        total: 'total',
+                        records: 'records',
+                        userdata : 'rows',
+                        repeatitems: true,
+                        id: 'Id'
+                },
+                mtype: 'GET',
+                contentType: "application/json; charset=utf-8",
+                onSelectRow: function (id) { verUsuario(id); },
+                complete: function(jsondata, stat) {
+                    if (stat == "success") {
+                        var thegrid = jQuery("#list")[0];
+                        thegrid.addJSONData(JSON.parse(jsondata.responseText).d);
+                    }
+                },
+                colNames:['Equipo','Hora','Resultado'],
+                colModel:[
+                    {name:'host',index:'host', width:50, align:"left"},
+                    {name:'time_aplicacion',index:'time_aplicacion', width:50, align:"center"},
+                    {name:'resultado',index:'resultado', width:30, align:"center",stype:'select', editoptions:{value:":TODOS;OK:OK;ERROR:ERROR"}}
+                ],
+                rowNum:15,
+                height:335,
+                width: 375,
+                rowList:[15,30,45],
+                pager: '#pager_maquinas',
+                sortname: 'host',
+                autowidth: false,
+                viewrecords: true,
+                sortorder: "desc",
+                caption: "Aplicación de la clase " +clase
+          });
+          jQuery("#list_maquinas").jqGrid('navGrid','#pager_maquinas',{add:false,edit:false,del:false,search:false,refresh:false});
+          jQuery("#list_maquinas").jqGrid('filterToolbar');
+          $("tr.ui-search-toolbar").height(30);
+          jQuery("#tabla_maquinas").find("select").height("90%");
+
+    }
+
+    
+
+</script>
+<script type="text/javascript">
+   jQuery(document).ready(function(){  print_grid();}); 
+</script>

@@ -354,12 +354,83 @@ def config():
 
 
 @service.json
-def sendMail():
+def sendReportMail():
 
     configuracion=Config(cdb)
     configuracion.loadConfig()
-    configuracion.sendListReport()
+    return configuracion.sendListReport()
+
+@service.json
+def sendTestMail():
+
+    configuracion=Config(cdb)
+    configuracion.loadConfig()
     return configuracion.enviaMail('Desde controlies', 'Este es un mensaje enviado desde Controlies. Si le ha llegado es que todo esta correcto.')
+
+
+@service.json
+def getConfigData():
+
+    configuracion=Config(cdb)
+    configuracion.loadConfig()
+    response=configuracion.getConfigData()
+    
+    return dict(response=response)
+
+@service.json
+@auth.requires_login()    
+def setConfigData():
+
+    configuracion=Config(cdb)
+    configuracion.loadConfig()    
+    
+    import gluon.contrib.simplejson
+    
+    #Los datos vienen en un string json y hay que reconstituirlos sobre un diccionario-lista python.
+    data = gluon.contrib.simplejson.loads(request.vars["data"])
+    
+    try:
+       if str(data['a_teclado']) == "a_teclado":
+             a_teclado=True
+    except LookupError:
+             a_teclado=False
+    try:
+       if str(data['a_raton']) == "a_raton":
+             a_raton=True
+    except LookupError:
+             a_raton=False
+    try:
+       if str(data['a_apagado']) == "a_apagado":
+             a_apagado=True
+    except LookupError:
+             a_apagado=False
+    try:
+       if str(data['l_email']) == "l_email":
+             l_email=True
+    except LookupError:
+             l_email=False         
+             
+    configuracion.saveConfig(data['m_server'],
+                   data['m_sender'],
+                   data['m_user'], 
+                   data['m_password'], 
+                   data['m_receiver'], 
+                   a_teclado, 
+                   a_raton, 
+                   a_apagado, 
+                   l_email,
+                   data['horarios'])               
+                   
+    response = "OK"
+    return dict(response = response)    
+
+@service.json
+@auth.requires_login()    
+def dummy():
+
+   response = "OK"
+   return dict(response = response)    
+
 
 
 def execCommand():

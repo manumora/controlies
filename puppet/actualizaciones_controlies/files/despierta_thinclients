@@ -11,7 +11,7 @@ thinclients=$(ldapsearch -xLLL -h ldap -b cn=THINCLIENTS,cn=DHCP\ Config,dc=inst
 
 for thinclient in $thinclients 
 do
-  mac=$(ldapsearch -xLLL -h ldap -b cn=THINCLIENTS,cn=DHCP\ Config,dc=instituto,dc=extremadura,dc=es "cn=$thinclient" "dhcpHWAddress" | grep ethernet | grep -v '00:00:00:00:00:00' | cut -f3 -d " ")
+  mac=$(ldapsearch -xLLL -h ldap -b cn=THINCLIENTS,cn=DHCP\ Config,dc=instituto,dc=extremadura,dc=es "cn=$thinclient" "dhcpHWAddress" | grep ethernet | grep -v '00:00:00:00:00:00' | cut -f3 -d " " | tr -d " ")
   echo "Despertando $thinclient con mac $mac"
 
   /usr/bin/wakeonlan $mac

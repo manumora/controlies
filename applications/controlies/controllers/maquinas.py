@@ -115,7 +115,7 @@ def list():
     
     where=where+ " and ultimorefresco between '"+fechaini+"' and date('"+fechafin+"','+24 hours')"
     sql = sql + where+" order by "+request.vars['sidx']+" "+request.vars['sord'] + " limit "+str(pagesize)+" offset "+str(offset)   
-#    file = open('/tmp/sql.txt', 'w')
+#    file = open('/sql.txt', 'w')
 #    file.write(sql)
 #    file.close()   
 
@@ -379,9 +379,14 @@ def matriz_aula():
             
         #Ya tenemos la lista de thinclients + servidor aula
         
-        horarios=[['08:15','09:25','1Hora'],['09:26','10:20','2Hora'],['10:21','11:15','3Hora'],
-                  ['11:16','11:40','Recreo'], ['11:41','12:35','4Hora'],['12:36','13:30','5Hora'],
-                  ['13:31','14:25','6Hora'],['14:26','21:00','7Hora']]
+        horarios=[]
+        #[['08:15','09:25','1Hora'],['09:26','10:20','2Hora'],['10:21','11:15','3Hora'],..... ]
+        sql="select id,inicio,fin,descripcion from horarios order by inicio"
+        consulta=cdb.executesql(sql)
+        for reg in consulta:
+           row = [ reg[1], reg[2], reg[3] ]
+           horarios.append(row)
+          
         rows=[]
         idrow=0
         for host in filas:
@@ -522,9 +527,9 @@ def toggleHostAlert():
     #Ojo, en sqlite los boolean son integer
     sql="update maquinas set alert="+stateAlert+"  where id="+idhost
     
-    file = open('/tmp/sql.txt', 'w')
-    file.write(str(request.vars))
-    file.close()       
+#    file = open('/tmp/sql.txt', 'w')
+#    file.write(str(request.vars))
+#    file.close()       
 
     try:
        cdb.executesql(sql)

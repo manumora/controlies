@@ -141,7 +141,22 @@ cdb.define_table('logprinter',
           Field('total','integer'),
           Field ('tamanio','integer'))
           
-
+cdb.define_table('horarios',
+          Field('inicio','time'),
+          Field('fin','time'),
+          Field('descripcion','string'))
 
                  
 
+cdb.define_table('clases_puppet',
+          Field('time','datetime',default=datetime.datetime.today()),
+          Field('tipohost','string'),
+          Field('clase','string'))
+
+cdb.define_table('clases_puppet_host',
+          Field('id_clase', 'integer'),
+          Field('time','datetime',default=datetime.datetime.today()),
+          Field('host','string'),
+          Field('resultado','string'))          
+
+                 

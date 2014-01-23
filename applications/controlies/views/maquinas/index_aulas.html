@@ -13,11 +13,22 @@
                 background-color: gray !important;;
             }
         </style>
+        
+        <!--Esto es para forzar a que que las cabeceras de la tabla se parta el título si hay espacios en blanco-->
+        <style type="text/css" media="screen">
+            th.ui-th-column div{
+                white-space:normal !important;
+                height:auto !important;
+                padding:2px;
+            }
+            .ui-jqgrid .ui-jqgrid-resize {height:100% !important;}
+         
+        </style>
 
         <form id="form_data" action="" enctype="multipart/form-data" method="post">
             Prefijo aula : <input id="prefijo" name="prefijo" style="width:50px;"/>&nbsp;&nbsp;&nbsp;
-            Fecha a consultar : <input class="date" id="fecha" name="fecha" type="date" style="width:80px;"/>&nbsp;&nbsp;&nbsp;
-            <input type="button" value="Realizar consulta" onclick="javascript:print_grid()">
+            Fecha a consultar : <input id="fecha" name="fecha" style="width:80px;"/>&nbsp;&nbsp;&nbsp;
+            <input id="btnConsulta" type="button" value="Realizar consulta" onclick="javascript:print_grid()">
         </form>
         <br/>
         <div id="tabla_aulas">
@@ -26,19 +37,32 @@
             <div id="filter" style="margin-left:30%;display:none">Buscar nada</div>
         </div>
 
-        <div id="dialog-form"></div>
-
-        <div id="dialog-form-borrado"></div>
-
-        <div id="dialog-alert" title="Atención" style="display:none;">
-            <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>Para operar sobre un registro debe seleccionarlo previamente.</p>
+        <div id="dialog-wait">
         </div>
-         
+        
+        <div id="dialog-form">
+        </div> 
 
 <script type="text/javascript">    
                 
     function print_grid(){  
         
+          jQuery("#dialog-wait").html("<br/><br/><p><span class='ui-icon ui-icon-alert' style='float:left; margin:0 7px 20px 0;'></span>Espere mientras se realiza la consulta.....").css("display","none");
+          
+          x = (jQuery(window).width()-350)/2;
+          y = 100;
+          jQuery("#dialog-wait").dialog({
+                    resizable: false,
+                    position: "center",
+                    modal: false,
+                    width: 350,
+                    height: 100
+          }).dialog('option', 'position', [x, y]);
+
+          //esto es para ocultar la barra de titulo, que va en un div encima de la caja de dialogo.
+          jQuery( "#dialog-wait" ).prev().css( "display", "none" );
+                     
+          jQuery("body").css("cursor","wait");        
           
           prefijo=$("#prefijo").val();
           fecha=$("#fecha").val();
@@ -51,10 +75,10 @@
                 if (resultado.codigo=="OK") {
           
                             grid=jQuery("#list");
-                            
                             grid.jqGrid('GridUnload');
-                            grid.css("cursor","pointer");        
-
+                            
+                            //Hay que volver a hacerlo tras el Unload, ya que se destruye el objeto completo.
+                            grid=jQuery("#list");
                             
                             var columnasModel=new Array();
                             var columnasNombre=new Array();
@@ -74,10 +98,11 @@
                                   }
                                   else {
                                       columna.formatter=formateadorCelda;
-                                      nomCol=resultado.userdata.columnas[i-1][2];
-                                      columna.width=100;
+                                      nomCol=resultado.userdata.columnas[i-1][2]; 
+                                      labelCol=nomCol+" "+resultado.userdata.columnas[i-1][0]+"-"+resultado.userdata.columnas[i-1][1];;
+                                      columna.width=120;
                                       columna.align="left";
-                                      columnasNombre.push(nomCol);    
+                                      columnasNombre.push(labelCol);    
                                   };
                                   columna.sortable=false;
                                   columna.name=nomCol;
@@ -100,10 +125,11 @@
                                 shrinkToFit: false,
                                 width: 900,
                                 viewrecords: true,
-                                caption: "Packages",
+                                caption: "Cuadrante de uso del aula",
                                 height: "auto",
                                 ignoreCase: true
                             });
+                            jQuery("body").css("cursor","pointer");        
                             grid.trigger( 'reloadGrid' );
                             //grid.jqGrid('setFrozenColumns'); //Hace falta jqgrid 4.3 o superior.
                             //view-source:http://www.ok-soft-gmbh.com/jqGrid/FrozenColumns_fixed.htm
@@ -113,14 +139,20 @@
                 }
                 else
                    alert(resultado.mensaje);
-                   
+                jQuery("body").css("cursor","pointer");          
+                jQuery('#dialog-wait').dialog('close'); 
+                 
             });
             
-            
-            function formateadorCelda(cellvalue, options, rowObject)
-            {
-               if (typeof(cellvalue) == "string") return cellvalue;
-               else {
+    
+    }
+        
+    function formateadorCelda(cellvalue, options, rowObject)
+    {
+			   if (typeof(cellvalue) == "undefined") return "";
+			   else	
+                 if (typeof(cellvalue) == "string") return cellvalue;
+                 else {
                    contenido="";
                    numEntradas=cellvalue.length;
                    urlimages="{{=URL('static','images')}}";                          
@@ -145,18 +177,16 @@
                            host=cellvalue[i].host;
                            fechalogin=cellvalue[i].time;
                            fechalogout=cellvalue[i].raton;
-                           contenido=contenido+"<img src='"+urlimages+"/nobody.png' style='width:20px;height:20px;' title='Login usuario'/><a href=\"javascript:verUsuario('"+login+ "','"+host+"','"+fechalogin+"','"+fechalogout+"')\">"+login+"</a>";
+                           contenido=contenido+"<a href=\"javascript:verUsuario('"+login+ "','"+host+"','"+fechalogin+"','"+fechalogout+"')\">"+login+"</a>&nbsp;<img src='"+urlimages+"/nobody.png' style='width:20px;height:20px;' title='Login usuario'/>";
                       };                           
                       contenido=contenido+"<br/>";
                     }
                    return contenido;
-               }
-            }
-          
-          //refrescar grid
-                
-   
+                 }
     }
+          
+    
+    
     
     function verUsuario(idLogin, host, fechain, fechaout){
    
@@ -169,7 +199,7 @@
         if(uid==false) return false;                    
         
         jQuery("#dialog-form").html("").css("display","none");
-        jQuery("#dialog-form").load("form_user.html", function() {
+        jQuery("#dialog-form").load("../seguimiento/form.html", function() {
        
             jQuery("#form_data #action").val("view");
             jQuery("#form_data #user").attr("readonly","true");
@@ -246,10 +276,17 @@
        var yyyy = today.getFullYear();
       
        if(dd<10){dd='0'+dd} if(mm<10){mm='0'+mm} var today = dd+'-'+mm+'-'+yyyy;
-       
+
+       jQuery("#fecha" ).datepicker({
+	      changeMonth: true,
+	      changeYear: true,
+          dateFormat: "dd-mm-yy",
+	      onSelect: function(){ $('#list').trigger('reloadGrid'); }
+	    });       
        $("#fecha").val(today);       
        //print_grid();
        
     }); 
 
 </script>
+

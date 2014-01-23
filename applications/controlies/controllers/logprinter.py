@@ -546,7 +546,36 @@ def list_all():
 def formatearFecha(fecha):
 	return fecha[6:]+"-"+fecha[3:5]+"-"+fecha[0:2]    
 
+@service.json
+def borrarLogPrinter():
 
+    retorno="OK"
+    idlog=request.vars['id']
+    try:
+       cdb(cdb.logprinter.id == int(idlog)).delete()
+       retorno="OK"
+    except:
+       retorno="fail"
+              
+    return dict(response=retorno)
+
+@service.json
+def modificarLogPrinter():
+
+    retorno="OK"
+    idlog=request.vars['id']
+    pag=request.vars['paginas']
+    cop=request.vars['copias']
+    total=str(int(pag)*int(cop))
+           
+    sql="update logprinter set paginas="+pag+", copias="+cop+", total="+total+"  where id="+idlog   
+    try:
+       cdb.executesql(sql)
+       retorno="OK"
+    except:
+       retorno="fail"
+    return dict(response=retorno)
+   
 @service.json
 def getUserData():
 

@@ -33,6 +33,7 @@
 	    jQuery( "#fechaini" ).datepicker({
 	      changeMonth: true,
 	      changeYear: true,
+          dateFormat: "dd/mm/yy", 
 	      onClose: function( selectedDate ) {
 	        $( "#fechafin" ).datepicker( "option", "minDate", selectedDate );
 	      },
@@ -42,6 +43,7 @@
 	    jQuery( "#fechafin" ).datepicker({
 	      changeMonth: true,
 	      changeYear: true,
+	      dateFormat: "dd/mm/yy", 
 	      onClose: function( selectedDate ) {
           	$( "#fechaini" ).datepicker( "option", "maxDate", selectedDate );
       	  },

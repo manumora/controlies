@@ -16,7 +16,8 @@ class Config(object):
         self.alert_teclado=False
         self.alert_raton=False
         self.alert_apagado=False
-        self.list_email=False           
+        self.list_email=False
+        self.horarios=[]           
 
 
     def loadConfig(self):
@@ -32,6 +33,7 @@ class Config(object):
            self.alert_raton=False
            self.alert_apagado=False          
            self.list_email=False           
+           self.horarios=[]
         else:
            self.mail_server = fila["mail_server"]
            self.mail_sender = fila["mail_sender"]
@@ -42,6 +44,18 @@ class Config(object):
            self.alert_raton=fila["alert_raton"]          
            self.alert_apagado=fila["alert_apagado"]          
            self.list_email=fila["list_email"]
+           sql="select id,inicio,fin,descripcion from horarios order by inicio"
+           consulta=self.DB.executesql(sql)
+           for reg in consulta:
+             row = {
+                "id":reg[0],
+                "cell":[reg[1],reg[2],reg[3]],
+                "inicio":reg[1],
+                "fin": reg[2],
+                "descripcion":reg[3]
+               }
+             self.horarios.append(row)
+
 
     def enviaMail(self, asunto, mensaje):
 		
@@ -92,13 +106,14 @@ class Config(object):
             "alert_teclado": self.alert_teclado,
             "alert_raton": self.alert_raton,
             "alert_apagado": self.alert_apagado,                  
-            "list_email": self.list_email
+            "list_email": self.list_email,
+            "horarios": self.horarios
           }
          
           return dataUser
          
 
-    def saveConfig(self,m_server,m_sender,m_user,m_password,m_receiver,alert_teclado,alert_raton,alert_apagado,list_email):
+    def saveConfig(self,m_server,m_sender,m_user,m_password,m_receiver,alert_teclado,alert_raton,alert_apagado,list_email, horarios):
 
 		self.mail_server = m_server
 		self.mail_sender = m_sender
@@ -115,8 +130,12 @@ class Config(object):
 			self.DB.config.insert(mail_server=self.mail_server, mail_sender=self.mail_sender, mail_user=self.mail_user, mail_password=self.mail_password, mail_receiver=self.mail_receiver, alert_teclado=self.alert_teclado, alert_raton=self.alert_raton, alert_apagado=self.alert_apagado, list_email= self.list_email)
 		else:
 			fila.update_record(mail_server=self.mail_server, mail_sender=self.mail_sender, mail_user=self.mail_user, mail_password=self.mail_password, mail_receiver=self.mail_receiver, alert_teclado=self.alert_teclado, alert_raton=self.alert_raton, alert_apagado=self.alert_apagado, list_email= self.list_email)
-	
-    
+	    
+		sql="delete from horarios"
+		self.DB.executesql(sql)
+		for reg in horarios:
+			self.DB.horarios.insert(inicio=reg["inicio"], fin=reg["fin"], descripcion=reg["descripcion"])
+			
     def sendListReport(self):
         
         if self.list_email and self.validaMail():
@@ -175,6 +194,5 @@ class Config(object):
                 mensaje=mensaje+"<b>Enhorabuena, tienes el IES como una patena!!!.</b>"    
             
             mensaje=mensaje+"</body></html>"     
-            
-            
-            self.enviaMail('Informe de Controlies '+ahora.strftime("%d/%m/%Y %H:%M"), mensaje)
+                    
+            return self.enviaMail('Informe de Controlies '+ahora.strftime("%d/%m/%Y %H:%M"), mensaje)

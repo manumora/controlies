@@ -159,17 +159,27 @@ def doactualizalogpuppet(filetext):
        output.write("</tr>")           
        output.write("<tr><td width='10%'>Message</td><td>"+item['message']+"</td></tr>")
        output.write("</table><br>")
+       
 	   
     output.write("<br><b>Clases y recursos aplicados</b><br><br>")      
     recursos=mydata["resource_statuses"]
     output.write("<table style='border: solid 1px #000000;width:95%'>")
+    clases_todas=[]
+    clases_error=[]
+        
     for item in recursos:
         eventos=recursos[item]['events']
         descripcion=recursos[item]['source_description']
         estado="OK"
+        start = descripcion.find('/',1) + 1
+        end = descripcion.find('/', start)
+        clase = descripcion[start:end]
+        clases_todas.append(clase)        
+  
         for evento in eventos:
             valor=evento['status']
             if valor == "failure" :
+                 clases_error.append(clase)
                  estado="ERROR"
                  estadoglobal="ERROR"
                  break	 
@@ -177,6 +187,7 @@ def doactualizalogpuppet(filetext):
             output.write("<tr style='border: solid 1px #000000;'><td width='90%'>"+ descripcion +"</td><td>"+estado+"</td></tr>")
         else:
             output.write("<tr style='border: solid 1px #000000;'><td width='90%'><font color='red'>"+ descripcion +"</font></td><td><font color='red'>"+estado+"</font></td></tr>")
+            
     output.write("</table><br><br></center>")
     
     fila=cdb((cdb.maquinas.host.upper()==host) & (cdb.maquinas.tipohost!='WINDOWS')).select().last()    
@@ -187,7 +198,12 @@ def doactualizalogpuppet(filetext):
         output.seek(0)   
         fila.update_record(ultimopuppet=ahora,estadopuppet=estadoglobal,logpuppet=cdb.maquinas.logpuppet.store(output,filename=host))
     output.close()
-        
+     
+    #Insertamos todas las clases recopiladas, con el estado pertinente: ok (si todo va bien), error (si alguno de los recursos tiene    
+    for clase in clases_todas:    
+        estado="ERROR" if clase in clases_error else "OK"
+        inserta_clase(clase,host,ahora,estado)
+    
     return "OK"
     
            
@@ -300,4 +316,34 @@ def docheckapagado(host):
 
 			
     return "OK"
+    
 
+def inserta_clase(clase, host, time, resultado):
+    
+    #Procesar clase para sacar el nombre: "/Stage[main]/Ltsp_smart-permisos/Exec[cambiar-permisos-smart]/returns"    
+    if clase != "": 
+        tipohost=getTipo(host)    
+        if tipohost != "":      
+            fila=cdb((cdb.clases_puppet.clase==clase) & (cdb.clases_puppet.tipohost==tipohost)).select().first()
+            if fila==None:
+                clase_id=cdb.clases_puppet.insert(time=time,clase=clase,tipohost=tipohost)
+                fila=cdb(cdb.clases_puppet.clase==clase).select()
+            else:
+                clase_id=fila.id
+                        
+            filahost=cdb((cdb.clases_puppet_host.id_clase==clase_id) & (cdb.clases_puppet_host.host==host)).select().first()
+            if filahost==None:
+                cdb.clases_puppet_host.insert(time=time,id_clase=clase_id, host=host,resultado=resultado)        
+            else:
+                filahost.update_record(time=time,resultado=resultado) 
+
+def getTipo(host):
+    
+    fila=cdb(cdb.maquinas.host==host).select().first()
+    if fila==None:
+        tipo=""
+    else:
+        tipo=fila.tipohost
+
+    return tipo
+    
