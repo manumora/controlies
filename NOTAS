@@ -4,39 +4,51 @@ CAMBIOS
 23 enero 2013
 
     -Añadido un nuevo seguimiento: seguimiento de tareas puppet
-        -Al actualizar un equipo por puppet, recopila todas las clases que se le aplican junto con el resultado de ejecución de la clase.
+        -Al actualizar un equipo por puppet, recopila todas las clases que se le aplican junto con 
+         el resultado de ejecución de la clase.
         -Todo puede consultarse en un grid maestro-detalle:
-              -Maestro: muestra nombre de clase puppet, tipo de equipo sobre el que se aplica, fecha de primera detección de la clase, nº de equipos
-               que han informado de que se ha aplicado sobre ellos y nº de equipos en los que ha dado error
-              -Detalle, al pinchar sobre una fila del grid de una clase puppet: lista de equipos dónde se ha aplicado, fecha de la última ejecución sobre
-               dicho equipo y estado (ok/error) de la ejecución.
+              -Maestro: muestra nombre de clase puppet, tipo de equipo sobre el que se aplica, 
+               fecha de primera detección de la clase, nº de equipos que han informado de que 
+               se ha aplicado sobre ellos y nº de equipos en los que ha dado error
+              -Detalle, al pinchar sobre una fila del grid de una clase puppet: lista de equipos 
+               donde se ha aplicado, fecha de la última ejecución sobre dicho equipo y estado
+               (ok/error) de la ejecución.
     
-    -En las sesiones de los usuarios en los thinclient muchas veces no se registraba la hora de logout, ya que el thinclient era apagado bruscamente. Para
-     evitar esto se adopta esta estrategia: mientras que el usuario está dentro del thinclient, cada 2 minutos se manda un mensaje para actualizar la hora
-     de logout con la hora actual. De esta manera:
-           -Si el equipo se apaga bruscamente, sabemos hasta que hora estuvo el usuario con 2 minutos de error.
-           -Si el equipo se apaga bien, al cierre de la sesión un script actualiza la hora de logout correcta.
+    -En las sesiones de los usuarios en los thinclient muchas veces no se registraba la 
+     hora de logout, ya que el thinclient era apagado bruscamente. Para evitar esto se adopta
+     la siguiente estrategia: mientras que el usuario está dentro del thinclient, cada 2 minutos
+     se manda un mensaje para actualizar la hora de logout con la hora actual. De esta manera:
+           -Si el equipo se apaga bruscamente, sabemos hasta que hora estuvo el usuario 
+            con 2 minutos de error.
+           -Si el equipo se apaga bien, al cierre de la sesión un script actualiza la 
+            hora de logout correcta.
            
-    -Arreglado bug que hacia que no se despertasen los clientes si en su MAC en ldap había espacios en blanco al final.
+    -Arreglado bug que hacia que no se despertasen los clientes si en su MAC en ldap había 
+     espacios en blanco al final.
                
 20 Enero 2014
 
-    -Arreglado problema con los datePicker en todos los formularios que piden fechas para filtrar, forzado el 
-     formato de fecha español (notificado por Paco-IES Téllez)
+    -Arreglado problema con los datePicker en todos los formularios que piden fechas 
+     para filtrar, forzado el formato de fecha español (notificado por Paco-IES Téllez)
     -Modificado el seguimiento de impresión:
-		-Se añade un botón en cada fila del grid para borrar el registro. Para eliminar pruebas o registros con datos incorrectos.
-		-Se remodela la opción de ver el registro de impresión, en una ventana aparte con todos los datos del usuario y del registro.
-	    -Se incluye una opción para editar un registro de impresión y modificar dos campos: nº de páginas y nº de copias. Esto se hará cuando
-         se quiera retocar un trabajo que haya quedado mal contabilizado por fallos en el driver de impresión. 
+		-Se añade un botón en cada fila del grid para borrar el registro. Para eliminar
+		 pruebas o registros con datos incorrectos.
+		-Se remodela la opción de ver el registro de impresión, en una ventana aparte 
+	     con todos los datos del usuario y del registro.
+	    -Se incluye una opción para editar un registro de impresión y modificar dos campos: 
+	     nº de páginas y nº de copias. Esto se hará cuando se quiera retocar un trabajo que 
+	     haya quedado mal contabilizado por fallos en el driver de impresión o en tea4cups. 
     -Reorganizado el formulario de Gestion/Configuración, 
          -Los campos sean mas fáciles de ver, son mas anchos.
          -La contraseña del correo no es visible.
          -Se incluye un botón nuevo, para enviar por correo un informe del estado de los equipos.
-         -Se incluye un grid para meter las franjas horarias del centro, que se usarán en el seguimiento de aulas.
+         -Se incluye un grid para meter las franjas horarias del centro, que se usarán en el 
+          seguimiento de aulas.
     -Añadido un nuevo seguimiento: seguimiento de aulas de thinclients.
-         -Pide un aula (por ejemplo: "a04", en general lo que precede al -pro de un servidor de aula) y una fecha y muestra un grid con la
-          actividad del aula en esa fecha. En las columnas están las franjas horarias y en las fila los thinclients. Se ven los encendidos, los
-          logines de los usuarios y el estado de teclado y ratón en cada encendido.
+         -Pide un aula (por ejemplo: "a04", en general lo que precede al -pro de un servidor 
+          de aula) y una fecha y muestra un grid con la actividad del aula en esa fecha. En 
+          las columnas están las franjas horarias y en las fila los thinclients. Se ven los 
+          encendidos, los logines de los usuarios y el estado de teclado y ratón en cada encendido.
 
 20 Diciembre 2013
 
@@ -48,8 +60,8 @@ CAMBIOS
 
 16 Diciembre 2013
 
-    -Configurado un control independiente de las alertas de teclado, ratón y apagado en thinclients. En la
-     pantalla de configuración pueden activarse por separado.
+    -Configurado un control independiente de las alertas de teclado, ratón y apagado en thinclients. 
+     En la pantalla de configuración pueden activarse por separado.
     -Mejorada la detección de thinclients apagados, pero sigue dando falsos positivos en ocasiones. Es
      díficil hacer un sistema infalible, ya que siempre se detectan por medios indirectos.
     -Arreglados bugs en grid de thinclients, no dejaban ordenar por columnas de fecha y estados
