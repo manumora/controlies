@@ -63,7 +63,10 @@ response.menu+=[('Base de Datos', False, None,[
                 ('Seguimiento Usuarios', False,URL( 'seguimiento', 'index')), 
                 ('Seguimiento Maquinas', False,URL( 'maquinas', 'index')), 
                 ('Seguimiento Thinclients', False, URL('maquinas', 'index_thinclients')),
-                ('Seguimiento Impresión', False, URL('logprinter', 'index'))
+                ('Seguimiento Impresión', False, URL('logprinter', 'index')),
+                ('Seguimiento Aulas', False, URL('maquinas', 'index_aulas')),
+                ('Seguimiento Tareas Puppet', False, URL('puppet', 'index'))
+                
                 ]),
             ]
    )]

@@ -1,0 +1,292 @@
+{{response.files.append(URL('static','js/multiselect/jquery.multiselect.css'))}}
+{{response.files.append(URL('static','js/multiselect/jquery.multiselect.min.js'))}}
+{{response.files.append(URL('static','js/multiselect/jquery.multiselect.es.js'))}}
+{{#response.files.append(URL('static','css/helper.css'))}}
+{{#response.files.append(URL('static','css/dropdown.css'))}}
+{{#response.files.append(URL('static','css/default.advanced.css'))}}
+ 
+
+{{extend 'layout.html'}}
+
+        <style>
+            .colhosts {
+                background-color: gray !important;;
+            }
+        </style>
+        
+        <!--Esto es para forzar a que que las cabeceras de la tabla se parta el título si hay espacios en blanco-->
+        <style type="text/css" media="screen">
+            th.ui-th-column div{
+                white-space:normal !important;
+                height:auto !important;
+                padding:2px;
+            }
+            .ui-jqgrid .ui-jqgrid-resize {height:100% !important;}
+         
+        </style>
+
+        <form id="form_data" action="" enctype="multipart/form-data" method="post">
+            Prefijo aula : <input id="prefijo" name="prefijo" style="width:50px;"/>&nbsp;&nbsp;&nbsp;
+            Fecha a consultar : <input id="fecha" name="fecha" style="width:80px;"/>&nbsp;&nbsp;&nbsp;
+            <input id="btnConsulta" type="button" value="Realizar consulta" onclick="javascript:print_grid()">
+        </form>
+        <br/>
+        <div id="tabla_aulas">
+          <table id="list" width="100%"></table>
+            <div id="pager" style=""></div> 
+            <div id="filter" style="margin-left:30%;display:none">Buscar nada</div>
+        </div>
+
+        <div id="dialog-wait">
+        </div>
+        
+        <div id="dialog-form">
+        </div> 
+
+<script type="text/javascript">    
+                
+    function print_grid(){  
+        
+          jQuery("#dialog-wait").html("<br/><br/><p><span class='ui-icon ui-icon-alert' style='float:left; margin:0 7px 20px 0;'></span>Espere mientras se realiza la consulta.....").css("display","none");
+          
+          x = (jQuery(window).width()-350)/2;
+          y = 100;
+          jQuery("#dialog-wait").dialog({
+                    resizable: false,
+                    position: "center",
+                    modal: false,
+                    width: 350,
+                    height: 100
+          }).dialog('option', 'position', [x, y]);
+
+          //esto es para ocultar la barra de titulo, que va en un div encima de la caja de dialogo.
+          jQuery( "#dialog-wait" ).prev().css( "display", "none" );
+                     
+          jQuery("body").css("cursor","wait");        
+          
+          prefijo=$("#prefijo").val();
+          fecha=$("#fecha").val();
+          
+          jQuery.post('call/json/matriz_aula', jQuery("#form_data").serialize(), function(result) {
+              
+                resultado=result; 
+                //alert(JSON.stringify(result));
+             
+                if (resultado.codigo=="OK") {
+          
+                            grid=jQuery("#list");
+                            grid.jqGrid('GridUnload');
+                            
+                            //Hay que volver a hacerlo tras el Unload, ya que se destruye el objeto completo.
+                            grid=jQuery("#list");
+                            
+                            var columnasModel=new Array();
+                            var columnasNombre=new Array();
+                            
+                            var numCols=resultado.userdata.columnas.length;                
+                                            
+                            for (var i=0; i<=numCols; i++) {
+                                  var columna=new Object();
+                                  
+                                  if (i==0) {
+                                     nomCol="host"; 
+                                     columna.width=60;
+                                     columna.frozen=true;
+                                     columna.align="center";
+                                     columna.classes="colhosts";
+                                     columnasNombre.push("Hosts");
+                                  }
+                                  else {
+                                      columna.formatter=formateadorCelda;
+                                      nomCol=resultado.userdata.columnas[i-1][2]; 
+                                      labelCol=nomCol+" "+resultado.userdata.columnas[i-1][0]+"-"+resultado.userdata.columnas[i-1][1];;
+                                      columna.width=120;
+                                      columna.align="left";
+                                      columnasNombre.push(labelCol);    
+                                  };
+                                  columna.sortable=false;
+                                  columna.name=nomCol;
+                                  columna.index=nomCol;                      
+                                  columna.label=nomCol;
+                                  columnasModel.push(columna);
+                                  
+                            }	  
+                              
+                                    
+                            grid.jqGrid({
+                                colNames: columnasNombre,
+                                colModel: columnasModel,
+                               // pager: '#packagePager',
+                                datatype: "local",
+                                data: resultado.rows,
+                                hoverrows:false,
+                                rowNum: 24,
+                                gridView: true,
+                                shrinkToFit: false,
+                                width: 900,
+                                viewrecords: true,
+                                caption: "Cuadrante de uso del aula",
+                                height: "auto",
+                                ignoreCase: true
+                            });
+                            jQuery("body").css("cursor","pointer");        
+                            grid.trigger( 'reloadGrid' );
+                            //grid.jqGrid('setFrozenColumns'); //Hace falta jqgrid 4.3 o superior.
+                            //view-source:http://www.ok-soft-gmbh.com/jqGrid/FrozenColumns_fixed.htm
+                            //las columna congelada tiene una altura distinta de la no congelada.
+                            //probar con jqgrid mas moderno.
+                            //grid.triggerHandler("jqGridAfterGridComplete");
+                }
+                else
+                   alert(resultado.mensaje);
+                jQuery("body").css("cursor","pointer");          
+                jQuery('#dialog-wait').dialog('close'); 
+                 
+            });
+            
+    
+    }
+        
+    function formateadorCelda(cellvalue, options, rowObject)
+    {
+			   if (typeof(cellvalue) == "undefined") return "";
+			   else	
+                 if (typeof(cellvalue) == "string") return cellvalue;
+                 else {
+                   contenido="";
+                   numEntradas=cellvalue.length;
+                   urlimages="{{=URL('static','images')}}";                          
+                   for (i=0; i<numEntradas; i++) {
+                      contenido=contenido+cellvalue[i].time+" ";
+                      if (cellvalue[i].tipo=="thinclient") {                                                     
+                           contenido=contenido+"&nbsp;"
+                           if (cellvalue[i].teclado=="2") contenido=contenido+"<img src='"+urlimages+"/ok.png' title='Teclado conectado'/>";
+                           else
+                              if (cellvalue[i].teclado=="1") contenido=contenido+"<img src='"+urlimages+"/error.png' title='Teclado desconectado'/>";
+                              else 
+                                if (cellvalue[i].teclado=="0") contenido=contenido+"&nbsp;<img src='"+urlimages+"/turnOff.png' style='width:24px;height:24px;' title='Thinclient apagado'/>";
+                           
+                           if (cellvalue[i].raton=="2") contenido=contenido+"<img src='"+urlimages+"/ok.png' title='Ratón conectado'/>";
+                           else
+                              if (cellvalue[i].raton=="1") contenido=contenido+"<img src='"+urlimages+"/error.png' title='Ratón desconectado'/>";
+                       
+                      }
+                      else {
+                           //En los logon de usuarios el nombre viene en el campo teclado, y la fecha de salida en el campo raton....
+                           login=cellvalue[i].teclado;
+                           host=cellvalue[i].host;
+                           fechalogin=cellvalue[i].time;
+                           fechalogout=cellvalue[i].raton;
+                           contenido=contenido+"<a href=\"javascript:verUsuario('"+login+ "','"+host+"','"+fechalogin+"','"+fechalogout+"')\">"+login+"</a>&nbsp;<img src='"+urlimages+"/nobody.png' style='width:20px;height:20px;' title='Login usuario'/>";
+                      };                           
+                      contenido=contenido+"<br/>";
+                    }
+                   return contenido;
+                 }
+    }
+          
+    
+    
+    
+    function verUsuario(idLogin, host, fechain, fechaout){
+   
+        jQuery("#list").css("cursor","wait");        
+
+        ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+        
+        uid=idLogin;
+                           
+        if(uid==false) return false;                    
+        
+        jQuery("#dialog-form").html("").css("display","none");
+        jQuery("#dialog-form").load("../seguimiento/form.html", function() {
+       
+            jQuery("#form_data #action").val("view");
+            jQuery("#form_data #user").attr("readonly","true");
+            jQuery("#form_data #user").css("background-color","#DDD");
+            
+                                                        
+            jQuery.post('call/json/getUserData',{ username: uid }, function(result) {
+                //var result = jQuery.parseJSON(data);
+                
+                                            
+                if(result.response['type']=="teacher")
+                    var textType = "Profesor";
+                else
+                   if (result.response['type']=="student")  
+                        var textType = "Alumno";
+                    else
+                          var textType="local";
+                                                                                                      
+                if (textType !=  "local" ) {
+                        jQuery("#form_data #type").val(textType);
+                        jQuery("#form_data #name").val(result.response['name']);
+                        jQuery("#form_data #nif").val(result.response['nif']);       
+                        jQuery("#form_data #user").val(result.response['user']);
+                        jQuery("#form_data #surname").val(result.response['surname']);
+                        if (result.response['photo']!='')
+                            jQuery("#form_data #photo").attr("src","data:image/png;base64,"+result.response['photo']);                       
+
+                        grupos="";
+                        $.each(result.response['groups']['departments'], function(i, l){
+                            grupos=grupos + l + " " ;                                
+                        });
+
+                        $.each(result.response['groups']['classrooms'], function(i, l){
+                            grupos=grupos + l + " " ;
+                        });                  
+                        jQuery("#form_data #group").val(grupos);   
+                }
+                else {
+                        jQuery("#form_data #type").val("local de la máquina");
+                        jQuery("#form_data #user").val(uid);
+                };
+                
+                jQuery("#form_data #equipo").val(host);                               
+                jQuery("#form_data #iniSesion").val(fechain);   
+                jQuery("#form_data #finSesion").val(fechaout);  
+
+                x = (jQuery(window).width()-400)/2;
+                y = (jQuery(window).height()-500)/2;
+                
+                jQuery("#messageLoading").hide();
+                jQuery("#list").css("cursor","pointer");                
+                
+                jQuery("#dialog-form").dialog({
+                    resizable: false,
+                    modal: true,
+                    width: 400,
+                    stack: false,                                
+                    title: "Consultar Sesión de Usuario"
+                }).dialog('option', 'position', [x, y]);                        
+
+            });               
+        });
+    }
+   
+      
+</script>
+<script type="text/javascript">
+
+   jQuery(document).ready(function(){  
+       
+       var today=new Date(); 
+       var dd = today.getDate();
+       var mm = today.getMonth()+1; 
+       var yyyy = today.getFullYear();
+      
+       if(dd<10){dd='0'+dd} if(mm<10){mm='0'+mm} var today = dd+'-'+mm+'-'+yyyy;
+
+       jQuery("#fecha" ).datepicker({
+	      changeMonth: true,
+	      changeYear: true,
+          dateFormat: "dd-mm-yy",
+	      onSelect: function(){ $('#list').trigger('reloadGrid'); }
+	    });       
+       $("#fecha").val(today);       
+       //print_grid();
+       
+    }); 
+
+</script>
+

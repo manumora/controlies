@@ -123,7 +123,9 @@ cdb.define_table('config',
           Field('mail_user','string'),
           Field('mail_password','password'),
           Field ('mail_receiver','string'),
-          Field ('alert_thinclient','integer'),
+          Field ('alert_teclado','integer'),
+          Field ('alert_raton','integer'),
+          Field ('alert_apagado','integer'),
           Field ('list_email','integer'))
 
 
@@ -139,7 +141,22 @@ cdb.define_table('logprinter',
           Field('total','integer'),
           Field ('tamanio','integer'))
           
-
+cdb.define_table('horarios',
+          Field('inicio','time'),
+          Field('fin','time'),
+          Field('descripcion','string'))
 
                  
 
+cdb.define_table('clases_puppet',
+          Field('time','datetime',default=datetime.datetime.today()),
+          Field('tipohost','string'),
+          Field('clase','string'))
+
+cdb.define_table('clases_puppet_host',
+          Field('id_clase', 'reference clases_puppet'),
+          Field('time','datetime',default=datetime.datetime.today()),
+          Field('host','string'),
+          Field('resultado','string'))          
+
+                 

@@ -159,17 +159,27 @@ def doactualizalogpuppet(filetext):
        output.write("</tr>")           
        output.write("<tr><td width='10%'>Message</td><td>"+item['message']+"</td></tr>")
        output.write("</table><br>")
+       
 	   
     output.write("<br><b>Clases y recursos aplicados</b><br><br>")      
     recursos=mydata["resource_statuses"]
     output.write("<table style='border: solid 1px #000000;width:95%'>")
+    clases_todas=[]
+    clases_error=[]
+        
     for item in recursos:
         eventos=recursos[item]['events']
         descripcion=recursos[item]['source_description']
         estado="OK"
+        start = descripcion.find('/',1) + 1
+        end = descripcion.find('/', start)
+        clase = descripcion[start:end]
+        clases_todas.append(clase)        
+  
         for evento in eventos:
             valor=evento['status']
             if valor == "failure" :
+                 clases_error.append(clase)
                  estado="ERROR"
                  estadoglobal="ERROR"
                  break	 
@@ -177,6 +187,7 @@ def doactualizalogpuppet(filetext):
             output.write("<tr style='border: solid 1px #000000;'><td width='90%'>"+ descripcion +"</td><td>"+estado+"</td></tr>")
         else:
             output.write("<tr style='border: solid 1px #000000;'><td width='90%'><font color='red'>"+ descripcion +"</font></td><td><font color='red'>"+estado+"</font></td></tr>")
+            
     output.write("</table><br><br></center>")
     
     fila=cdb((cdb.maquinas.host.upper()==host) & (cdb.maquinas.tipohost!='WINDOWS')).select().last()    
@@ -187,7 +198,12 @@ def doactualizalogpuppet(filetext):
         output.seek(0)   
         fila.update_record(ultimopuppet=ahora,estadopuppet=estadoglobal,logpuppet=cdb.maquinas.logpuppet.store(output,filename=host))
     output.close()
-        
+     
+    #Insertamos todas las clases recopiladas, con el estado pertinente: ok (si todo va bien), error (si alguno de los recursos tiene    
+    for clase in clases_todas:    
+        estado="ERROR" if clase in clases_error else "OK"
+        inserta_clase(clase,host,ahora,estado)
+    
     return "OK"
     
            
@@ -207,7 +223,7 @@ def doactualizathinclient(host, raton, teclado):
     #Ver si hay que mandar emails, siempre que traiga informacion
     configuracion=Config(cdb)
     configuracion.loadConfig()    
-    if (raton=="1" or teclado=="1") and (configuracion.alert_thinclient==1): 
+    if (raton=="1" or teclado=="1") and (configuracion.alert_teclado==1 or configuracion.alert_raton==1): 
         
         #Busca ultimo estado que no sea "apagado", para comparar
         
@@ -219,7 +235,7 @@ def doactualizathinclient(host, raton, teclado):
                ult_teclado=ultimo_estado.teclado
                ult_raton=ultimo_estado.raton
                
-        if (teclado=="1" and ult_teclado=="2") or (raton=="1" and ult_raton=="2"):
+        if (teclado=="1" and ult_teclado=="2" and configuracion.alert_teclado==1) or (raton=="1" and ult_raton=="2" and configuracion.alert_raton==1):
                mensaje="Aviso fallo teclado/ratón en thinclient "+host+" ("+ahora.strftime("%d/%m/%Y %H:%M")+")\n\n"
                est_teclado="Conectado" if teclado=="2" else "Desconectado"
                est_raton="Conectado" if raton=="2" else "Desconectado"
@@ -263,3 +279,71 @@ def dologprinter(impresora,jobid,usuario,host,trabajo,paginas,copias,total,taman
     cdb.logprinter.insert(impresora=impresora,jobid=jobid,usuario=usuario,host=host,trabajo=trabajo,paginas=paginas,copias=copias,total=total, tamanio=tamanio)
     return "OK"
 
+
+def checkapagado():
+    session.forget(response)
+    host=request.vars["host"]
+    docheckapagado(host)
+    
+@service.xmlrpc
+def docheckapagado(host):
+
+    ahora=datetime.datetime.today()
+    
+    #Ver si hay que mandar emails, siempre que traiga informacion
+    configuracion=Config(cdb)
+    configuracion.loadConfig()    
+    if (configuracion.alert_apagado==1): 
+    
+        enviar_mensaje=False
+        ultimos_estados=cdb(cdb.thinclients.host==host).select(orderby=~cdb.thinclients.time, limitby=(0, 2)).as_list()
+        
+        #Si hay algun estado anterior.... miramos si ha pasado de encendido->apagado.       
+        if len(ultimos_estados)>0 :
+            #Si el ultimo vale 0, estaba apagado.
+            if (ultimos_estados[0]["raton"]=="0"):
+               if len(ultimos_estados)>1:    #Si hay penultimo
+                   #Si no vale 0, estaba encendido y ahora apagado. Hay que avisar de que está apagado.
+                   if (ultimos_estados[1]["raton"]!="0"):
+                       enviar_mensaje=True
+               else:
+                   #Si no hay penúltimo, avisamos de que está apagado.
+                   enviar_mensaje=True           
+                   
+            if enviar_mensaje: 
+                  mensaje="El thinclient "+host+" parece apagado o bloqueado ("+ahora.strftime("%d/%m/%Y %H:%M")+")\n\n"
+                  configuracion.enviaMail('Aviso de thinclient '+host+" apagado", mensaje)
+
+			
+    return "OK"
+    
+
+def inserta_clase(clase, host, time, resultado):
+    
+    #Procesar clase para sacar el nombre: "/Stage[main]/Ltsp_smart-permisos/Exec[cambiar-permisos-smart]/returns"    
+    if clase != "": 
+        tipohost=getTipo(host)    
+        if tipohost != "":      
+            fila=cdb((cdb.clases_puppet.clase==clase) & (cdb.clases_puppet.tipohost==tipohost)).select().first()
+            if fila==None:
+                clase_id=cdb.clases_puppet.insert(time=time,clase=clase,tipohost=tipohost)
+                fila=cdb(cdb.clases_puppet.clase==clase).select()
+            else:
+                clase_id=fila.id
+                        
+            filahost=cdb((cdb.clases_puppet_host.id_clase==clase_id) & (cdb.clases_puppet_host.host==host)).select().first()
+            if filahost==None:
+                cdb.clases_puppet_host.insert(time=time,id_clase=clase_id, host=host,resultado=resultado)        
+            else:
+                filahost.update_record(time=time,resultado=resultado) 
+
+def getTipo(host):
+    
+    fila=cdb(cdb.maquinas.host==host).select().first()
+    if fila==None:
+        tipo=""
+    else:
+        tipo=fila.tipohost
+
+    return tipo
+    

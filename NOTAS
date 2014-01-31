@@ -1,68 +1,99 @@
 CAMBIOS
 =======
 
-19-Diciembre-2012: version alfa subida a github.
+30 enero 2014
 
-29-Enero-2013: versión inicial beta. 
+    -Arreglado bug en config.html con los checkbox (notificado por Paco IES Téllez)
+    -Incluida clave externa en la tabla clases_puppet_host
 
-22-Marzo-2012:
+23 enero 2014
 
-    -Incluido seguimiento en thinclients de teclados y ratones.
-    -Ahora todos los scripts averiguan el dominio del centro para añadirlo en las peticiones ldap.
-    -El script de seguimiento de equipos, al verificar el estado del sistema de paquetes no se daba cuenta de si los repositorios estaban bien o mal, normalmente por
-    problemas de firmas.  Ahora lo verifica y pone el estado a "ERROR" si ve que no se puede acceder a algún repositorio.
-    -El script wpkg.js no avisaba siempre si había errores en el log del wpkg y por dicho motivo había equipos donde fallaba un paquete pero no te enterabas.
-    -Varios cambios estéticos.
+    -Añadido un nuevo seguimiento: seguimiento de tareas puppet
+        -Al actualizar un equipo por puppet, recopila todas las clases que se le aplican junto con 
+         el resultado de ejecución de la clase.
+        -Todo puede consultarse en un grid maestro-detalle:
+              -Maestro: muestra nombre de clase puppet, tipo de equipo sobre el que se aplica, 
+               fecha de primera detección de la clase, nº de equipos que han informado de que 
+               se ha aplicado sobre ellos y nº de equipos en los que ha dado error
+              -Detalle, al pinchar sobre una fila del grid de una clase puppet: lista de equipos 
+               donde se ha aplicado, fecha de la última ejecución sobre dicho equipo y estado
+               (ok/error) de la ejecución.
+    
+    -En las sesiones de los usuarios en los thinclient muchas veces no se registraba la 
+     hora de logout, ya que el thinclient era apagado bruscamente. Para evitar esto se adopta
+     la siguiente estrategia: mientras que el usuario está dentro del thinclient, cada 2 minutos
+     se manda un mensaje para actualizar la hora de logout con la hora actual. De esta manera:
+           -Si el equipo se apaga bruscamente, sabemos hasta que hora estuvo el usuario 
+            con 2 minutos de error.
+           -Si el equipo se apaga bien, al cierre de la sesión un script actualiza la 
+            hora de logout correcta.
+           
+    -Arreglado bug que hacia que no se despertasen los clientes si en su MAC en ldap había 
+     espacios en blanco al final (Notificado por Ismael- IES Gonzalo Korreas).
+               
+20 Enero 2014
 
-Mayo-2013:
+    -Arreglado problema con los datePicker en todos los formularios que piden fechas 
+     para filtrar, forzado el formato de fecha español (notificado por Paco-IES Téllez)
+    -Modificado el seguimiento de impresión:
+		-Se añade un botón en cada fila del grid para borrar el registro. Para eliminar
+		 pruebas o registros con datos incorrectos.
+		-Se remodela la opción de ver el registro de impresión, en una ventana aparte 
+	     con todos los datos del usuario y del registro.
+	    -Se incluye una opción para editar un registro de impresión y modificar dos campos: 
+	     nº de páginas y nº de copias. Esto se hará cuando se quiera retocar un trabajo que 
+	     haya quedado mal contabilizado por fallos en el driver de impresión o en tea4cups. 
+    -Reorganizado el formulario de Gestion/Configuración, 
+         -Los campos sean mas fáciles de ver, son mas anchos.
+         -La contraseña del correo no es visible.
+         -Se incluye un botón nuevo, para enviar por correo un informe del estado de los equipos.
+         -Se incluye un grid para meter las franjas horarias del centro, que se usarán en el 
+          seguimiento de aulas.
+    -Añadido un nuevo seguimiento: seguimiento de aulas de thinclients.
+         -Pide un aula (por ejemplo: "a04", en general lo que precede al -pro de un servidor 
+          de aula) y una fecha y muestra un grid con la actividad del aula en esa fecha. En 
+          las columnas están las franjas horarias y en las fila los thinclients. Se ven los 
+          encendidos, los logines de los usuarios y el estado de teclado y ratón en cada encendido.
 
-    -Arreglo de varios bugs menores.
+20 Diciembre 2013
 
-17-junio-2013:
+    -Modificado seguimiento de impresión para que los filtros aplicados al grid se apliquen tambien al 
+     generar el csv para descargar.
+    -Modificado seguimiento de impresión para generar directamente informes con PDF, totales y agrupados
+     por usuario. Se aplican los mismos filtros que hay en el grid.
 
-   -Definidos índices en las tablas de la BD.
-   -Seguimiento: modificado el interface para que permita llamadas por xmlrpc, no solo por wget/REST, con vistas a permitir que los scripts cliente en el futuro sean en python y no en bash.
-   -Seguimiento de usuarios: no se ha tocado nada.
-   -Seguimiento de máquinas:
-           -En el grid de sesiones de usuario para una maquina dada, al pulsar sobre el usuario sale una ventana con su foto y datos.
-           -Una misma máquina, con arranque dual en Windows y Linux se guarda en dos registros separados apareciendo dos veces en la lista, una por cada sistema operativo. Al mostrar las
-            sesiones de usuario de esa máquina solo se muestran las de Windows o las de Linux, no ambas mezcladas.
-           -Cuando la fecha del último puppet y/o pkgsync es anterior en 24 horas a la del ultimo arranque, aparece resaltada en naranja en el grid, como aviso de que algo puede ir mal.
-           -Arreglado bug que hacía que en los equipos duales los datos de puppet se guardasen tanto en el registro de los Linux como de los Windows.
-   -Seguimiento de thinclients:
-           -Quitado el filtro de consulta por fechas, ya que no servía para nada (solo nos interesa el estado último de los thinclients) y ralentiza el proceso de consulta.
-           -Añadido un botón que elimina todos los registros de thinclients anteriores a 30 dias. Es solo de prueba, ya que se ha añadido un proceso en el crontab de controlies que hace
-            lo mismo automáticamente cada noche.
-           -Al pulsar sobre un thinclient, en el grid de la derecha ya no solo aparecen el histórico de estados previos de teclados y ratones, también aparecen los logines de los usuarios 
-            que han iniciado sesión en esos equipos. Pulsando sobre un usuario aparece su ficha con datos y foto.
 
-   -Nueva opción->Gestion/Configuracion: permite definir los parámetros de una cuenta de correo (la he probado con gmail sin problemas) para enviar mensajes automáticos desde controlies.
-    Con vistas a enviar informes periódicos automatizados al administrador. He añadido un botón para probar in situ si funciona.
+16 Diciembre 2013
 
-   -Wpkg:
-        -Modificado wpkg.js para que las conexiones sean con user-agent Mozilla en lugar de Internet Explorer, de tal forma que el Squid no las bloquee.
-        -Entre los datos del informe enviado al Controlies se incluye la IP del equipo Windows en el momento de hacer enviar los datos.
-        -Puesto try..catch en todas las llamadas de envio de datos, para que si se produce un error de comunicación no se haga nada. Ahora sacaba una ventana de alert que 
-            despistaba mucho al usuario. También se ha puesto en los scripts que controlan el login/logout de los usuarios Windows.
-   -Scripts instalados mediante puppet:
-        -Se modifican los scripts para que averiguen el dominio del IES (gracias, Paco), ya que había imágenes donde daba problemas de conexión si no se ponía el dominio.
-        -Al verificar el estado de paquetes en el script seguimiento_equipos se producía un "falso positivo" de error si en ese momento se está ejecutando el pkgsync en dicho ordenador.
-        Para evitarlo se comprueba si hay un pkgsync en marcha y, en caso afirmativo, se deja la comprobación del estado del sistema de paquetes para la siguiente revisión.
+    -Configurado un control independiente de las alertas de teclado, ratón y apagado en thinclients. 
+     En la pantalla de configuración pueden activarse por separado.
+    -Mejorada la detección de thinclients apagados, pero sigue dando falsos positivos en ocasiones. Es
+     díficil hacer un sistema infalible, ya que siempre se detectan por medios indirectos.
+    -Arreglados bugs en grid de thinclients, no dejaban ordenar por columnas de fecha y estados
+     de teclado y ratón. En el grid histórico de un thinclient se desactiva la ordenación, no es
+     necesaria.
 
-12-julio-2013:
+11-Diciembre 2013
 
-    -Añadido control de documentos impresos en Linux mediante tea4cups y pkpgcounter.
+    -Definidos stages en las tareas puppet, para que primero se ejecute instala_controlies y despues 
+     actualizaciones_controlies
+    -Corregido bug informado por Francisco Lancharro: los campos boolean de la configuración no se procesaban
+     como enteros (sqlite los guarda internamente como enteros) y los checkbox de la vista correspondiente no
+     aparecian como marcados cuando el valor en la tabla era True.
+    -Corregido bug informado por Manolo Vadillo: modificado paquete controlies-client para que se llame a
+     script seguimiento-equipos inmediatemente en cada reboot, mediante @reboot en crontab. De esta manera la
+     hora de ultimo arranque del equipo se actaliza ipso-facto en el arranque y no cuando lo llame el crontab.
 
-10-octubre 2013:
+4-Diciembre 2013:
 
-   -Arreglado bug en el script despierta_clientes, que hacía que los thinclients que no estuviesen en la rama group1 del arbol ldap fuesen ignorados. Reportado por
-    Ana Belén Cerejo Cortijo.
-   -Arreglado bug en pkpgcounter en impresoras HP-10XX con filtro foo2zjs (Zenographics), ya está notificado a Jerome (creador del tea4cups). Se cambia la clase
-    python pertinente del paquete pkpgcouter para que tenga en cuena la cabecera PJL que éste filtro añade al fichero mandado a la impresora. Es un parche sobre el
-    paquete original, de tal forma que si dicho paquete se actualiza se perderá el cambio. De momento se queda así hasta que Jerome parchee la aplicación y la envie
-    a los empaquetadores de Debian. Reportado por: Paco (IES Téllez).
-   -Modificadas las cabeceras del script seguimiento_thinclient para que solo se ejecute en el nivel 2, al encendido, ya que ahora ha dejado de hacer caso 
-    al update-rc y se mete en todos los niveles, generando llamadas repetidas a controlies. Solucionado por Paco da con la solucion y modifica script y tarea puppet.
+    -La parte de los clientes se hace mediante paquetes debian, para facilitar su instalación.
+    -La tarea puppet se divide en tres subtareas, para permitir actualizaciones mas cómodas y puntuales.
+    -Se mejora la gestión de portátiles.
+    -Se incluyen agrupamientos en el grid de registro de impresión.
+    -Arreglado bug en la visualización de equipos en tiempo real, necesitaba la rama laptop_hosts en ldap.
+    -Incluida funcionalidad que permite la ejecución de comandos remotos en tiempo real sobre las maquinas 
+     seleccionadas.
+    -Se cambian los calendarios para que usen el de jquery, con mas funcionalidades y mas homogéneos con el resto.
 
 5-Noviembre 2013:
 
@@ -100,28 +131,69 @@ Mayo-2013:
     -Reorganizados los menús de seguimiento, tal como lo ha hecho Manu Mora.
 
     -Actualizada tarea puppet con nuevos scripts.
-    
-4-Diciembre 2013:
 
-    -La parte de los clientes se hace mediante paquetes debian, para facilitar su instalación.
-    -La tarea puppet se divide en tres subtareas, para permitir actualizaciones mas cómodas y puntuales.
-    -Se mejora la gestión de portátiles.
-    -Se incluyen agrupamientos en el grid de registro de impresión.
-    -Arreglado bug en la visualización de equipos en tiempo real, necesitaba la rama laptop_hosts en ldap.
-    -Incluida funcionalidad que permite la ejecución de comandos remotos en tiempo real sobre las maquinas 
-     seleccionadas.
-    -Se cambian los calendarios para que usen el de jquery, con mas funcionalidades y mas homogéneos con el resto.
+12-julio-2013:
 
-11-Diciembre 2013
+    -Añadido control de documentos impresos en Linux mediante tea4cups y pkpgcounter.
 
-    -Definidos stages en las tareas puppet, para que primero se ejecute instala_controlies y despues 
-     actualizaciones_controlies
-    -Corregido bug informado por Francisco Lancharro: los campos boolean de la configuración no se procesaban
-     como enteros (sqlite los guarda internamente como enteros) y los checkbox de la vista correspondiente no
-     aparecian como marcados cuando el valor en la tabla era True.
-    -Corregido bug informado por Manolo Vadillo: modificado paquete controlies-client para que se llame a
-     script seguimiento-equipos inmediatemente en cada reboot, mediante @reboot en crontab. De esta manera la
-     hora de ultimo arranque del equipo se actaliza ipso-facto en el arranque y no cuando lo llame el crontab.
+10-octubre 2013:
+
+   -Arreglado bug en el script despierta_clientes, que hacía que los thinclients que no estuviesen en la rama group1 del arbol ldap fuesen ignorados. Reportado por
+    Ana Belén Cerejo Cortijo.
+   -Arreglado bug en pkpgcounter en impresoras HP-10XX con filtro foo2zjs (Zenographics), ya está notificado a Jerome (creador del tea4cups). Se cambia la clase
+    python pertinente del paquete pkpgcouter para que tenga en cuena la cabecera PJL que éste filtro añade al fichero mandado a la impresora. Es un parche sobre el
+    paquete original, de tal forma que si dicho paquete se actualiza se perderá el cambio. De momento se queda así hasta que Jerome parchee la aplicación y la envie
+    a los empaquetadores de Debian. Reportado por: Paco (IES Téllez).
+   -Modificadas las cabeceras del script seguimiento_thinclient para que solo se ejecute en el nivel 2, al encendido, ya que ahora ha dejado de hacer caso 
+    al update-rc y se mete en todos los niveles, generando llamadas repetidas a controlies. Solucionado por Paco da con la solucion y modifica script y tarea puppet.
+
+17-junio-2013:
+
+   -Definidos índices en las tablas de la BD.
+   -Seguimiento: modificado el interface para que permita llamadas por xmlrpc, no solo por wget/REST, con vistas a permitir que los scripts cliente en el futuro sean en python y no en bash.
+   -Seguimiento de usuarios: no se ha tocado nada.
+   -Seguimiento de máquinas:
+           -En el grid de sesiones de usuario para una maquina dada, al pulsar sobre el usuario sale una ventana con su foto y datos.
+           -Una misma máquina, con arranque dual en Windows y Linux se guarda en dos registros separados apareciendo dos veces en la lista, una por cada sistema operativo. Al mostrar las
+            sesiones de usuario de esa máquina solo se muestran las de Windows o las de Linux, no ambas mezcladas.
+           -Cuando la fecha del último puppet y/o pkgsync es anterior en 24 horas a la del ultimo arranque, aparece resaltada en naranja en el grid, como aviso de que algo puede ir mal.
+           -Arreglado bug que hacía que en los equipos duales los datos de puppet se guardasen tanto en el registro de los Linux como de los Windows.
+   -Seguimiento de thinclients:
+           -Quitado el filtro de consulta por fechas, ya que no servía para nada (solo nos interesa el estado último de los thinclients) y ralentiza el proceso de consulta.
+           -Añadido un botón que elimina todos los registros de thinclients anteriores a 30 dias. Es solo de prueba, ya que se ha añadido un proceso en el crontab de controlies que hace
+            lo mismo automáticamente cada noche.
+           -Al pulsar sobre un thinclient, en el grid de la derecha ya no solo aparecen el histórico de estados previos de teclados y ratones, también aparecen los logines de los usuarios 
+            que han iniciado sesión en esos equipos. Pulsando sobre un usuario aparece su ficha con datos y foto.
+
+   -Nueva opción->Gestion/Configuracion: permite definir los parámetros de una cuenta de correo (la he probado con gmail sin problemas) para enviar mensajes automáticos desde controlies.
+    Con vistas a enviar informes periódicos automatizados al administrador. He añadido un botón para probar in situ si funciona.
+
+   -Wpkg:
+        -Modificado wpkg.js para que las conexiones sean con user-agent Mozilla en lugar de Internet Explorer, de tal forma que el Squid no las bloquee.
+        -Entre los datos del informe enviado al Controlies se incluye la IP del equipo Windows en el momento de hacer enviar los datos.
+        -Puesto try..catch en todas las llamadas de envio de datos, para que si se produce un error de comunicación no se haga nada. Ahora sacaba una ventana de alert que 
+            despistaba mucho al usuario. También se ha puesto en los scripts que controlan el login/logout de los usuarios Windows.
+   -Scripts instalados mediante puppet:
+        -Se modifican los scripts para que averiguen el dominio del IES (gracias, Paco), ya que había imágenes donde daba problemas de conexión si no se ponía el dominio.
+        -Al verificar el estado de paquetes en el script seguimiento_equipos se producía un "falso positivo" de error si en ese momento se está ejecutando el pkgsync en dicho ordenador.
+        Para evitarlo se comprueba si hay un pkgsync en marcha y, en caso afirmativo, se deja la comprobación del estado del sistema de paquetes para la siguiente revisión.
+
+Mayo-2013:
+
+    -Arreglo de varios bugs menores.
+
+22-Marzo-2012:
+
+    -Incluido seguimiento en thinclients de teclados y ratones.
+    -Ahora todos los scripts averiguan el dominio del centro para añadirlo en las peticiones ldap.
+    -El script de seguimiento de equipos, al verificar el estado del sistema de paquetes no se daba cuenta de si los repositorios estaban bien o mal, normalmente por
+    problemas de firmas.  Ahora lo verifica y pone el estado a "ERROR" si ve que no se puede acceder a algún repositorio.
+    -El script wpkg.js no avisaba siempre si había errores en el log del wpkg y por dicho motivo había equipos donde fallaba un paquete pero no te enterabas.
+    -Varios cambios estéticos.
+
+29-Enero-2013: versión inicial beta. 
+
+19-Diciembre-2012: version alfa subida a github.
 
     
 TODO

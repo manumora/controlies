@@ -6,7 +6,6 @@ from applications.controlies.modules.SQLiteConnection import SQLiteConnection
 from applications.controlies.modules.Laptops import Laptops
 from applications.controlies.modules.LaptopsHistory import LaptopsHistory
 from applications.controlies.modules.Config import Config
-import applications.controlies.modules.Utils.LdapUtils as LdapUtils
 
 import xmlrpclib
 import gluon.contrib.simplejson
@@ -78,6 +77,12 @@ def servidores_aula():
     if not auth.user: redirect(URL(c='default',f='index'))
     return dict()
     
+@service.json   
+@auth.requires_login()
+def servidores_centro():
+    if not auth.user: redirect(URL(c='default',f='index'))
+    return dict()
+
 @service.json   
 @auth.requires_login()    
 def getClassroomDetails():
@@ -296,29 +301,12 @@ def getLTSPStatus():
 def wakeup():
     data = gluon.contrib.simplejson.loads(request.body.read())
 
-    l=conecta()    
-    broadcast = LdapUtils.getBroadcast(l)
-    return response.json({'success':'true'})    
+    l=conecta()
     for i in data["pclist"]:
-        h = Hosts(l,i,"","","")        
-        h.wakeup(broadcast)
+        h = Hosts(l,i,"","","")
+        h.wakeup()
 
     return response.json({'success':'true'})
-
-
-@service.json   
-@auth.requires_login()    
-def wakeupThinclients():
-    l=conecta()
-    rows = LdapUtils.getThinclientsFromClassroom(l, request.vars["host"])
-
-    try:
-        server = xmlrpclib.ServerProxy("http://"+request.vars["host"]+":6800")
-        s = server.wakeupThinclients(rows)
-        return dict(response="OK", host=request.vars["host"], message=s)
-    except:
-        return dict(response="fail", host=request.vars["host"], message="Surgió un error")
-
 
 @service.json  
 @auth.requires_login()     
@@ -340,7 +328,6 @@ def executeCommand():
         return dict(response="OK", host=request.vars["host"], message=s)
     except:
         return dict(response="fail", host=request.vars["host"], message="Surgió un error")
-  
 
 @auth.requires_login()
 def config():
@@ -358,32 +345,125 @@ def config():
           Field('m_user', type='string', label="Usuario correo", length=50, default=configuracion.mail_user),
           Field('m_password',type='string',label="Contraseña correo" , length=30, default=configuracion.mail_password),
           Field ('m_receiver',type='string', label="Email receptor", length=50, default=configuracion.mail_receiver),
-          Field ('a_thinclient',type='boolean', label="Alertar teclado/ratón thinclients", length=50, default=True if configuracion.alert_thinclient==1 else False),
+          Field ('a_teclado',type='boolean', label="Alertar teclado thinclients", length=50, default=True if configuracion.alert_teclado==1 else False),
+          Field ('a_raton',type='boolean', label="Alertar raton thinclients", length=50, default=True if configuracion.alert_raton==1 else False),
+          Field ('a_apagado',type='boolean', label="Alertar thinclients apagados", length=50, default=True if configuracion.alert_apagado==1 else False),
           Field ('l_email',type='boolean', label="Envio de correo resumen", length=50, default=True if configuracion.list_email==1 else False) ,
           submit_button='Guardar Datos Configuración')
 
     if form.accepts(request.vars, session):
           response.flash = 'Procesando datos, espere'                    
-          configuracion.saveConfig(form.vars.m_server,form.vars.m_sender, form.vars.m_user, form.vars.m_password, form.vars.m_receiver, form.vars.a_thinclient, form.vars.l_email)          
+          configuracion.saveConfig(form.vars.m_server,form.vars.m_sender, form.vars.m_user, form.vars.m_password, form.vars.m_receiver, form.vars.a_teclado, form.vars.a_raton, form.vars.a_apagado, form.vars.l_email)          
           redirect( URL( 'gestion', 'config')) 
 
     return dict(form=form)
 
 
 @service.json
-def sendMail():
+def sendReportMail():
 
     configuracion=Config(cdb)
     configuracion.loadConfig()
-    configuracion.sendListReport()
+    return configuracion.sendListReport()
+
+@service.json
+def sendTestMail():
+
+    configuracion=Config(cdb)
+    configuracion.loadConfig()
     return configuracion.enviaMail('Desde controlies', 'Este es un mensaje enviado desde Controlies. Si le ha llegado es que todo esta correcto.')
+
+
+@service.json
+def getConfigData():
+
+    configuracion=Config(cdb)
+    configuracion.loadConfig()
+    response=configuracion.getConfigData()
+    
+    return dict(response=response)
+
+
+@service.json
+def getServerStatus():
+
+    servidor=request.vars["server"]
+    
+    response=[ {"id": 1, "label": "Progreso", "type": "progress", "value": 75},
+                 {"id": 2, "label": "Progreso 2", "type": "progress", "value": 30},   
+                 {"id": 3, "label": "Servidor NFS", "type": "title"},
+                 {"id": 4, "label": "Uso", "type": "text", "value": "Hola"},
+                 {"id": 5, "label": "Estado", "type": "onoff", "value": "on"} ]
+    
+    s = xmlrpclib.Server("http://"+servidor+":6800");
+    response = s.getServerMonitor()
+
+    
+    return dict(response=response)
+
+@service.json
+@auth.requires_login()    
+def setConfigData():
+
+    configuracion=Config(cdb)
+    configuracion.loadConfig()    
+    
+    import gluon.contrib.simplejson
+    
+    #Los datos vienen en un string json y hay que reconstituirlos sobre un diccionario-lista python.
+    data = gluon.contrib.simplejson.loads(request.vars["data"])
+    
+    try:
+       a_teclado=False
+       if str(data['a_teclado']) == "a_teclado":
+             a_teclado=True
+    except LookupError:
+             pass
+    try:
+       a_raton=False
+       if str(data['a_raton']) == "a_raton":
+             a_raton=True
+    except LookupError:
+             pass
+    try:
+       a_apagado=False
+       if str(data['a_apagado']) == "a_apagado":
+             a_apagado=True
+    except LookupError:
+             pass
+    try:
+       l_email=False           
+       if str(data['l_email']) == "l_email":       
+             l_email=True
+    except LookupError:
+             pass      
+             
+    configuracion.saveConfig(data['m_server'],
+                   data['m_sender'],
+                   data['m_user'], 
+                   data['m_password'], 
+                   data['m_receiver'], 
+                   a_teclado, 
+                   a_raton, 
+                   a_apagado, 
+                   l_email,
+                   data['horarios'])               
+                   
+    response = "OK"
+    return dict(response = response)    
+
+@service.json
+@auth.requires_login()    
+def dummy():
+
+   response = "OK"
+   return dict(response = response)    
+
 
 
 def execCommand():
     return dict()
 
-def wakeupThin():
-    return dict()
 
 def call():
     """

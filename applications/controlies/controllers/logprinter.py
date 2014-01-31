@@ -5,6 +5,7 @@ from applications.controlies.modules.Utils import Utils
 from math import floor
 import gluon.contenttype
 import cStringIO
+from gluon.contrib.pyfpdf import FPDF, HTMLMixin
 
 def index():
     if not auth.user:
@@ -163,28 +164,290 @@ def list():
     if page > totalPages:
         page = totalPages
 
-    consulta=cdb.executesql("select sum(total) as totalpag from logprinter where 1=1 "+where)
+    #select sum() devuelve null si hay 0 registros, select total() devuelve 0.
+    
+    sql="select total(total) as totalpag from logprinter where 1=1 "+where
+#    file = open('/tmp/sql.txt', 'w')
+#    file.write(sql)
+#   file.close() 
+
+    consulta=cdb.executesql(sql)
     totalpag= int(consulta[0][0])   
     
     return { "page":page, "total":totalPages, "records":totalreg, "rows":rows, "userdata": {"trabajo": "Total................", "total": totalpag }} 
 
 
-@service.run
+    
 @auth.requires_login()   
 def export_csv():
-	
-    response.headers['Content-Type'] = gluon.contenttype.contenttype('.csv')
-    
-    stream=cStringIO.StringIO()
-    
-      
-    consulta=cdb(cdb.logprinter).select()
-    consulta.export_to_csv_file(stream)
+        
+    consulta=consultaInforme()
+    #Montamos el csv a mano, ya que export_to_csv_file(stream) solo funciona con el objeto Rows y executesql devuelve una lista.
+    doc="Id,Time,Impresora,Jobid,Usuario,Host,Nombre_Trabajo,Paginas,Copias,Total,Tamanio\n"
+                
+    for reg in consulta:
+        doc = doc+str(reg[0]) +',"'+reg[1]+'","'+reg[2]+'",'+str(reg[3])+',"'+reg[4]+'","'+reg[5]+'","'+reg[6]+'",'+str(reg[7])+","+str(reg[8])+","+str(reg[9])+","+str(reg[10])+"\n"
        
-    response.headers['Content-disposition'] = 'attachment; filename=%s.csv' % 'logimpresion'
-    response.write(stream.getvalue())
+    response.headers['Content-Type']=gluon.contenttype.contenttype('.csv')
+    #Pasamos el documento a utf-8, si no da error el codifirlo en base64
+    doc=doc.encode("utf-8")
+    doc64=embed64(data=doc,extension='application/csv')    
+    #No podemos darle un nombre, las data uri estandar no incluyen el nombre del fichero, solo el formato y los datos.
+    return 'document.location="%s";' % doc64 
+
+
+@auth.requires_login()   
+def export_pdf():
     
-    return stream.getvalue()
+    
+    title = "Informe de impresiones"
+    
+    head = THEAD(TR(TH("Fecha/Hora",_width="16%"), 
+                    TH("Impresora",_width="17%"),
+                    TH("Host",_width="10%"),
+                    TH("Usuario",_width="10%"),
+                    TH("Trabajo",_width="33%"),
+                    TH("Pag",_width="4%"), 
+                    TH("Cop",_width="4%"), 
+                    TH("Total",_width="6%"),  
+                    _bgcolor="#A0A0A0"))
+
+   
+    rowsTable = []
+    i=0;
+    
+    rows=consultaInforme()
+    
+    for r in rows:
+        
+        col = i % 2 and "#F0F0F0" or "#FFFFFF"
+
+        documento=r[6].encode("latin_1","replace")[:50]
+                      
+        rowsTable.append(TR(TD(r[1], _align="left"),
+                       TD(r[2], _align="left", _style="font-size: 20px;"),
+                       TD(r[5], _align="left"),
+                       TD(r[4], _align="left"),
+                       TD(documento, _align="left"),
+                       TD(r[7], _align="center"),
+                       TD(r[8], _align="center"),
+                       TD(r[9], _align="center"),
+                       _bgcolor=col, _style="font-size: 5px;"))                       
+        #rowsTable.append(TR(eval(fields), _bgcolor=col))
+        i+=1 
+
+    body = TBODY(*rowsTable)
+    table = TABLE(*[head, body], _border="1", _align="center", _width="100%")
+
+    class MyFPDF(FPDF, HTMLMixin):
+        
+        def __init__(self):
+            FPDF.__init__(self,'L')
+        
+        def header(self):
+            self.set_font('Arial','B',15)
+            self.cell(0,10, title ,1,0,'C')
+            
+        def footer(self):
+            self.set_y(-15)
+            self.set_font('Arial','I',8)
+            self.cell(0,10,"IES",0,0,'L')
+            txt = 'Pag. %s de %s' % (self.page_no(), self.alias_nb_pages())
+            self.cell(0,10,txt,0,0,'R')
+                
+    pdf=MyFPDF()    
+    pdf.add_page()    
+    
+    pdf.write_html(str(XML(table, sanitize=False)))        
+
+    response.headers['Content-Type']='application/pdf; charset=utf-8'    
+    doc=pdf.output(dest='S')
+    doc64=embed64(data=doc,extension='application/pdf')    
+    return 'window.open("%s");' % doc64 
+
+
+@auth.requires_login()   
+def export_pdf_user():
+    
+    
+    title = "Informe de impresiones por usuario"
+    
+    head = THEAD(TR(TH("Fecha/Hora",_width="15%"), 
+                    TH("Impresora",_width="15%"),
+                    TH("Host",_width="10%"),                    
+                    TH("Trabajo",_width="32%"),
+                    TH("Pag",_width="5%"), 
+                    TH("Cop",_width="5%"), 
+                    TH("Total",_width="8%"),  
+                    _bgcolor="#A0A0A0"))
+
+    tablas=[]
+    rowsTable = []
+    i=0;
+    
+    rows=consultaInforme('USER')
+    usuario=""
+    subtotal=0
+    
+    for r in rows:
+        
+        col = i % 2 and "#F0F0F0" or "#FFFFFF"
+        if usuario!=r[4]:
+            if usuario!="":                
+                rowsTable.append(TR(TD("Total impresiones ", _align="right", _colspan="6"), TD(subtotal, _align="center"), _border="1", _bgcolor="#F0F0F0"))                
+                body = TBODY(*rowsTable)
+                table = TABLE(*[head, body], _border="1", _align="center", _width="100%")                
+                tablas.append(table)
+            usuario=r[4]
+            subtotal=0
+            rowsTable=[]            
+            rowsTable.append(TR(TD("USUARIO: " +usuario, _align="left", _colspan="7" ), _border="1", _bgcolor="#F0F0F0"))            
+            
+                       
+        documento=r[6].encode("latin_1","replace")[:50]
+                                         
+        rowsTable.append(TR(TD(r[1], _align="left"),
+                       TD(r[2], _align="left"),
+                       TD(r[5], _align="left"),
+                       TD(documento, _align="left"),
+                       TD(r[7], _align="center"),
+                       TD(r[8], _align="center"),
+                       TD(r[9], _align="center"),
+                       _bgcolor=col))                       
+        subtotal=subtotal+r[9]
+        
+        i+=1 
+    
+    if len(rowsTable)>0 :
+        rowsTable.append(TR(TD("Total impresiones ", _align="right", _colspan="6"), TD(subtotal, _align="center"), _border="1", _bgcolor="#F0F0F0"))                
+        body = TBODY(*rowsTable)
+        table = TABLE(*[head, body], _border="1", _align="center", _width="100%")                
+        tablas.append(table)
+        
+    contenido = DIV(*tablas, _width="100%", _align="center")
+
+    class MyFPDF(FPDF, HTMLMixin):
+        
+        def __init__(self):
+            FPDF.__init__(self,'L')
+        
+        def header(self):
+            self.set_font('Arial','B',15)
+            self.cell(0,10, title ,1,0,'C')
+            
+        def footer(self):
+            self.set_y(-15)
+            self.set_font('Arial','I',8)
+            self.cell(0,10,"IES",0,0,'L')
+            txt = 'Pag. %s de %s' % (self.page_no(), self.alias_nb_pages())
+            self.cell(0,10,txt,0,0,'R')
+                
+    pdf=MyFPDF()
+    ##pdf.set_font("Arial",'I', size=8) No vale para nada, no formatea bien
+    pdf.add_page()    
+    pdf.write_html(str(XML(contenido, sanitize=False)))        
+
+    response.headers['Content-Type']='application/pdf'
+    doc=pdf.output(dest='S')
+    doc64=embed64(data=doc,extension='application/pdf')    
+    return 'window.open("%s");' % doc64 
+
+   
+
+def consultaInforme(orden='GRID'):
+    
+    where=""
+    try:
+       if str(request.vars['time']) != "None":
+             where = where+" and time like '%"+str(request.vars['time'])+"%'"
+    except LookupError:
+       pass
+    
+    try:
+       if str(request.vars['host']) != "None":
+             where = where+" and host like '%"+str(request.vars['host'])+"%'"
+    except LookupError:
+       pass
+    
+    try:
+       if str(request.vars['impresora']) != "None":
+             where = where+" and impresora like '%"+str(request.vars['impresora'])+"%'"
+    except LookupError:
+       pass
+        
+    try:
+       if str(request.vars['jobid']) != "None":
+             where = where+" and jobid>="+str(request.vars['jobid'])+" "
+    except LookupError:
+       pass
+       
+    try:
+       if str(request.vars['usuario']) != "None":
+             where = where+" and usuario like '%"+str(request.vars['usuario'])+"%'"
+    except LookupError:
+       pass
+   
+    try:
+       if str(request.vars['trabajo']) != "None":
+             where = where+" and trabajo like '%"+str(request.vars['trabajo'])+"%'"
+    except LookupError:
+       pass
+   
+    try:
+       if str(request.vars['paginas']) != "None":
+             where = where+" and paginas>="+str(request.vars['paginas'])+" "
+    except LookupError:
+       pass          
+
+    try:
+       if str(request.vars['copias']) != "None":
+             where = where+" and copias>="+str(request.vars['copias'])+" "
+    except LookupError:
+       pass
+
+    try:
+       if str(request.vars['total']) != "None":
+             where = where+" and total>="+str(request.vars['total'])+" "
+    except LookupError:
+       pass
+
+    try:
+       if str(request.vars['tamanio']) != "None":
+             where = where+" and tamanio>="+str(request.vars['tamanio'])+" "
+    except LookupError:
+       pass
+
+    fechaini='01-01-2000'
+    try:
+       if len(str(request.vars['fechaini'])) > 0 :
+             fechaini=request.vars['fechaini'].replace("/","-")
+    except LookupError:
+       pass
+      
+    fechafin='01-01-2100'   
+    try:
+       if len(str(request.vars['fechafin'])) > 0 :
+             fechafin=request.vars['fechafin'].replace("/","-")
+    except LookupError:
+       pass
+
+    fechaini = formatearFecha(fechaini)
+    fechafin = formatearFecha(fechafin)
+    
+    sql="select id,time,impresora,jobid,usuario,host,trabajo,paginas,copias,total,tamanio from logprinter where 1=1"     
+    where=where+ " and time between '"+fechaini+"' and date('"+fechafin+"','+24 hours')"
+    sql = sql + where
+    
+    if orden=='GRID':
+         sql = sql + " order by "+request.vars['sidx']+" "+request.vars['sord']    
+    elif orden=="USER":
+         sql = sql + " order by usuario asc"   
+    else:
+         pass
+         
+    consulta=cdb.executesql(sql)
+    
+    return consulta
 
 def list_all():    
       
@@ -283,7 +546,36 @@ def list_all():
 def formatearFecha(fecha):
 	return fecha[6:]+"-"+fecha[3:5]+"-"+fecha[0:2]    
 
+@service.json
+def borrarLogPrinter():
 
+    retorno="OK"
+    idlog=request.vars['id']
+    try:
+       cdb(cdb.logprinter.id == int(idlog)).delete()
+       retorno="OK"
+    except:
+       retorno="fail"
+              
+    return dict(response=retorno)
+
+@service.json
+def modificarLogPrinter():
+
+    retorno="OK"
+    idlog=request.vars['id']
+    pag=request.vars['paginas']
+    cop=request.vars['copias']
+    total=str(int(pag)*int(cop))
+           
+    sql="update logprinter set paginas="+pag+", copias="+cop+", total="+total+"  where id="+idlog   
+    try:
+       cdb.executesql(sql)
+       retorno="OK"
+    except:
+       retorno="fail"
+    return dict(response=retorno)
+   
 @service.json
 def getUserData():
 
@@ -292,7 +584,6 @@ def getUserData():
     response = u.getUserData()
     l.close()
     return dict(response=response)
-
 
     
 def form():
