@@ -1,7 +1,12 @@
 CAMBIOS
 =======
 
-23 enero 2013
+30 enero 2014
+
+    -Arreglado bug en config.html con los checkbox (notificado por Paco IES Téllez)
+    -Incluida clave externa en la tabla clases_puppet_host
+
+23 enero 2014
 
     -Añadido un nuevo seguimiento: seguimiento de tareas puppet
         -Al actualizar un equipo por puppet, recopila todas las clases que se le aplican junto con 
@@ -24,7 +29,7 @@ CAMBIOS
             hora de logout correcta.
            
     -Arreglado bug que hacia que no se despertasen los clientes si en su MAC en ldap había 
-     espacios en blanco al final.
+     espacios en blanco al final (Notificado por Ismael- IES Gonzalo Korreas).
                
 20 Enero 2014
 

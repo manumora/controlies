@@ -1,0 +1,167 @@
+<style>
+	
+	.contenedor {
+		width:100%;
+		height:15px;
+		border:1px solid #000;
+		overflow:hidden; }
+	.progreso {
+		width:37%;
+		height:15px;
+		border-right: 1px solid #000000;
+        }
+	.etiqueta {
+		color: #000000;
+		font-size: 13px;
+		left: 25px;
+		position: relative;
+		top: -16px; }
+        
+    .divServer {
+        padding:3px;
+        border:1px solid #BBBBBB !important;
+        width: 300px; 
+        border-radius: 8px;         
+        color: #1C94C4 !important;
+    }
+    
+</style>
+
+{{extend 'layout.html'}}
+
+<script>
+  
+      
+    $(function() {
+        $("#tabSrv").tabs().css("font-size","13px");
+        
+        jQuery.post('call/json/getServerStatus', { server: "192.168.1.14" } , function(result) {                    
+               updateServer("tabSrv1", result.response);            
+        });
+    
+        
+    });   
+    
+    function progreso(porcentaje) {
+	
+		var contenedor = document.createElement("div");
+        var barra= document.createElement("div");
+        var etiqueta = document.createElement("div")
+        
+        contenedor.appendChild(barra);
+        contenedor.appendChild(etiqueta);
+        contenedor.className="contenedor";
+		barra.className="progreso";
+        if (porcentaje<66)  barra.style.background="#9acd32";
+        else 
+          if (porcentaje<90)  barra.style.background="#ffa500";
+          else barra.style.background="#d65946";
+        
+		etiqueta.className="etiqueta";
+		
+		barra.style.width=porcentaje+'%';
+        etiqueta.innerHTML=porcentaje+'%';
+
+        return contenedor;
+    }		
+
+    function updateServer(id, status) {
+		
+		var index, cellContent, cell, row;
+		var tbl     = document.createElement("table");
+        var tblBody = document.createElement("tbody");
+		
+		
+		for (index = 0; index < status.length; ++index) {
+			row = document.createElement("tr");
+			switch (status[index].type) {
+				case "progress":
+				   cell = document.createElement("td");
+				   cell.setAttribute("width", "50%");
+       		       cellContent = document.createTextNode(status[index].label);
+			       cell.appendChild(cellContent);
+			       cell.style.color="#1C94C4";
+			       row.appendChild(cell);
+		           cell = document.createElement("td");
+				   //cellContent = document.createTextNode(status[index].value+"%");
+			       cellContent=progreso(status[index].value);
+			       cell.appendChild(cellContent);
+			       row.appendChild(cell);
+				   break;
+				case "title":
+				   cell = document.createElement("td");
+			       cellContent = document.createTextNode(status[index].label);
+			       cell.setAttribute("colspan",2);
+                   cell.style.color="#1C94C4";
+			       //cell.appendChild(cellContent);
+			       cell.innerHTML="<b>"+status[index].label+"</b>"
+			       row.appendChild(cell);
+		           break;
+				case "text":
+				   cell = document.createElement("td");
+			       cell.setAttribute("width", "50%");
+       		       cellContent = document.createTextNode(status[index].label);
+			       cell.appendChild(cellContent);
+                   cell.style.color="#1C94C4";
+			       row.appendChild(cell);
+		           cell = document.createElement("td");
+				   cellContent = document.createTextNode(status[index].value);
+                   cell.style.color="#1C94C4";
+			       cell.appendChild(cellContent);
+			       row.appendChild(cell);
+				   break;
+				case "onoff":
+				   cell = document.createElement("td");
+				   cell.setAttribute("width", "50%");
+       		       cellContent = document.createTextNode(status[index].label);
+                   cell.style.color="#1C94C4";
+			       cell.appendChild(cellContent);
+			       row.appendChild(cell);                   
+		           cell = document.createElement("td");
+				   cellContent = document.createTextNode(status[index].value);
+                   cell.style.color="#1C94C4";
+                   cell.style.textAlign="center"
+                   if (status[index].value=="on") cell.style.backgroundColor="#9acd32"; 
+			       else cell.style.backgroundColor="#d65946";
+			       
+			       cell.appendChild(cellContent);
+			       row.appendChild(cell);
+				   break;
+			};
+			tblBody.appendChild(row);
+	    }; 
+	    tbl.appendChild(tblBody);
+        jQuery("#"+id).append(tbl);
+        tbl.setAttribute("border", "2");
+        tbl.setAttribute("width", "100%");
+       
+		
+	}
+    
+</script>
+<table width="100%" cellspacing="12">
+<tr>
+	<td>    
+	    <div id="tabSrv">
+	        <ul>
+	            <li><a href="#tabSrv1"><span id="actions">Monitorización de Servidores</span></a></li>
+	        </ul>
+	        <div id="tabSrv1" class="divServer">  
+	            
+	        </div>
+	        
+	    </div>       
+	</td>
+</tr>
+</table>
+
+<div id="dialog-form"></div>
+
+<div id="dialog-details"></div>
+
+<div id="dialogAlert" title="Atenci&oacute;n">
+        <p>
+                <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 7px 0;"></span>
+                <span id="dialogAlertMessage"></span>
+        </p>
+</div>

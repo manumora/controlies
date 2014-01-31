@@ -272,10 +272,10 @@
        config.m_password=jQuery("#form_data #m_password").val();
        config.m_sender=jQuery("#form_data #m_sender").val();
        config.m_receiver=jQuery("#form_data #m_receiver").val();
-       config.a_teclado=jQuery("#form_data #a_teclado").val();
-       config.a_raton=jQuery("#form_data #a_raton").val();
-       config.a_apagado=jQuery("#form_data #a_apagado").val();
-       config.l_email=jQuery("#form_data #l_email").val();
+       config.a_teclado=jQuery("#form_data #a_teclado").is(":checked") ? "a_teclado":"";
+       config.a_raton=jQuery("#form_data #a_raton").is(":checked") ? "a_raton":"";
+       config.a_apagado=jQuery("#form_data #a_apagado").is(":checked") ? "a_apagado":"";
+       config.l_email=jQuery("#form_data #l_email").is(":checked") ? "l_email":"";
        config.horarios=horarios.rows;
               
        datos=JSON.stringify(config); //Serializamos en json el objeto que contiene toda la configuracion...

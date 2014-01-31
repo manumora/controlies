@@ -154,7 +154,7 @@ cdb.define_table('clases_puppet',
           Field('clase','string'))
 
 cdb.define_table('clases_puppet_host',
-          Field('id_clase', 'integer'),
+          Field('id_clase', 'reference clases_puppet'),
           Field('time','datetime',default=datetime.datetime.today()),
           Field('host','string'),
           Field('resultado','string'))          

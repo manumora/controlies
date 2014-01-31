@@ -78,6 +78,12 @@ def servidores_aula():
     return dict()
     
 @service.json   
+@auth.requires_login()
+def servidores_centro():
+    if not auth.user: redirect(URL(c='default',f='index'))
+    return dict()
+
+@service.json   
 @auth.requires_login()    
 def getClassroomDetails():
     import xmlrpclib
@@ -377,6 +383,24 @@ def getConfigData():
     
     return dict(response=response)
 
+
+@service.json
+def getServerStatus():
+
+    servidor=request.vars["server"]
+    
+    response=[ {"id": 1, "label": "Progreso", "type": "progress", "value": 75},
+                 {"id": 2, "label": "Progreso 2", "type": "progress", "value": 30},   
+                 {"id": 3, "label": "Servidor NFS", "type": "title"},
+                 {"id": 4, "label": "Uso", "type": "text", "value": "Hola"},
+                 {"id": 5, "label": "Estado", "type": "onoff", "value": "on"} ]
+    
+    s = xmlrpclib.Server("http://"+servidor+":6800");
+    response = s.getServerMonitor()
+
+    
+    return dict(response=response)
+
 @service.json
 @auth.requires_login()    
 def setConfigData():
@@ -390,25 +414,29 @@ def setConfigData():
     data = gluon.contrib.simplejson.loads(request.vars["data"])
     
     try:
+       a_teclado=False
        if str(data['a_teclado']) == "a_teclado":
              a_teclado=True
     except LookupError:
-             a_teclado=False
+             pass
     try:
+       a_raton=False
        if str(data['a_raton']) == "a_raton":
              a_raton=True
     except LookupError:
-             a_raton=False
+             pass
     try:
+       a_apagado=False
        if str(data['a_apagado']) == "a_apagado":
              a_apagado=True
     except LookupError:
-             a_apagado=False
+             pass
     try:
-       if str(data['l_email']) == "l_email":
+       l_email=False           
+       if str(data['l_email']) == "l_email":       
              l_email=True
     except LookupError:
-             l_email=False         
+             pass      
              
     configuracion.saveConfig(data['m_server'],
                    data['m_sender'],
