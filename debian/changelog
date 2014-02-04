@@ -1,3 +1,21 @@
+controlies (0.6.5-9) unstable; urgency=low
+
+  * Control independiente de alertas de teclado, ratón y apagados para thinclients
+  * Mejorada detección de thinclients apagados (problema: sigue dando falsos positivos)
+  * Arreglados bugs de columnas en grid de thinclients
+  * Informes de log de impresión con filtros y en varios formatos
+  * Arreglado bug en el formato de fechas de los datePicker
+  * Seguimiento de impresión: añadida opción de borrado de registros
+  * Seguimiento de impresión: añadida opción de modificacion manual de nº de páginas y copias
+  * Configuración: remodelación del formulario para ganar visibilidad 
+  * Configuración: añadido grid para insertar las franjas horarias del centro, para ser usada en el seg. de aulas
+  * Nuevo seguimiento: seguimiento de uso de un aula en una fecha concreta
+  * Nuevo seguimiento: seguimiento maestro-detalle de tareas puppet aplicadas en todos los equipos, con fechas y resultado
+  * Seguimiento de usuarios: la hora de cierre de sesión en thinclients se actualiza constantemente. A prueba de apagados bruscos 
+  * Arreglado bug en las MACs de thinclients con espacios en blanco al final.
+  
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Fri, 18 Dec 2013 11:05:00 +0200
+
 controlies (0.6.5-8) unstable; urgency=low
 
   * Restringir acceso a otros usuarios

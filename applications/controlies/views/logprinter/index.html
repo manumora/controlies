@@ -38,8 +38,7 @@
 				jQuery('#list').trigger('reloadGrid') 
 			});
     });
-    
-                
+                      
     function print_grid(){  
 		  
           jQuery("#list").jqGrid({
@@ -57,19 +56,39 @@
                         thegrid.addJSONData(JSON.parse(jsondata.responseText).d);
                     }
                 },        
-                onSelectRow: function (id) { verUsuario(id); },                       
-                colNames:['Fecha','Impresora','Jobid','Usuario','Host','Nombre','Pág.','Cop.','Tot.','Bytes'],
+                colNames:['Fecha','Impresora','Jobid','Usuario','Host','Nombre','Pág.','Cop.','Tot.','Bytes','Borr'],
                 colModel:[                  
-                    {name:'time',index:'time', width:40, align:"center"},
+                    
+                    {name:'time',index:'time', width:40, align:"center", editable:true,  edittype:'text', editoptions:{readonly:true , maxlength: 20} },
                     {name:'impresora',index:'impresora', width:40, align:"left"},
-                    {name:'jobid',index:'jobid', width:12, align:"right"},
+                    {name:'jobid',index:'jobid', width:12, align:"right", editable:true,  edittype:'text', editoptions:{readonly:true , maxlength: 20} },
                     {name:'usuario',index:'usuario', width:30, align:"left"},
                     {name:'host',index:'host', width:30, align:"left"},
-                    {name:'trabajo',index:'trabajo', width:60, align:"left"},
-                    {name:'paginas',index:'paginas', width:10, align:"left"},
-                    {name:'copias',index:'copias', width:10, align:"left"},
+                    {name:'trabajo',index:'trabajo', width:60, align:"left", editable:true,  edittype:'text', editoptions:{readonly:true , maxlength: 20} },
+                    {name:'paginas',index:'paginas', width:10, align:"left", editable:true,  edittype:'text', editoptions:{maxlength: 5}, editrules: {required:true, number: true}},
+                    {name:'copias',index:'copias', width:10, align:"left", editable:true,  edittype:'text', editoptions:{maxlength: 5}, editrules: {required:true, number: true}},
                     {name:'total',index:'total', width:10, align:"left"},
-                    {name:'tamanio',index:'tamanio', width:15, align:"left"}
+                    {name:'tamanio',index:'tamanio', width:15, align:"left"}, 
+                    {name:'borrar',index:'borrar', search:false, width:15, sortable: false, align:"left", formatter:'actions',
+                          formatoptions: {
+                            keys: true,
+                            editformbutton: false,
+                            delbutton: true,
+                            editbutton: false,
+                            delOptions: {                                 
+                                 reloadAfterSubmit:true,
+                                 processing: false,
+                                 msg: "¿Desea borrar el resgistro de impresión seleccionado?",
+                                 top: 300,
+                                 left: 600,
+                                 modal: true,
+                                 width:340, 
+                                 ajaxDelOptions: { contentType: "application/json" },                                 
+                                 useDataProxy: true  //Utiliza el dataProxy del Grid para hacer la petición Ajax de borrado. Si definimos un dataProxy
+                                                     //en la columna no funciona, pese a que la documentación dice que si.
+                            }
+                          }
+                    }          
                 ], 
                 rowNum:25,
                 height:335,
@@ -82,30 +101,179 @@
                 sortorder: "desc", 
                 caption:"Log impresión",
                 footerrow: true, 
-                userDataOnFooter: true            
+                userDataOnFooter: true, 
+                
+                dataProxy :  function (t, act) {                                          
+                    switch(act){
+                            case "del_list":{ //Si se ha llamado desde la accion de borrado de filas...
+                               var rowid=t.data.id;
+                               var grid = jQuery("#list");
+                               jQuery.post('call/json/borrarLogPrinter', t.data , function(result) { 
+                                    switch(result.response){
+                                         case "OK":{
+                                              grid.delRowData(rowid); 
+                                              // Lo siguiente parece ser que impide que haya un popup de confirmación
+                                              $("#delmod"+grid[0].id).hide();
+                                              if (grid[0].p.lastpage > 1) {
+                                                 // reload grid to make the row from the next page visable.
+                                                 // TODO: deleting the last row from the last page which number is higher as 1
+                                                 grid.trigger("reloadGrid", [{page:grid[0].p.page}]);
+                                              };
+                                              break;
+                                         }
+                                         case "fail":{
+                                             alert("Ha habido un problema en el borrado");
+                                             break;
+                                         }
+                                    }                                
+                               });                               
+                               break;   
+                            }
+                    };
+                }
           }); 
-          jQuery("#list").jqGrid('navGrid','#pager',{add:false,edit:false,del:false,search:false,refresh:false});          
+          jQuery("#list").jqGrid('navGrid','#pager',{add:false,edit:true,del:false,search:false,refresh:false},
+              {recreateForm: false,
+              viewPagerButtons: false,
+              url: 'call/json/modificarLogPrinter',
+              closeAfterEdit: true, 
+ 			  beforeShowForm: function (formEdit) {  //para poner desactivados los campos readonly
+					formEdit.find(".FormElement[readonly]")
+						.prop("disabled", true)
+						.addClass("ui-state-disabled")
+						.closest(".DataTD")
+						.prev(".CaptionTD");
+				}
+			}	
+          );          
+          
+          //Titulo de la ventana de modificacion
+          $.jgrid.edit.editCaption= "Modifique nº paginas y/o copias";
+          
+          
           jQuery("#list").jqGrid('filterToolbar'); 
+                   
+          jQuery("#list").jqGrid('navButtonAdd','#pager',{
+                    caption: "Ver",
+                    buttonicon :'ui-icon-search',
+                    onClickButton : function (){               
+			
+			            verRegistro(); 
+             	
+  		            } 
+          });
           
           jQuery("#list").jqGrid('navButtonAdd','#pager',{
-                    caption: "Exportar CVS",
+                    caption: "CSV",
                     buttonicon :'ui-icon-calculator',
                     onClickButton : function (){               
-						   window.open("{{=URL(c='logprinter',f='export_csv',args=['run'])}}");
+						
+                        //jQuery("#gs_time").val() -> es el filtro de la columna "time". Es mas facil obtenerlo todo junto de postData
+                        //Se aplican los valores del filtro aplicado en la última consulta del grid. Si luego se han cambiado, pero no se
+                        //actualizado el grid, no se actualizan. Es decir, el CSV se carga con lo mismo que hay en el grid.
+                        
+                        filtro=jQuery.param($("#list").getGridParam("postData"));
+                        
+                        jQuery.ajax({url:"export_csv",data: filtro})
+                            .done(function ( data ){
+                                switch(data){
+                                    case 'noPeople':{
+                                        jQuery('#messageReport').html("No se han encontrado datos").effect("highlight", {"color":"yellow"}, 1000);
+                                        break
+                                    }
+                                    default: eval(data);
+                                }
+                            }
+ 
+ 
+                        );	
   		            } 
           }); 
-
           
+          jQuery("#list").jqGrid('navButtonAdd','#pager',{
+                    caption: "PDF",
+                    buttonicon :'ui-icon-calculator',
+                    onClickButton : function (){               
+						
+                        //jQuery("#gs_time").val() -> es el filtro de la columna "time". Es mas facil obtenerlo todo junto de postData
+                        //Se aplican los valores del filtro aplicado en la última consulta del grid. Si luego se han cambiado, pero no se
+                        //actualizado el grid, no se actualizan. Es decir, el CSV se carga con lo mismo que hay en el grid.
+                        
+                        filtro=jQuery.param($("#list").getGridParam("postData"));
+                        
+                        jQuery.ajax({url:"export_pdf",data: filtro})
+                            .done(function ( data ){
+                                switch(data){
+                                    case 'noPeople':{
+                                        jQuery('#messageReport').html("No se han encontrado datos").effect("highlight", {"color":"yellow"}, 1000);
+                                        break
+                                    }
+                                    default: eval(data);
+                                }
+                            }
+ 
+ 
+                        );	
+  		            } 
+          }); 
           
+          jQuery("#list").jqGrid('navButtonAdd','#pager',{
+                    caption: "PDF Usuarios",
+                    buttonicon :'ui-icon-calculator',
+                    onClickButton : function (){               
+						
+                        //jQuery("#gs_time").val() -> es el filtro de la columna "time". Es mas facil obtenerlo todo junto de postData
+                        //Se aplican los valores del filtro aplicado en la última consulta del grid. Si luego se han cambiado, pero no se
+                        //actualizado el grid, no se actualizan. Es decir, el CSV se carga con lo mismo que hay en el grid.
+                        
+                        filtro=jQuery.param($("#list").getGridParam("postData"));
+                        
+                        jQuery.ajax({url:"export_pdf_user",data: filtro})
+                            .done(function ( data ){
+                                switch(data){
+                                    case 'noPeople':{
+                                        jQuery('#messageReport').html("No se han encontrado datos").effect("highlight", {"color":"yellow"}, 1000);
+                                        break
+                                    }
+                                    default: eval(data);
+                                }
+                            }
+ 
+ 
+                        );	
+  		            } 
+          }); 
        
     }
 
-function verUsuario(id){
+ function rowSelected(){
+            var uid = jQuery("#list").jqGrid('getGridParam','selrow'); 
+        
+            if( uid == null ){
+				jQuery("#list").css("cursor","pointer");                 
+                jQuery( "#dialog-alert" ).dialog({
+                    resizable: false,
+                    height:150,
+                    width:290,
+                    modal: true,
+                    buttons: { "Aceptar": function() { $( this ).dialog( "close" ); }}
+                }).dialog('open');
+                return false;
+            }
+            return uid;
+    }           
+  
+
+function verRegistro(){
    
                     jQuery("#list").css("cursor","wait");        
        
 					ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
-															
+	
+	                var id = rowSelected();
+                    if(id==false)
+                        return false;
+     
 					
                     jQuery("#messageLoading").show();
                                         
@@ -153,6 +321,7 @@ function verUsuario(id){
 										grupos=grupos + l + " " ;
 									});                  
 									jQuery("#form_data #group").val(grupos);   
+                                   
 							}
 							else {
 									jQuery("#form_data #type").val("local de la máquina");
@@ -160,10 +329,16 @@ function verUsuario(id){
 							};
 							
 							jQuery("#form_data #equipo").val(data.host);                               
-							jQuery("#form_data #iniSesion").val(data.timelogin);   
-							jQuery("#form_data #finSesion").val(data.timelogout);   
+
+							jQuery("#form_data #time").val(data.time);   
+                            jQuery("#form_data #impresora").val(data.impresora);   
+                            jQuery("#form_data #jobid").val(data.jobid);   
+                            jQuery("#form_data #trabajo").val(data.trabajo);   
+                            jQuery("#form_data #paginas").val(data.paginas);   
+                            jQuery("#form_data #copias").val(data.copias);   
+                            jQuery("#form_data #total").val(data.total);   
 			
-							x = (jQuery(window).width()-400)/2;
+							x = (jQuery(window).width()-600)/2;
 							y = (jQuery(window).height()-500)/2;
 							
 							jQuery("#messageLoading").hide();
@@ -172,9 +347,9 @@ function verUsuario(id){
 							jQuery("#dialog-form").dialog({
 								resizable: false,
 								modal: true,
-								width: 400,
+								width: 600,
 								stack: false,                                
-								title: "Consultar Sesión de Usuario"
+								title: "Detalle Trabajo Impresión"
 							}).dialog('option', 'position', [x, y]);                        
 
                         });               
@@ -189,6 +364,7 @@ function verUsuario(id){
 	    jQuery( "#fechaini" ).datepicker({
 	      changeMonth: true,
 	      changeYear: true,
+          dateFormat: "dd/mm/yy", 
 	      onClose: function( selectedDate ) {
 	        $( "#fechafin" ).datepicker( "option", "minDate", selectedDate );
 	      },
@@ -198,6 +374,7 @@ function verUsuario(id){
 	    jQuery( "#fechafin" ).datepicker({
 	      changeMonth: true,
 	      changeYear: true,
+          dateFormat: "dd/mm/yy",
 	      onClose: function( selectedDate ) {
           	$( "#fechaini" ).datepicker( "option", "maxDate", selectedDate );
       	  },

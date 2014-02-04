@@ -10,6 +10,7 @@
 	    jQuery( "#fechainiborrado" ).datepicker({
 	      changeMonth: true,
 	      changeYear: true,
+	      dateFormat: "dd/mm/yy", 
 	      onClose: function( selectedDate ) {
 	        $( "#fechafinborrado" ).datepicker( "option", "minDate", selectedDate );
 	      },
@@ -18,6 +19,7 @@
 	    jQuery( "#fechafinborrado" ).datepicker({
 	      changeMonth: true,
 	      changeYear: true,
+	      dateFormat: "dd/mm/yy", 
 	      onClose: function( selectedDate ) {
 	      	$( "#fechainiborrado" ).datepicker( "option", "maxDate", selectedDate );
 	  	  },

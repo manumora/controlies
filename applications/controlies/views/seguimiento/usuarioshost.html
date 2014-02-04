@@ -6,8 +6,8 @@
 {{#response.files.append(URL('static','css/default.advanced.css'))}}
 
 <form action="" enctype="multipart/form-data" method="post" id="form_host">	
-	Fecha inicio: <input class="date" id="fechaini" name="fechaini" type="date" />
-	Fecha fin: <input class="date" id="fechafin" name="fechafin" type="date" />
+	Fecha inicio: <input id="fechainiusuarios" name="fechainiusuarios" style="text-align:center; width:80px"/>
+	Fecha fin: <input id="fechafinusuarios" name="fechafinusuarios" style="text-align:center; width:80px"/>
 	<input type="button" value="Actualizar" onclick="javascript:$('#list_sesiones').trigger('reloadGrid')">
 	<input type="hidden" id="host" name="host" value=""/>
 	<input type="hidden" id="tipohost" name="tipohost" value=""/>
@@ -32,8 +32,8 @@
           jQuery("#list_sesiones").jqGrid({
                 url:"{{=URL(c='seguimiento',f='call',args=['json','list'])}}",
                 data: "{}",
-                postData: { fechaini: function() { return jQuery("#form_host #fechaini").val();} , 
-                            fechafin: function() { return jQuery("#form_host #fechafin").val();} ,
+                postData: { fechaini: function() { return jQuery("#form_host #fechainiusuarios").val();} , 
+                            fechafin: function() { return jQuery("#form_host #fechafinusuarios").val();} ,
                             host: function() { return jQuery("#form_host #host").val(); },
                             tipohost: function() { return jQuery("#form_host #tipohost").val(); }
                             },
@@ -157,7 +157,30 @@
    
 </script>
 <script type="text/javascript">     
-  jQuery(document).ready( function(){  print_grid(); } );   
+  jQuery(document).ready( function(){  
+      
+         print_grid(); 
+      
+         jQuery( "#fechainiusuarios" ).datepicker({
+	      changeMonth: true,
+	      changeYear: true,
+	      dateFormat: "dd/mm/yy", 
+	      onClose: function( selectedDate ) {
+	        $( "#fechafinusuarios" ).datepicker( "option", "minDate", selectedDate );
+	      }          
+	    });
+	    
+	    jQuery( "#fechafinusuarios" ).datepicker({
+	      changeMonth: true,
+	      changeYear: true,
+	      dateFormat: "dd/mm/yy", 
+	      onClose: function( selectedDate ) {
+	      	$( "#fechainiusuarios" ).datepicker( "option", "maxDate", selectedDate );
+	  	  }
+	    });
+      
+      } 
+  );   
   
   
   

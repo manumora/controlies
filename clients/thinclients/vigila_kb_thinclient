@@ -55,4 +55,40 @@ then
 
 fi
 
+#Si hay un usuario logueado, actualiza el campo logout con la hora actual, por si se apaga
+#bruscamente.
+
+haysocket=$(ls -1 /var/run/ldm_socket*  | wc -l)
+
+if [ $haysocket -eq 0 ]
+then
+  exit 0
+fi
+
+if [ -z $LDM_SOCKET ]
+then
+   LDM_SOCKET=$(ls -1 /var/run/ldm_socket*  | head -1)
+else
+   exit 0
+fi
+
+if [ -z $LDM_SERVER ]
+then
+   LDM_SERVER=192.168.0.254
+else 
+   exit 0
+fi
+
+#Utiliza el socket ssh creado entre thinclient y servidor para averiguar el login del usuario
+LDM_USERNAME=$(ssh -S $LDM_SOCKET $LDM_SERVER "id -un")
+
+if [ -z $LDM_USERNAME ]
+then
+   exit 0
+fi
+
+usuario=$LDM_USERNAME
+
+peticion="http://ldap.$dominio/controlies/init/registro/logout?usuario=$usuario&maquina=$equipo"
+actualiza=$(wget -q -O - $peticion 2>/dev/null)
 

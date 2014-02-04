@@ -5,6 +5,9 @@
             <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>Operacion Realizada.</p>
 </div>
 
+<div id="dialog-wait">
+</div>
+    
 
 <table width="100%" cellspacing="12">
     <tr>
@@ -14,14 +17,66 @@
                 <li class="ui-state-default ui-corner-top ui-tabs-selected ui-state-active"><a href="#tabs-1"><span id="actions">Configuración</span></a></li>
             </ul>
             <div id="tabs-1" style="padding:3px;" class="ui-tabs-panel ui-widget-content ui-corner-bottom">  
-                <table>
+                <table width="100%">
                     <tr>
                         <td>
-                            {{=form}}
-                            <form>
-                                    <input type="button" value="Enviar correo de prueba" id="envio" name="envio" onclick="javascript:sendMail()">
+                         <!--   {{=form}} -->
+                            <form enctype="multipart/form-data" method="post" id="form_data" onsubmit="return guardarConfiguracion();">
+                                <table width="100%">
+                                     <tr>
+                                         <td width="30%">Servidor SMTP(nombre:puerto)</td>
+                                         <td width="35%"><input type="text" id="m_server" size="35"  name="m_server" maxlength="50"></td>
+                                         <td width="35%" rowspan="9">  
+                                             <div id="tabla">
+                                                <table id="packages"><tr><td><td/></tr></table>
+                                            </div>
+                                            <div id="packagePager"></div>                                           
+                                         </td>
+                                     </tr>    
+                                     <tr>
+                                         <td>E-mail de envío</td>
+                                         <td><input type="text" id="m_sender" size="35"  name="m_sender" maxlength="50"/></td>
+                                     </tr>    
+                                     </tr>    
+                                     <tr>
+                                         <td>Usuario correo</td>
+                                         <td><input type="text" id="m_user" size="35" name="m_user" maxlength="50"/></td>
+                                     </tr>    
+                                     <tr>
+                                         <td>Password correo</td>
+                                         <td><input type="password" id="m_password" size="20"  name="m_password"  maxlength="30"/></td>
+                                     </tr>    
+                                     <tr>
+                                         <td>E-mail receptor</td>
+                                         <td><input type="text" id="m_receiver" size="35" name="m_receiver"  maxlength="50"/></td>
+                                     </tr>    
+                                     <tr>
+                                         <td>Alerta teclado thinclients</td>
+                                         <td><input type="checkbox" id="a_teclado" name="a_teclado" value="a_teclado"/></td>
+                                     </tr>    
+                                     <tr>
+                                         <td>Alerta ratón thinclients</td>
+                                         <td><input type="checkbox" id="a_raton" name="a_raton" value="a_raton"/></td>
+                                     </tr>    
+                                     <tr>
+                                         <td>Alerta apagado thinclients</td>
+                                         <td><input type="checkbox" id="a_apagado" name="a_apagado" value="a_apagado"/></td>
+                                     </tr>    
+                                     <tr>
+                                         <td>Envío de correo resumen</td>
+                                         <td><input type="checkbox" id="l_email" name="l_email" value="l_email"/></td>
+                                     </tr>    
+                                        <td colspan="3" align="left">    
+                                           <br/>
+                                           <input value="Guardar configuración" id="saveButton" type="submit" style="width:200px;">&nbsp;&nbsp;
+                                           <input type="button" value="Enviar correo de prueba" id="envioTest" name="envioTest" style="width:250px;" onclick="javascript:sendTestMail()">
+                                           <input type="button" value="Enviar correo de informe" id="envioReport" name="envioReport" style="width:250px;" onclick="javascript:sendReportMail()">
+                                        </td>
+                                     </tr>    
+                                </table>    
                             </form>
-
+							
+                            <div id="message" style="text-align:center; font-weight:bold; color:red; padding:3px; "></div>
                         </td>
                     </tr>
                 </table>
@@ -33,25 +88,247 @@
 
 <script type="text/javascript">
 
+
+    var horarios = {
+                        "records": 1,
+                        "total": 1,
+                        "rows": [],
+                        "page": 1
+                      
+                    };
+
     $(function() {
         $("#tabConfig").tabs().css("font-size","13px");
+        jQuery.post('call/json/getConfigData', { data: "" } , function(result) {
+            
+            jQuery("#form_data #m_server").val(result.response['mail_server']);
+            jQuery("#form_data #m_user").val(result.response['mail_user']);
+            jQuery("#form_data #m_password").val(result.response['mail_password']);
+            jQuery("#form_data #m_sender").val(result.response['mail_sender']);
+            jQuery("#form_data #m_receiver").val(result.response['mail_receiver']);
+            if (result.response['alert_teclado']==1) valor=true;
+            else valor=false;           
+            jQuery("#form_data #a_teclado").attr('checked', valor);
+            if (result.response['alert_raton']==1) valor=true;
+            else valor=false;
+            jQuery("#form_data #a_raton").attr('checked', valor);
+            if (result.response['alert_apagado']==1) valor=true;
+            else valor=false;
+            jQuery("#form_data #a_apagado").attr('checked', valor);
+            if (result.response['list_email']==1) valor=true;
+            else valor=false;
+            jQuery("#form_data #l_email").attr('checked', valor);;
+            
+            horarios.rows = result.response["horarios"];                        
+                        
+            var grid = $("#packages");
+            var lastsel;
+                       
+            var nomColumnas=["Id","Inicio","Fin","Descrip."];
+            var modColumnas=[
+                    {name:'id',index:'id', hidden: true},
+                    {name:'inicio',index:'inicio', width:20, editable:true,  edittype:'text',
+                                    editoptions:{maxlength: 5}, editrules: {required:true, time: true}},
+                    {name:'fin',index:'fin', width:20, editable:true,  edittype:'text',
+                                    editoptions:{maxlength: 5}, editrules: {required:true, time: true}},
+                    {name:'descripcion',index:'descripcion', width:100, editable:true,  edittype:'text',
+                                    editoptions:{maxlength: 10}, editrules: {required:true}}
+                ];
+                                            
+            var onclickSubmitLocal = function(options,postdata) {
+                            var grid_p = grid[0].p,
+                                idname = grid_p.prmNames.id,
+                                grid_id = grid[0].id,
+                                id_in_postdata = grid_id+"_id",
+                                rowid = postdata[id_in_postdata],
+                                addMode = rowid === "_empty",
+                                id;
+                                
+                                if (!addMode) {		
+                                    id=buscarID(horarios.rows,rowid);
+                                    if (id!=-1) {
+                                        horarios.rows[id].inicio=postdata.inicio; 
+                                        horarios.rows[id].fin=postdata.fin; 						
+                                        horarios.rows[id].descripcion=postdata.descripcion; 					
+                                    }
+                                } //Si estamos en modo add no se hace nada, ya que todavia no hay id. Se pospone al evento afterComplete				
+                                this.processing = false;  
+                                
+                            };
+                            
+            var editSettings = {
+                        recreateForm: true,
+                        reloadAfterSubmit: false,
+                        closeOnEscape: true,
+                        savekey: [true, 13],
+                        closeAfterEdit: true,
+                        closeAfterAdd:true,             
+                        url: "call/json/dummy", 
+                        onclickSubmit:onclickSubmitLocal        
+                    };
+                    
+            var addSettings = {
+                        recreateForm:true,
+                        reloadAfterSubmit:false,                     
+                        savekey: [true,13],
+                        addedrow: 'last',
+                        afterComplete : function (response, postdata, formid) {
+                                //En este punto el id está generado por jqgrid y podemos meterlo en el array.
+                                var fila=new Object();
+                                fila.inicio=postdata.inicio;
+                                fila.fin=postdata.fin;
+                                fila.descripcion=postdata.descripcion;
+                                fila.id=postdata.id;
+                                horarios.rows.push(fila);
+                        },
+                        closeOnEscape:true,
+                        closeAfterAdd:true,
+                        closeAfterEdit: true,
+                        addCaption: "Añadir registro",
+                        url: "call/json/dummy", 
+                        onclickSubmit:onclickSubmitLocal                        
+                };
+                        
+            var delSettings = {
+                    recreateForm:true,
+                    width:320,
+                    reloadAfterSubmit:true,                   
+                    url: "call/json/dummy", 
+                    processing: true, 
+                    onclickSubmit: function(options, rowid) {
+                    var grid_id = grid[0].id,
+                        grid_p = grid[0].p,
+                        newPage = grid_p.page,
+                        rowids = grid_p.multiselect? grid_p.selarrrow: [grid_p.selrow],	id;
+                        
+                        id=buscarID(horarios.rows,rowid);
+                        if (id!=-1) {
+                            delete horarios.rows[id];
+                            horarios.rows.splice(id,1);
+                            $.jgrid.hideModal("#delmod" + grid_id, { gb: "#gbox_" + grid_id, jqm: options.jqModal, onClose: options.onClose });
+                            grid.jqGrid('delRowData', rowid);
+                           // grid.trigger("reloadGrid", [{ page: newPage}]);
+                        };
+                }
+            };
+                        
+            var grid = $("#packages");                
+            
+            grid.jqGrid({
+                            colNames: nomColumnas,
+                            colModel: modColumnas,
+                            pager: '#packagePager',
+                            datatype: "local",
+                            data: horarios.rows,
+                            rowNum: 24,
+                            width: 350,
+                            height: "100%", //100% para que coja todo el espacio asignado.
+                            viewrecords: true,
+                            caption: "Franjas horarias",
+                            height: "auto",
+                            ignoreCase: true,
+                            editurl: 'clientArray'                
+                        });
+            grid.jqGrid('navGrid',"#packagePager",{edit:true,add:true,del:true}, editSettings, addSettings, delSettings);
+                       // editar en local, sin url: http://stackoverflow.com/questions/10236065/clientside-data-manipulation-in-jqgrid
+                       
+         });  
     });
 
 
-    function sendMail() {
-            
-           jQuery('#envio').attr("disabled", "disabled");
-           jQuery('#envio').attr("value", "Enviando correo...tenga paciencia");
+    function sendTestMail() {
+        
+          mostrarDialogo("Enviando correo de prueba....");
+          
+          jQuery.post('call/json/sendTestMail', { data: "" } , function(result) {
+                    jQuery('#dialog-wait').dialog('close'); 
+                    jQuery('#message').html(result).effect("highlight", {"color":"yellow"}, 1000);
+           });
 
-           jQuery.post('call/json/sendMail', { data: "" } , function(result) {
-                    jQuery('#envio').removeAttr("disabled");
-                    jQuery('#envio').attr("value", "Enviar correo de prueba");
-                    alert(result);
+           return false;
+    }
+    
+    function sendReportMail() {
+        
+          mostrarDialogo("Enviando correo con informe....");
+          
+          jQuery.post('call/json/sendReportMail', { data: "" } , function(result) {                    
+                    jQuery('#dialog-wait').dialog('close'); 
+                    jQuery('#message').html(result).effect("highlight", {"color":"yellow"}, 1000);
                     
            });
 
            return false;
     }
+   
+   function guardarConfiguracion() {
+       
+       var config=new Object();
+       
+       mostrarDialogo("Guardando configuración....");
+       
+       config.m_server=jQuery("#form_data #m_server").val();
+       config.m_user=jQuery("#form_data #m_user").val();
+       config.m_password=jQuery("#form_data #m_password").val();
+       config.m_sender=jQuery("#form_data #m_sender").val();
+       config.m_receiver=jQuery("#form_data #m_receiver").val();
+       config.a_teclado=jQuery("#form_data #a_teclado").is(":checked") ? "a_teclado":"";
+       config.a_raton=jQuery("#form_data #a_raton").is(":checked") ? "a_raton":"";
+       config.a_apagado=jQuery("#form_data #a_apagado").is(":checked") ? "a_apagado":"";
+       config.l_email=jQuery("#form_data #l_email").is(":checked") ? "l_email":"";
+       config.horarios=horarios.rows;
+              
+       datos=JSON.stringify(config); //Serializamos en json el objeto que contiene toda la configuracion...
+                     
+       jQuery.post('call/json/setConfigData', {data: datos} , function(result) {
+            switch(result.response){
+                case "OK":{
+                    jQuery('#message').html("Operación realizada correctamente").css("color","green").effect("highlight", {"color":"yellow"}, 1000);					
+                    break;
+                }
+                case "fail":{
+                    jQuery('#message').html("Se produjo un error").effect("highlight", {"color":"yellow"}, 1000);
+                    break;
+                }
+            }
+            jQuery('#dialog-wait').dialog('close'); 
+            
+       });
+       return false;
+   }
+   
+   function sleep(delay) {
+        var start = new Date().getTime();
+        while (new Date().getTime() < start + delay);
+   } 
+     
+   
+   function buscarID(result,id) {
+          var tamanio=result.length,i;									
+		  for (i=0;i<tamanio;i++) if (result[i].id.toString()==id) break;
+		  if (i==tamanio) i=-1;
+		  return i;
+   }
+						
+
+   function mostrarDialogo(texto) {
+       
+      jQuery("#dialog-wait").html("<br/><p><span class='ui-icon ui-icon-alert' style='float:left; margin:0 7px 20px 0;'></span>"+texto).css("display","none");
+          
+      x = (jQuery(window).width()-350)/2;
+      y = 200;
+      jQuery("#dialog-wait").dialog({
+                resizable: false,
+                position: "center",
+                modal: false,
+                width: 350,
+                height: 100
+      }).dialog('option', 'position', [x, y]);
+
+      //esto es para ocultar la barra de titulo, que va en un div encima de la caja de dialogo.
+      jQuery( "#dialog-wait" ).prev().css( "display", "none" );  
+       
+   }         
 
 </script>
 
