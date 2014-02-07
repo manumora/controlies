@@ -102,9 +102,6 @@ def actualizalogwpkg():
 
     session.forget(response)
     host=request.args(0)
-#    logfile = open("/tmp/"+host+".txt", "w")
-#    logfile.write(request.body.read())
-#    logfile.close()
     doactualizalogwpkg(host,request.args(0),request.body)
 
 @service.xmlrpc
@@ -137,8 +134,10 @@ def doactualizalogpuppet(filetext):
     yaml.add_multi_constructor(u"!ruby/object:", construct_ruby_object)
     yaml.add_constructor(u"!ruby/sym", construct_ruby_sym)
     mydata = yaml.load(filetext)
-    host=mydata["host"].upper()
-    host=host[:host.index('.')]
+    host=mydata["host"]
+    host_original=host[:host.index('.')]
+    host=host_original.upper()
+    #En host_original está el nombre en minúsculas(asi lo manda siempre puppet), y en host en mayúsculas.
     estadoglobal="OK"
     output = StringIO.StringIO()
     logs=mydata["logs"]
@@ -190,7 +189,7 @@ def doactualizalogpuppet(filetext):
             
     output.write("</table><br><br></center>")
     
-    fila=cdb((cdb.maquinas.host.upper()==host) & (cdb.maquinas.tipohost!='WINDOWS')).select().last()    
+    fila=cdb((cdb.maquinas.host.upper()==host.upper()) & (cdb.maquinas.tipohost!='WINDOWS')).select().last()    
     if fila==None:
         pass
     else:		
@@ -200,9 +199,10 @@ def doactualizalogpuppet(filetext):
     output.close()
      
     #Insertamos todas las clases recopiladas, con el estado pertinente: ok (si todo va bien), error (si alguno de los recursos tiene    
+
     for clase in clases_todas:    
         estado="ERROR" if clase in clases_error else "OK"
-        inserta_clase(clase,host,ahora,estado)
+        inserta_clase(clase,host_original,ahora,estado)
     
     return "OK"
     
@@ -339,7 +339,7 @@ def inserta_clase(clase, host, time, resultado):
 
 def getTipo(host):
     
-    fila=cdb(cdb.maquinas.host==host).select().first()
+    fila=cdb(cdb.maquinas.host.upper()==host.upper()).select().first()
     if fila==None:
         tipo=""
     else:
@@ -347,3 +347,9 @@ def getTipo(host):
 
     return tipo
     
+def logea(fichero, mensaje):
+
+    logfile = open("/tmp/"+fichero+".txt", "a")
+    logfile.write(mensaje+"\n")
+    logfile.close()
+

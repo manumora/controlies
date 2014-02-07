@@ -150,7 +150,8 @@ class Config(object):
             #    file.close()   
             
             
-            mensaje="<html><body><b>Listado de maquinas con problemas detectados ("+ahora.strftime("%d/%m/%Y %H:%M")+ "):</b> <br/><br/>"            
+            mensaje="<html>"
+            mensaje=mensaje+"<body><b>Listado de maquinas con problemas ("+ahora.strftime("%d/%m/%Y %H:%M")+ "):</b> <br/><br/>"            
             mensaje=mensaje+"<table border='1'><tr  style='font-weight:bold'><td width='8%'>HOST</td><td width='8%'>TIPOHOST</td><td width='19%'>ULT.REFRE</td><td width='19%'>ULT.BOOT</td>"
             mensaje=mensaje+"<td width='19%'>ULT.PKGSY</td><td width='8%'>PAQUETES</td><td width='19%'>ULT.PUPP</td><td>PUPPET</td></tr>"
             consulta=self.DB.executesql(sql+where)            
@@ -160,39 +161,45 @@ class Config(object):
                 mensaje=mensaje+"<td>"+ reg[7] +"</td>"+"<td>"+reg[8]+"</td></tr>"
                 cont=cont+1
                 
-                
             mensaje=mensaje+"</table>"    
-            
-            sql="select distinct host from thinclients"
-            consulta=self.DB.executesql(sql)
-            mensaje=mensaje+"<br/><b>Listado de thinclients con problemas:<b><br/><br/>"
-            mensaje=mensaje+"<table border='1'><tr  style='font-weight:bold'><td>HOST</td><td>FECHA</td><td>TECLADO</td><td>RATON</td></tr>"
-            
-            for reg in consulta:
-                host=reg[0]
-                sqlultimo="select id,host,time,teclado,raton from thinclients where host='"+host+"' order by time desc limit 1"   
-                sql="select id,host,time,teclado,raton from thinclients where host='"+host+"' and (raton<>'2' or teclado<>'2') order by time desc limit 1"
-                consulta_ultimo=self.DB.executesql(sqlultimo) #devuelve el ultimo valor de ese thinclient en la fecha indicada
-                consulta_host=self.DB.executesql(sql) #devuelve una tupla o ninguna con el ultimo valor de ese thinclient
-                                                  #en ese estado de raton y teclado
-                if len(consulta_host)==1 :
-                    reg=consulta_host[0]
-                    reg_ultimo=consulta_ultimo[0]
-                    if reg[0]==reg_ultimo[0]  :
-                        #Si el ultimo registro del thinclient en esa fecha coincide con el ultimo
-                        #registro con ese estado de raton y teclado, se incluye en la lista                        
-                        if reg[3]=="0":
-                            mensaje=mensaje+"<tr><td>"+reg[1]+"</td><td>"+reg[2]+"</td><td colspan=2>Apagado</td></tr>"
-                        else:
-                            teclado="Conectado" if reg[3]=="2" else "Desconectado"
-                            raton="Conectado" if reg[4]=="2" else "Desconectado"
-                            mensaje=mensaje+"<tr><td>"+reg[1]+"</td><td>"+reg[2]+"</td><td>"+teclado+"</td><td>"+raton+"</td></tr>"
-                        cont=cont+1
-            mensaje=mensaje+"</table>"    
-            
-            if cont==0 :
-                mensaje=mensaje+"<b>Enhorabuena, tienes el IES como una patena!!!.</b>"    
-            
             mensaje=mensaje+"</body></html>"     
+            
+            retorno=self.enviaMail('Informe de Controlies: listado de hosts '+ahora.strftime("%d/%m/%Y %H:%M"), mensaje)
+            
+            if retorno[0:2] == "OK":
+                          
+                sql="select distinct host from thinclients"
+                consulta=self.DB.executesql(sql)
+                mensaje="<html>"            
+                mensaje=mensaje+"<body><br/><b>Listado de thinclients con problemas: ("+ahora.strftime("%d/%m/%Y %H:%M")+ "):</b><br/><br/>"
+                mensaje=mensaje+"<table border='1'><tr  style='font-weight:bold'><td>HOST</td><td>FECHA</td><td>TECLADO</td><td>RATON</td></tr>"
+                
+                for reg in consulta:
+                    host=reg[0]
+                    sqlultimo="select id,host,time,teclado,raton from thinclients where host='"+host+"' order by time desc limit 1"   
+                    sql="select id,host,time,teclado,raton from thinclients where host='"+host+"' and (raton<>'2' or teclado<>'2') order by time desc limit 1"
+                    consulta_ultimo=self.DB.executesql(sqlultimo) #devuelve el ultimo valor de ese thinclient en la fecha indicada
+                    consulta_host=self.DB.executesql(sql) #devuelve una tupla o ninguna con el ultimo valor de ese thinclient
+                                                      #en ese estado de raton y teclado
+                    if len(consulta_host)==1 :
+                        reg=consulta_host[0]
+                        reg_ultimo=consulta_ultimo[0]
+                        if reg[0]==reg_ultimo[0]  :
+                            #Si el ultimo registro del thinclient en esa fecha coincide con el ultimo
+                            #registro con ese estado de raton y teclado, se incluye en la lista                        
+                            if reg[3]=="0":
+                                mensaje=mensaje+"<tr><td>"+reg[1]+"</td><td>"+reg[2]+"</td><td colspan=2>Apagado</td></tr>"
+                            else:
+                                teclado="Conectado" if reg[3]=="2" else "Desconectado"
+                                raton="Conectado" if reg[4]=="2" else "Desconectado"
+                                mensaje=mensaje+"<tr><td>"+reg[1]+"</td><td>"+reg[2]+"</td><td>"+teclado+"</td><td>"+raton+"</td></tr>"
+                            cont=cont+1
+                mensaje=mensaje+"</table>"    
+                
+                if cont==0 :
+                    mensaje=mensaje+"<b>Enhorabuena, tienes el IES como una patena!!!.</b>"    
+                mensaje=mensaje+"</body></html>"     
+                retorno=self.enviaMail('Informe de Controlies: listado de thinclients '+ahora.strftime("%d/%m/%Y %H:%M"), mensaje)
+
                     
-            return self.enviaMail('Informe de Controlies '+ahora.strftime("%d/%m/%Y %H:%M"), mensaje)
+            return retorno

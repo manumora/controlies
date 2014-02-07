@@ -459,11 +459,37 @@ def dummy():
    response = "OK"
    return dict(response = response)    
 
+@service.json
+@auth.requires_login()    
+def addMonitorizado():
+  
+    host=request.vars['host']
+    fila=cdb(cdb.monitorizados.host == host).select().last()
+    if fila == None :
+       cdb.monitorizados.insert(host=host)
+    retorno="OK"
 
-
+@service.json
+@auth.requires_login()    
+def delMonitorizado():
+  
+    host=request.vars['host']
+    try:
+       cdb(cdb.monitorizados.host == host).delete()
+       retorno="OK"
+    except:
+       retorno="fail"
+              
+@service.json
+@auth.requires_login()    
+def getMonitorizados():
+	
+    sql="select host from monitorizados"
+    consulta=cdb.executesql(sql)
+    return {"monitorizados": consulta}
+  
 def execCommand():
     return dict()
-
 
 def call():
     """

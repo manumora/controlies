@@ -159,4 +159,7 @@ cdb.define_table('clases_puppet_host',
           Field('host','string'),
           Field('resultado','string'))          
 
+cdb.define_table('monitorizados',
+          Field('host','string'))
+
                  

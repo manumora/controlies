@@ -1,0 +1,62 @@
+<script language="javascript">
+
+    $(function() {
+        $("#name").focus();
+        $("#exitButton")
+             .click( function(){ $('#dialog-form').dialog('close'); });
+            
+    });
+    
+    
+    function send(){
+    	ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+        restartStyle();
+        
+        if (jQuery("#form_data #action").val()=="add") { 
+			jQuery.post('call/json/addMonitorizado', jQuery("#form_data").serialize(), function(result) {			
+				switch(result.response){
+					case "OK":{
+						jQuery('#message').html("Operación realizada correctamente").css("color","green").effect("highlight", {"color":"yellow"}, 1000);
+						setTimeout("$('#dialog-form-borrado').dialog('close')",1000);
+						break;
+					}
+					case "fail":{
+						jQuery('#message').html("Se produjo un error").effect("highlight", {"color":"yellow"}, 1000);
+						break;
+					} 
+				}
+			});
+		}
+		else { 
+			jQuery.post('call/json/delMonitorizado', jQuery("#form_data").serialize(), function(result) {			
+				switch(result.response){
+					case "OK":{
+						jQuery('#message').html("Operación realizada correctamente").css("color","green").effect("highlight", {"color":"yellow"}, 1000);
+						setTimeout("$('#dialog-form-borrado').dialog('close')",1000);
+						break;
+					}
+					case "fail":{
+						jQuery('#message').html("Se produjo un error").effect("highlight", {"color":"yellow"}, 1000);
+						break;
+					} 
+				}
+			});
+		}
+		
+    }
+    
+    
+</script>
+ 
+<form id="form_data" onsubmit="return send();">
+    <input type="hidden" id="action" name="action"/>
+    <div>
+        <p><span id="hostTag">Host</span><br><input type="text" id="host" name="host"/></p> 
+    </div>
+    <div id="message" style="text-align:center; font-weight:bold; color:red; padding:3px; "></div>
+    <div style="text-align:center;">
+		<button type="button" type="submit" id="doButton" style="width:100px;">Añadir</button>
+		<button type="button" id="exitButton" style="width:100px;">Cancelar</button>
+    </div>
+    <p style="padding-top:10px; text-align:center; font-size:10px;" id="messageForm"></p>       
+</form>

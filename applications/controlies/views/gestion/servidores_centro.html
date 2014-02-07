@@ -35,10 +35,8 @@
     $(function() {
         $("#tabSrv").tabs().css("font-size","13px");
         
-        jQuery.post('call/json/getServerStatus', { server: "192.168.1.14" } , function(result) {                    
-               updateServer("tabSrv1", result.response);            
-        });
-    
+        showMonitorizados($("#tabSrv"));
+        updateMonitorizados();
         
     });   
     
@@ -64,6 +62,50 @@
 
         return contenedor;
     }		
+    
+    function showMonitorizados (contenedor) {
+	   
+        jQuery.post('call/json/getMonitorizados', { data: "" } , function(result) {
+	         var index, monitorizados, host;
+	         var etiqueta;
+	         
+	         monitorizados=result.monitorizados;
+	         for (index = 0; index < monitorizados.length; ++index) {
+                 host=monitorizados[index][0];
+                 etiqueta = document.createElement("div");
+                 etiqueta.className="divServer";
+                 etiqueta.id=host;
+                 contenedor.append(etiqueta);
+             };		
+		 
+	    });
+	   
+	}
+	
+	
+	function updateMonitorizados() {
+	
+	   jQuery.post('call/json/getMonitorizados', { data: "" } , function(result) {
+	         var index, monitorizados, host;
+	         var etiqueta;
+	         
+	         monitorizados=result.monitorizados;
+	         for (index = 0; index < monitorizados.length; ++index) {
+                 host=monitorizados[index][0];
+				 jQuery.ajax( { type: 'POST', url: 'call/json/getServerStatus', data: { server: host } , 
+				   sucess: function(result) {                    
+                       updateServer(host, result.response);            
+                   },
+                   error: function() {
+			           alert("No responde "+host);
+			       }    
+                 } );
+             }		
+		 
+	    });
+	 
+		
+	}
 
     function updateServer(id, status) {
 		
@@ -138,7 +180,34 @@
 		
 	}
     
+     function formMonitorizado(action){
+    		ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+            
+            jQuery("#dialog-form").html("").css("display","none");
+            jQuery("#dialog-form").load("form_servidor.html", function() {
+                
+                if (action=="add" ) titulo="Añadir servidor";
+                else titulo="Quitar servidor";
+                jQuery("#form_data #action").val(action);
+                
+                x = (jQuery(window).width()-350)/2;
+                y = (jQuery(window).height()-500)/2;
+        
+                jQuery("#dialog-form").dialog({
+                    resizable: false,
+                    position: top,
+                    modal: true,
+                    width: 350,
+                    title: titulo
+                }).dialog('option', 'position', [x, y]);
+            });
+    }
+    
 </script>
+<form action="" enctype="multipart/form-data" method="post" id="form_monitorizados">
+            <input type="button" value="Añadir" onclick="javascript: formMonitorizado('add')">            
+            <input type="button" value="Quitar" onclick="javascript: formMonitorizado('del')">
+</form>
 <table width="100%" cellspacing="12">
 <tr>
 	<td>    
@@ -146,10 +215,6 @@
 	        <ul>
 	            <li><a href="#tabSrv1"><span id="actions">Monitorización de Servidores</span></a></li>
 	        </ul>
-	        <div id="tabSrv1" class="divServer">  
-	            
-	        </div>
-	        
 	    </div>       
 	</td>
 </tr>
