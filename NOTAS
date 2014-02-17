@@ -1,6 +1,12 @@
 CAMBIOS
 =======
 
+7 febrero 2014
+ 
+    -Arreglado bug en el seguimiento de tareas puppet de portatiles.
+    -Separado el envio de informes por correo en dos correos distintos: informe de hosts e
+     informe de thinclients.
+
 30 enero 2014
 
     -Arreglado bug en config.html con los checkbox (notificado por Paco IES Téllez)
