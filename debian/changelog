@@ -1,17 +1,28 @@
+controlies (0.6.5-10) unstable; urgency=low
+
+  * Arreglado bug en seguimiento de aula con nombre de equipo de profesor (problema mays-mins).
+  * Modificado seguimiento de aula para que muestre actividad en aulas de workstations y portatiles
+  * Modificado RPCServer.py para mayor seguridad y devolucion del nombre del pc del profesor en aulas de portatiles.
+  * Modificado el seguimiento de tareas puppet para adaptarlo a las versiones de puppet para Debian Wheezy
+  * Arreglado bug en seguimiento de equipos que provocaba fallos en la deteccion del estado de paquetes.
+  * Arreblado bug en paquete controlies-client: el script de desinstalaci√≥n no limpiaba todo.
+
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Fri, 18 Dec 2013 11:05:00 +0200
+
 controlies (0.6.5-9) unstable; urgency=low
 
-  * Control independiente de alertas de teclado, ratÛn y apagados para thinclients
-  * Mejorada detecciÛn de thinclients apagados (problema: sigue dando falsos positivos)
+  * Control independiente de alertas de teclado, rat√≥n y apagados para thinclients
+  * Mejorada deteccion de thinclients apagados (problema: sigue dando falsos positivos)
   * Arreglados bugs de columnas en grid de thinclients
-  * Informes de log de impresiÛn con filtros y en varios formatos
+  * Informes de log de impresi√≥n con filtros y en varios formatos
   * Arreglado bug en el formato de fechas de los datePicker
-  * Seguimiento de impresiÛn: aÒadida opciÛn de borrado de registros
-  * Seguimiento de impresiÛn: aÒadida opciÛn de modificacion manual de n∫ de p·ginas y copias
-  * ConfiguraciÛn: remodelaciÛn del formulario para ganar visibilidad 
-  * ConfiguraciÛn: aÒadido grid para insertar las franjas horarias del centro, para ser usada en el seg. de aulas
+  * Seguimiento de impresi√≥n: a√±adida opci√≥n de borrado de registros
+  * Seguimiento de impresi√≥n: a√±adida opci√≥n de modificacion manual de n√∫m. de p√≥ginas y copias
+  * Configuraci√≥n: remodelaci√≥n del formulario para ganar visibilidad 
+  * Configuraci√≥n: a√±adido grid para insertar las franjas horarias del centro, para ser usada en el seg. de aulas
   * Nuevo seguimiento: seguimiento de uso de un aula en una fecha concreta
   * Nuevo seguimiento: seguimiento maestro-detalle de tareas puppet aplicadas en todos los equipos, con fechas y resultado
-  * Seguimiento de usuarios: la hora de cierre de sesiÛn en thinclients se actualiza constantemente. A prueba de apagados bruscos 
+  * Seguimiento de usuarios: la hora de cierre de sesi√≥n en thinclients se actualiza constantemente. A prueba de apagados bruscos 
   * Arreglado bug en las MACs de thinclients con espacios en blanco al final.
   
  -- Manuel Mora Gordillo <manuito@gmail.com>  Fri, 18 Dec 2013 11:05:00 +0200

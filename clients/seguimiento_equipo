@@ -28,7 +28,8 @@ ult_boot=$(date +"%F %X" -d @${s})
 #actualizar esos campos y dejarlos para la proxima llamada al script.
 
 pkgsyncenuso=$(ps aux | grep pkgsync | grep -v grep | wc -l)
-if [ $pkgsyncenuso -eq 0 ]
+aptitudeenuso=$(ps aux | grep aptitude | grep -v grep | wc -l)
+if [ $pkgsyncenuso -eq 0 -a $aptitudeenuso -eq 0 ]
 then
    #Ultimo pkgsync
     ult_pkgsync=$(stat -c '%z' /var/log/pkgsync.log | cut -d"." -f1)

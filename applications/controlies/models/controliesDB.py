@@ -86,7 +86,8 @@ cdb.define_table('sesiones',
     Field('usuario'),
     Field('timelogin','datetime',default=datetime.datetime.today()),
     Field('timelogout','datetime'),
-    Field('tipohost'))
+    Field('tipohost'), 
+    Field('aula'))
 cdb.executesql('CREATE INDEX IF NOT EXISTS idxseshost ON sesiones (host);')
 cdb.executesql('CREATE INDEX IF NOT EXISTS idxsesusuario ON sesiones (usuario);')
 

@@ -355,30 +355,47 @@ def matriz_aula():
     aula = request.vars["prefijo"].upper()
     fecha = formatearFecha(request.vars['fecha'])
 
-    ltsp=aula+"-PRO"
+    profesor=aula+"-PRO"
+
+    filas=[]
     
-    sql="select * from maquinas where upper(host)='" + ltsp + "' and tipohost='LTSP'"
+    sql="select host from maquinas where upper(host)='" + profesor + "'"
     consulta=cdb.executesql(sql)
+    #Incluimos el servidor de aula
+    if len(consulta) > 0 : 
+       profesor=consulta[0][0]
+       filas=addUnico(filas,profesor)
     
-    if len(consulta) == 0:
+    #Incluimos los thinclients
+    sql="select distinct host from thinclients where host like '"+aula+"-%' order by host"
+    consulta=cdb.executesql(sql)    
+    for reg in consulta:
+        host=reg[0]
+        filas=addUnico(filas,host)        
+    
+    #Incluimos los workstations
+    sql="select distinct host from maquinas where host like '"+aula+"-%' and (tipohost='WORKSTATION' or tipohost='WINDOWS') order by host"
+    #logea("/tmp/sql.txt",sql)
+    consulta=cdb.executesql(sql)    
+    for reg in consulta:
+        host=reg[0]
+        filas=addUnico(filas,host)                
+            
+    #Incluimos los portatiles
+    sql="select distinct host from sesiones "
+    sql=sql+"where upper(aula)=upper('"+aula+"') and tipohost='PORTATIL' and "
+    sql=sql+" timelogin between '"+fecha+"' and date('"+fecha+"','+24 hours') order by host"
+    consulta=cdb.executesql(sql)    
+    for reg in consulta:
+        host=reg[0]
+        filas=addUnico(filas,host)        
+    
+    if len(filas) == 0:
         
-        retorno= {"codigo": "ERROR", "mensaje": "El aula "+aula +" no corresponde con un servidor de aula"}
+        retorno= {"codigo": "ERROR", "mensaje": "No se ha encontrado nada referido al aula "+aula}
         
     else:
-
-        
-        sql="select distinct host from thinclients where host like '"+aula+"-%' order by host"
-        consulta=cdb.executesql(sql)
-        
-        filas=[]
-        filas.append(aula+"-PRO")
-        
-        for reg in consulta:
-            host=reg[0]
-            filas.append(host)
-            
-        #Ya tenemos la lista de thinclients + servidor aula
-        
+               
         horarios=[]
         #[['08:15','09:25','1Hora'],['09:26','10:20','2Hora'],['10:21','11:15','3Hora'],..... ]
         sql="select id,inicio,fin,descripcion from horarios order by inicio"
@@ -394,7 +411,7 @@ def matriz_aula():
             row={"id":idrow, "host": host}
             for clase in horarios: 
                 idclase=clase[2]
-                datos=obtenerActividad(fecha,clase,host)
+                datos=obtenerActividad(fecha,clase,host,aula)
                 #contenido=""
                 #for entrada in datos:
                 #    contenido=contenido+entrada["time"]+"-"+entrada["teclado"]+"-"+entrada["raton"]+"\n"
@@ -412,8 +429,18 @@ def matriz_aula():
 
 #Este es el formato a devolver: http://www.trirand.com/jqgridwiki/doku.php?id=wiki:retrieving_data#json_data
 
+#Añade el elemento a la lista, si no está previamente
+def addUnico(lista,elemento):
+    
+    try:
+        i=lista.index(elemento)        
+    except:
+        lista.append(elemento)
+    
+    return lista
+ 
 
-def obtenerActividad(fecha,clase,host):
+def obtenerActividad(fecha,clase,host,aula):
 
     sqlthc="select id,host,time,teclado,raton, 'thinclient' as tipo from thinclients where 1=1"    
     sqlses="select id,host,timelogin as time,usuario as teclado ,timelogout as raton, 'sesion' as tipo from sesiones where 1=1"
@@ -425,12 +452,13 @@ def obtenerActividad(fecha,clase,host):
     horafin=fecha+" "+clase[1]
     wherethc = wherethc+" and time between '"+horaini+"' and '"+horafin+"'"
     whereses = whereses+" and time between '"+horaini+"' and '"+horafin+"'"
+    whereses = whereses+" and ( upper(aula)=upper('"+aula+"') or ifnull(aula,'')='' ) " 
     
     sql = sqlthc + wherethc+ " union " + sqlses + whereses+" order by time"
     
-    #    file = open('/tmp/sql.txt', 'w')
-    #    file.write(sql)
-    #    file.close()   
+    #file = open('/tmp/sql.txt', 'w')
+    #file.write(sql)
+    #file.close()   
 
     consulta=cdb.executesql(sql)
     rows=[]
@@ -538,4 +566,8 @@ def toggleHostAlert():
        retorno="fail"
     return dict(response=retorno)
  
-  
+def logea(fichero,texto):
+ 
+   file = open(fichero, 'w')
+   file.write(texto)
+   file.close()   

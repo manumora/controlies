@@ -18,13 +18,13 @@ def index():
 @auth.requires_login()
 def list():
 
-    fields = ['host','usuario','timelogin','timelogout','tipohost']
+    fields = ['host','usuario','timelogin','timelogout','tipohost','aula']
     rows = []
     page =  int(request.vars["page"])
     pagesize = int(request.vars["rows"])    
     offset = (page-1) * pagesize
         
-    sql="select id,host,usuario,timelogin,timelogout,tipohost from sesiones where 1=1"
+    sql="select id,host,usuario,timelogin,timelogout,tipohost,aula from sesiones where 1=1"
     where=""
     try:
        if str(request.vars['host']) != "None":
@@ -55,6 +55,13 @@ def list():
              where = where+" and tipohost like '%"+str(request.vars['tipohost'])+"%'"
     except LookupError:
        pass
+
+    try:
+       if str(request.vars['aula']) != "None":
+             where = where+" and aula like '%"+str(request.vars['aula'])+"%'"
+    except LookupError:
+       pass
+
     
     fechaini='01-01-2000'
     try:
@@ -86,12 +93,13 @@ def list():
     for reg in consulta:
         row = {
                 "id":reg[0],
-                "cell":[reg[1],reg[2],reg[3],reg[4],reg[5]],
+                "cell":[reg[1],reg[2],reg[3],reg[4],reg[5],reg[6]],
                 "host":reg[1],
                 "usuario":reg[2],
                 "timelogin":reg[3],
                 "timelogout":reg[4],
-                "tipohost":reg[5]
+                "tipohost":reg[5],
+                "aula": reg[6]
             }
         rows.append(row)
 

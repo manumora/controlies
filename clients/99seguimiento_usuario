@@ -26,6 +26,7 @@ fi
 
 #Si es un LTSP, debemos saber si es profesor, ya que los alumnos tambien hacen login (indirectamente) en el equipo del profesor
 #y aparecerían registrados en él.
+#OJO: aqui el comparador es =. No usar ==, ya que estos scripts NO los ejecuta bash y el == no funciona.
 if [ $tipo = "LTSP" ]
 then 
 	es_profe=$(id -nG $usuario | grep teachers | wc -l)
@@ -35,7 +36,17 @@ then
 	  actualiza=$(wget -q -O - $peticion 2>/dev/null)
 	fi
 else
-    peticion="http://ldap.$dominio/controlies/init/registro/login?usuario=$usuario&maquina=$equipo&tipohost=$tipo"
+    #Si es un PORTATIL además hay que intentar averiguar en que aula está para pasar ese dato.
+    if [ $tipo = "PORTATIL" ]
+    then
+        #Obtiene el nombre del pc del profesor preguntando al servidor de aula por XMLRPC.
+        aula=$(python -c "import xmlrpclib; s = xmlrpclib.Server('http://192.168.0.254:6800'); print s.getHostName()" 2> /dev/null)
+        #Quita el sufijo y el "-", quedando solo el prefijo.
+        aula=${aula%-*}
+        peticion="http://ldap.$dominio/controlies/init/registro/login?usuario=$usuario&maquina=$equipo&tipohost=$tipo&aula=$aula"
+    else
+        peticion="http://ldap.$dominio/controlies/init/registro/login?usuario=$usuario&maquina=$equipo&tipohost=$tipo"    
+    fi    
     actualiza=$(wget -q -O - $peticion 2>/dev/null)
 fi
 
