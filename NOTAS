@@ -1,5 +1,9 @@
 CAMBIOS
 =======
+19 marzo 2014
+
+   -Modificado codigo de seguimiento de maquinas para que no se produzca error cuando el fichero /var/lib/dpkg/lock esta bloqueado.
+   -Añadido script 97controlies-seguimiento a los clientes, que se ejecutarÃ¡ al recibir IP. Usado para los portatiles que se encienden sin conexion a red.
 
 7 marzo 2014
 
