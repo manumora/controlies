@@ -28,6 +28,7 @@ case "$1" in
     echo "exit 0" >> /etc/$DIR/PostSession/Default
     chmod +x /etc/$DIR/PostSession/Default
     chmod 755 /usr/share/controlies-client/PostSession
+    chmod 755 /etc/NetworkManager/dispatcher.d/97controlies-seguimiento
 
     ######################################################
     # Seguimiento equipos

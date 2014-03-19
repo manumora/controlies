@@ -1,0 +1,43 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+    echo "$0: called with no interface" 1>&2
+    exit 1;
+fi
+
+# Fake ifupdown environment
+export IFACE="$1"
+export LOGICAL="$1"
+export ADDRFAM="NetworkManager"
+export METHOD="NetworkManager"
+export VERBOSITY="0"
+
+# Run the right scripts
+case "$2" in
+    up)
+
+        #Ahora que hay red, llamamos a sequimiento de equipo
+        /usr/share/controlies-client/seguimiento_equipo
+
+        #Si hay un usuario logueado, hacemos un seguimiento_usuario
+        USUARIO=$(who | grep "(:0)" | head -1 | cut -d" " -f1)
+        if [ "$USUARIO" != "" ]
+        then
+            OLD_USER=$USER
+            export USER=$USUARIO
+            /etc/X11/Xsession.d/99seguimiento_usuario
+            export USER=$OLD_USER
+        fi
+        exit 0
+	;;
+
+    *)
+	echo "$0: called with unknown action \`$2'" 1>&2
+	exit 1
+	;;
+esac
+
+
+
+
+
