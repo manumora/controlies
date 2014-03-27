@@ -44,9 +44,9 @@ class actualizaciones_controlies {
 
 			}
         "portatil-profesor-2011","portatil-alumno-2011": {
-		file {"/etc/dhcp/dhcp.conf":
+		file {"/etc/dhcp/dhclient.conf":
 			owner => root, group => root, mode => 644,
-			source => "puppet:///actualizaciones_controlies/dhcp.conf",
+			source => "puppet:///actualizaciones_controlies/dhclient.conf",
 		}        
 	}
 	default: {}
