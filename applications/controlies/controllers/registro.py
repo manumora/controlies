@@ -154,6 +154,7 @@ def doactualizalogpuppet(filetext):
     host_original=host[:host.index('.')]
     host=host_original.upper()
     #En host_original está el nombre en minúsculas(asi lo manda siempre puppet), y en host en mayúsculas.
+    estado="OK"
     estadoglobal="OK"
     output = StringIO.StringIO()
     logs=mydata["logs"]
@@ -174,7 +175,11 @@ def doactualizalogpuppet(filetext):
        output.write("</tr>")           
        output.write("<tr><td width='10%'>Message</td><td>"+item['message']+"</td></tr>")
        output.write("</table><br>")
-       
+       if item['message'][:45] == "Could not retrieve catalog from remote server":
+               # Could not retrieve catalog from remote server: SSL_connect SYSCALL returned=5 errno=0 state=SSLv2/v3 read server hello A"
+               #Si se encuentra este mensaje quiere decir que no ha podido contactar con el servidor debido a un intermitente bug de puppet no corregido
+               #En ese caso, lo mejor es abortar y actuar como si nunca hubiese habido intento de actualización. 
+           return "OK"
 	   
     output.write("<br><b>Clases y recursos aplicados</b><br><br>")      
     recursos=mydata["resource_statuses"]

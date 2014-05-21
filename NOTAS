@@ -1,6 +1,13 @@
 CAMBIOS
 =======
 
+20 Mayo 2014
+
+   -Modificado registro.py para que no registre un error intermitente que aparece a veces en la sincronización de puppet. Es un error causado por un 
+    bug de la versión de puppet usada, que hace que el cliente puppet no pueda conectar totalmente con el servidor puppet. Si lo intenta al poco rato
+    ya si puede conectar sin problema, asi que ignoramos ese error.
+
+
 27 marzo 2014
 
    -Modificado paquete controlies-client para portatiles. Ismael Muñoz detecta un bug grave que hace que no se envien datos de seguimiento de portatiles
