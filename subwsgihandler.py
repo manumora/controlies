@@ -42,9 +42,9 @@ class SubWeb2py(object):
         # status: 3xx (redirect)
         _headers = []
         for key, value in headers:
-            if key == 'Set-Cookie':
+            #if key == 'Set-Cookie':
                 # don't modify the cookie, it already has a modified location
-                return self._start_response(status, headers, info)
+                #return self._start_response(status, headers, info)
             # relative URLs start with '/', absolute URLs start with 'http'
             if key == 'Location' and value.startswith('/'):
                 value = self.script_name + value

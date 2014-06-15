@@ -157,7 +157,8 @@ class Config(object):
             consulta=self.DB.executesql(sql+where)            
             cont=0
             for reg in consulta:                
-                mensaje=mensaje+"<tr><td>"+reg[1]+"</td><td>"+reg[2]+"</td><td>"+reg[3]+"</td><td>"+reg[4]+"</td><td>"+reg[5]+"</td>"+"</td><td>"+reg[6]+"</td>"                
+                mensaje=mensaje+"<tr><td>"+reg[1]+"</td><td>"+reg[2]+"</td><td>"+reg[3].strftime("%d/%m/%Y %H:%M")+"</td><td>"+reg[4].strftime("%d/%m/%Y %H:%M")+"</td><td>"+reg[5].strftime("%d/%m/%Y %H:%M")+"</td>"+"</td><td>"+reg[6]+"</td>"                
+
                 mensaje=mensaje+"<td>"+ reg[7] +"</td>"+"<td>"+reg[8]+"</td></tr>"
                 cont=cont+1
                 
@@ -188,11 +189,11 @@ class Config(object):
                             #Si el ultimo registro del thinclient en esa fecha coincide con el ultimo
                             #registro con ese estado de raton y teclado, se incluye en la lista                        
                             if reg[3]=="0":
-                                mensaje=mensaje+"<tr><td>"+reg[1]+"</td><td>"+reg[2]+"</td><td colspan=2>Apagado</td></tr>"
+                                mensaje=mensaje+"<tr><td>"+reg[1]+"</td><td>"+reg[2].strftime("%d/%m/%Y %H:%M")+"</td><td colspan=2>Apagado</td></tr>"
                             else:
                                 teclado="Conectado" if reg[3]=="2" else "Desconectado"
                                 raton="Conectado" if reg[4]=="2" else "Desconectado"
-                                mensaje=mensaje+"<tr><td>"+reg[1]+"</td><td>"+reg[2]+"</td><td>"+teclado+"</td><td>"+raton+"</td></tr>"
+                                mensaje=mensaje+"<tr><td>"+reg[1]+"</td><td>"+reg[2].strftime("%d/%m/%Y %H:%M")+"</td><td>"+teclado+"</td><td>"+raton+"</td></tr>"
                             cont=cont+1
                 mensaje=mensaje+"</table>"    
                 

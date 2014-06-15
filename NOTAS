@@ -1,6 +1,12 @@
 CAMBIOS
 =======
 
+15 Junio 2014
+
+  -Compatibilidad con Debian Wheezy: modificado subwsgihandler.py para que enrute correctamente las URL.
+  -Compatibilidad con Debian Wheezy: modificado modulo Config.py para dar formato correcto a las fechas al 
+   construir el mensaje de correo con el resumen de estado del centro.
+
 20 Mayo 2014
 
    -Modificado registro.py para que no registre un error intermitente que aparece a veces en la sincronización de puppet. Es un error causado por un 
