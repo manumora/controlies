@@ -1,0 +1,28 @@
+#!/bin/sh
+
+
+AHORA=$(/bin/date)
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+#Verificamos que es una IP valida: 172.*.*.*  o 192.*.*.*
+IP=$(ifconfig | grep -E 'inet addr:(172|192)')
+
+if [ "$IP" != "" ]
+then
+   #Ahora que hay red válida, llamamos a sequimiento de equipo
+   /usr/share/controlies-client/seguimiento_equipo
+
+   #Si hay un usuario logueado, hacemos un seguimiento_usuario
+   USUARIO=$(who | grep "(:0)" | head -1 | cut -d" " -f1)
+   if [ "$USUARIO" != "" ]
+   then
+
+            OLD_USER=$USER
+            export USER=$USUARIO
+            /etc/X11/Xsession.d/99seguimiento_usuario
+            export USER=$OLD_USER
+   fi
+fi
+
+exit 0
+

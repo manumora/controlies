@@ -1,0 +1,78 @@
+#!/bin/bash
+
+NM_DHCLIENT_SCRIPT=/usr/lib/NetworkManager/nm-dhcp-client.action
+
+
+# dhclient-script for Linux. Dan Halbert, March, 1997.
+# Updated for Linux 2.[12] by Brian J. Murrell, January 1999.
+# Modified for Debian.  Matt Zimmerman and Eloy Paris, December 2003
+# Modified to remove useless tests for antiquated kernel versions that
+# this doesn't even work with anyway, and introduces a dependency on /usr
+# being mounted, which causes cosmetic errors on hosts that NFS mount /usr
+# Andrew Pollock, February 2005
+# Modified to work on point-to-point links. Andrew Pollock, June 2005
+# Modified to support passing the parameters called with to the hooks. Andrew Pollock, November 2005
+
+# The alias handling in here probably still sucks. -mdz
+
+run_hook() {
+    local script="$1"
+    local exit_status
+    shift	# discard the first argument, then the rest are the script's
+
+    if [ -f $script ]; then
+        . $script "$@"
+    fi
+
+
+    if [ -n "$exit_status" ] && [ "$exit_status" -ne 0 ]; then
+        logger -p daemon.err "$script returned non-zero exit status $exit_status"
+        save_exit_status=$exit_status
+    fi
+
+    return $exit_status
+}
+
+run_hookdir() {
+    local dir="$1"
+    local exit_status
+    shift	# See run_hook
+
+    echo "$1" >> /tmp/test
+
+    if [ -d "$dir" ]; then
+        for script in $(run-parts --list $dir); do
+            run_hook $script "$@" || true
+            exit_status=$?
+        done
+    fi
+
+    return $exit_status
+}
+
+# Must be used on exit.   Invokes the local dhcp client exit hooks, if any.
+exit_with_hooks() {
+    exit_status=$1
+
+    # Source the documented exit-hook script, if it exists
+    if ! run_hook /etc/dhcp/dhclient-exit-hooks "$@"; then
+        exit_status=$?
+    fi
+
+    # Now run scripts in the Debian-specific directory.
+    if ! run_hookdir /etc/dhcp/dhclient-exit-hooks.d "$@"; then
+        exit_status=$?
+    fi
+
+    exit $exit_status
+}
+
+# The action starts here
+
+# Invoke the local dhcp client enter hooks, if they exist.
+run_hook /etc/dhcp/dhclient-enter-hooks
+run_hookdir /etc/dhcp/dhclient-enter-hooks.d
+
+$NM_DHCLIENT_SCRIPT
+
+exit_with_hooks 0

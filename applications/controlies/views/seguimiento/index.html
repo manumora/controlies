@@ -42,14 +42,14 @@
                 
                 onSelectRow: function (id) { verUsuario(id); },
                 
-                colNames:['Host','Usuario','Login','Logout','Tipo Host'],
+                colNames:['Host','Usuario','Login','Logout','Tipo Host','Aula'],
                 colModel:[                  
                     {name:'host',index:'host', width:70, align:"left"},
                     {name:'usuario',index:'usuario', width:50, align:"center"},
                     {name:'timelogin',index:'timelogin', width:50, align:"center"},
                     {name:'timelogout',index:'timelogout', width:50, align:"center"},
-                    {name:'tipohost',index:'tipohost', width:50, align:"center",stype:'select', editoptions:{value:":TODOS;LTSP:LTSP;THINCLIENT:THINCLIENT;WORKSTATION:WORKSTATION;PORTATIL:PORTATIL;WINDOWS:WINDOWS"}}
-                    
+                    {name:'tipohost',index:'tipohost', width:50, align:"center",stype:'select', editoptions:{value:":TODOS;LTSP:LTSP;THINCLIENT:THINCLIENT;WORKSTATION:WORKSTATION;PORTATIL:PORTATIL;WINDOWS:WINDOWS"}}, 
+                    {name:'aula',index:'aula', width:50, align:"center"}
                 ], 
                 rowNum:25,
                 height:335,
@@ -134,7 +134,9 @@
 							
 							jQuery("#form_data #equipo").val(data.host);                               
 							jQuery("#form_data #iniSesion").val(data.timelogin);   
-							jQuery("#form_data #finSesion").val(data.timelogout);   
+							jQuery("#form_data #finSesion").val(data.timelogout);  
+                                                        jQuery("#form_data #aula").val(data.aula);
+ 
 			
 							x = (jQuery(window).width()-400)/2;
 							y = (jQuery(window).height()-500)/2;

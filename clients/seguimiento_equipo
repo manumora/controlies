@@ -27,22 +27,25 @@ ult_boot=$(date +"%F %X" -d @${s})
 #Si pkgsync está lanzado, apt-get check y update darán error por bloqueo. En ese caso lo mejor es no
 #actualizar esos campos y dejarlos para la proxima llamada al script.
 
-pkgsyncenuso=$(ps aux | grep pkgsync | grep -v grep | wc -l)
-if [ $pkgsyncenuso -eq 0 ]
+#Estado paquetes
+echo "apt-get check: "  > /tmp/apt-get.log
+apt-get check >> /tmp/apt-get.log 2>&1
+check_result=$?
+
+echo "----------------------------------------------------------------"  >>   /tmp/apt-get.log
+echo "apt-get update: "  >> /tmp/apt-get.log
+apt-get update >> /tmp/apt-get.log 2>&1
+update_result=$?
+
+#Echo si está bloqueado el sistema de paquetes....
+grep "/var/lib/dpkg/lock" /tmp/apt-get.log > /dev/null
+no_bloqueado=$?
+
+if [ $no_bloqueado -ne 0 ]
 then
+   #No aparece /var/lib/dpkg/lock en el log, luego los apt-get se han realizado sin problemas
    #Ultimo pkgsync
-    ult_pkgsync=$(stat -c '%z' /var/log/pkgsync.log | cut -d"." -f1)
-
- 
-   #Estado paquetes
-   echo "apt-get check: "  > /tmp/apt-get.log
-   apt-get check >> /tmp/apt-get.log 2>&1
-   check_result=$?
-
-   echo "----------------------------------------------------------------"  >>	 /tmp/apt-get.log
-   echo "apt-get update: "  >> /tmp/apt-get.log
-   apt-get update >> /tmp/apt-get.log 2>&1
-   update_result=$?
+   ult_pkgsync=$(stat -c '%z' /var/log/pkgsync.log | cut -d"." -f1)
 
    grep NO_PUBKEY /tmp/apt-get.log > /dev/null
    key_result=$?

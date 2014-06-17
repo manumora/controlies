@@ -1,6 +1,52 @@
 CAMBIOS
 =======
 
+15 Junio 2014
+
+  -Compatibilidad con Debian Wheezy: modificado subwsgihandler.py para que enrute correctamente las URL.
+  -Compatibilidad con Debian Wheezy: modificado modulo Config.py para dar formato correcto a las fechas al 
+   construir el mensaje de correo con el resumen de estado del centro.
+
+20 Mayo 2014
+
+   -Modificado registro.py para que no registre un error intermitente que aparece a veces en la sincronización de puppet. Es un error causado por un 
+    bug de la versión de puppet usada, que hace que el cliente puppet no pueda conectar totalmente con el servidor puppet. Si lo intenta al poco rato
+    ya si puede conectar sin problema, asi que ignoramos ese error.
+
+
+27 marzo 2014
+
+   -Modificado paquete controlies-client para portatiles. Ismael Muñoz detecta un bug grave que hace que no se envien datos de seguimiento de portatiles
+    si estos no estan conectados a la red cuando el usuario hace login. Modificado el paquete para que se envien los datos tan pronto como el portatil
+    obtenga una ip valida. El dispatcher.d de NetworkManager no puede manejar esto y hemos tenido que modificarlo para que se llame a 
+    dhcp/dhclient-exit-hooks.d, que por defecto queda inutilizado por NetworManager.
+
+
+19 marzo 2014
+
+   -Modificado codigo de seguimiento de maquinas para que no se produzca error cuando el fichero /var/lib/dpkg/lock esta bloqueado.
+   -Añadido script de "controlies-seguimiento" a los clientes, que se ejecutara al recibir IP. Usado para los portatiles que se encienden sin conexion a red.
+
+7 marzo 2014
+
+  -Modificado el seguimiento puppet para adaptarse al formato del nuevo servidor puppet para Wheezy, ya que no es compatible con el que tenemos.
+   Asimismo se procede a borrar en cada actualizacion las clases antiguas asociadas a un equipo, para tener la lista siempre actualizada con los
+   datos de las clases aplicadadas realmente.
+  -Arreglado bug en seguimiento de equipos que provocaba fallos en la deteccion del estado de paquetes, ya que no detectaba que estaba corriendo 
+   aptitude y solo preguntaba por pkgsync.
+  -Arreblado bug en paquete controlies-client: el script de desinstalacion no limpiaba todo lo que se había instalado.
+
+
+24 febrero 2014
+  
+  -Arreglado bug en seguimiento de aula con nombre de equipo de profesor (problema mays-mins).
+  -Modificado seguimiento de aula para que muestre actividad en aulas de workstations y portátiles (se ha añadido un campo "aula" a la tabla
+   de sesiones):
+       -Hecho para workstations -> el nombre del aula se saca del prejijo de nombre del pc.
+       -Hecho para portatiles -> el nombre del aula se pregunta via XMLRPC a 192.168.0.254
+  -Modificado RPCServer.py para que incluya función para devolver el nombre del equipo y se aporta seguridad permitiendo solo llamadas
+   desde el servidor ldap a las funciones mas senssibles. 
+   
 7 febrero 2014
  
     -Arreglado bug en el seguimiento de tareas puppet de portatiles.

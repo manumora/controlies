@@ -14,11 +14,27 @@ def login():
   usuario=request.vars['usuario']
   maquina=request.vars['maquina']
   tipohost=request.vars['tipohost']
-  dologin(usuario,maquina,tipohost)
-  
+  #Si viene el parametro aula, lo cogemos.
+  #Si no viene, o viene vacio, lo inferimos a partir del nombre de la máquina.
+  try:
+       aula=request.vars['aula']
+  except LookupError:
+       aula=""
+  if aula=="" : aula=getAula(maquina)
+  dologin(usuario,maquina,tipohost,aula)
+
+def getAula(host):
+  pos=host.find("-")
+  if pos != -1:
+      aula=host[0:pos]
+  else: # No hay "-", por tanto no podemos idenfificar el aula a la que pertenece, ya que la norma dice que
+         # es aXX-oYY, siendo aXX el auula
+     aula=""
+  return aula
+
 @service.xmlrpc
-def dologin(usuario,maquina,tipohost):
-  cdb.sesiones.insert(usuario=usuario, host=maquina, tipohost=tipohost)
+def dologin(usuario,maquina,tipohost,aula):
+  cdb.sesiones.insert(usuario=usuario, host=maquina, tipohost=tipohost, aula=aula)
 
   
 def logout():
@@ -138,6 +154,7 @@ def doactualizalogpuppet(filetext):
     host_original=host[:host.index('.')]
     host=host_original.upper()
     #En host_original está el nombre en minúsculas(asi lo manda siempre puppet), y en host en mayúsculas.
+    estado="OK"
     estadoglobal="OK"
     output = StringIO.StringIO()
     logs=mydata["logs"]
@@ -158,7 +175,11 @@ def doactualizalogpuppet(filetext):
        output.write("</tr>")           
        output.write("<tr><td width='10%'>Message</td><td>"+item['message']+"</td></tr>")
        output.write("</table><br>")
-       
+       if item['message'][:45] == "Could not retrieve catalog from remote server":
+               # Could not retrieve catalog from remote server: SSL_connect SYSCALL returned=5 errno=0 state=SSLv2/v3 read server hello A"
+               #Si se encuentra este mensaje quiere decir que no ha podido contactar con el servidor debido a un intermitente bug de puppet no corregido
+               #En ese caso, lo mejor es abortar y actuar como si nunca hubiese habido intento de actualización. 
+           return "OK"
 	   
     output.write("<br><b>Clases y recursos aplicados</b><br><br>")      
     recursos=mydata["resource_statuses"]
@@ -168,25 +189,41 @@ def doactualizalogpuppet(filetext):
         
     for item in recursos:
         eventos=recursos[item]['events']
-        descripcion=recursos[item]['source_description']
-        estado="OK"
-        start = descripcion.find('/',1) + 1
-        end = descripcion.find('/', start)
-        clase = descripcion[start:end]
+#       El campo source_description es obsoleto, ya no se usa en puppet
+#       descripcion=recursos[item]['source_description']
+        file=recursos[item]['file'] 
+        if file != None:
+          estado="OK"
+          if file[:20] == "/etc/puppet/modules/" :
+              #Es un modulo en la forma /etc/puppet/modules/config-iceweasel-firefox/manifests/init.pp. Lo quedamos en modules/config-iceweasel-firefox
+              file=file[12:-18]
+          elif file[:22] == "/etc/puppet/manifests/" :
+              file=file[12:-3]
+        else:  
+           file=""
+        descripcion=file+"/"+recursos[item]['resource'] 
+              
+        #El nombre de la clase es todo lo posterior al ultimo "/" del nombre del fichero
+        pos=file.rfind("/")
+        if pos != -1 :
+            clase=file[pos+1:]
+        else: #En los recursos donde no hay nombre de fichero, es el nombre del recurso
+            clase=recursos[item]['resource']
+
         clases_todas.append(clase)        
-  
         for evento in eventos:
-            valor=evento['status']
-            if valor == "failure" :
-                 clases_error.append(clase)
-                 estado="ERROR"
-                 estadoglobal="ERROR"
-                 break	 
+                valor=evento['status']
+                if valor == "failure" :
+                       clases_error.append(clase)
+                       estado="ERROR"
+                       estadoglobal="ERROR"
+                       break
+                 
         if estado=="OK":                         			 
             output.write("<tr style='border: solid 1px #000000;'><td width='90%'>"+ descripcion +"</td><td>"+estado+"</td></tr>")
         else:
             output.write("<tr style='border: solid 1px #000000;'><td width='90%'><font color='red'>"+ descripcion +"</font></td><td><font color='red'>"+estado+"</font></td></tr>")
-            
+           
     output.write("</table><br><br></center>")
     
     fila=cdb((cdb.maquinas.host.upper()==host.upper()) & (cdb.maquinas.tipohost!='WINDOWS')).select().last()    
@@ -198,14 +235,39 @@ def doactualizalogpuppet(filetext):
         fila.update_record(ultimopuppet=ahora,estadopuppet=estadoglobal,logpuppet=cdb.maquinas.logpuppet.store(output,filename=host))
     output.close()
      
-    #Insertamos todas las clases recopiladas, con el estado pertinente: ok (si todo va bien), error (si alguno de los recursos tiene    
+    #Insertamos todas las clases recopiladas, con el estado pertinente: ok (si todo va bien), error (si alguno de los
+    # recursos fallo). Previamente borramos todas las clases anteriormente asociadas a dicho host.    
 
+    limpiar_clases(host)
     for clase in clases_todas:    
         estado="ERROR" if clase in clases_error else "OK"
         inserta_clase(clase,host_original,ahora,estado)
     
     return "OK"
+ 
+
+#Divide un recurso en sus partes, separandolo por "/" a excepcion de que los  "/" esten dentro de unos "[...]"
+#Devuelve un array de strings
+# Descripcion: "/Stage[main]/Clase-especifica-squeeze/Restringe_impresora[ML-1210]/Exec[restringe-impresora-ML-1210]"
+def split_source(descripcion):
     
+    sources=[]
+    anidamiento=0
+    clase=""
+    for car in descripcion[1:]:
+        if car == "[" : anidamiento=anidamiento+1
+        elif car == "]" : anidamiento=anidamiento-1
+        
+        if car == "/" and anidamiento == 0:
+            sources.append(clase)
+            clase=""
+        else:
+            clase=clase+car
+    if clase != "":
+        sources.append(clase)
+        
+    return sources[1:-1]
+
            
 def actualizathinclient():
     session.forget(response)
@@ -314,13 +376,12 @@ def docheckapagado(host):
                   mensaje="El thinclient "+host+" parece apagado o bloqueado ("+ahora.strftime("%d/%m/%Y %H:%M")+")\n\n"
                   configuracion.enviaMail('Aviso de thinclient '+host+" apagado", mensaje)
 
-			
+
     return "OK"
     
 
 def inserta_clase(clase, host, time, resultado):
-    
-    #Procesar clase para sacar el nombre: "/Stage[main]/Ltsp_smart-permisos/Exec[cambiar-permisos-smart]/returns"    
+        
     if clase != "": 
         tipohost=getTipo(host)    
         if tipohost != "":      
@@ -336,6 +397,16 @@ def inserta_clase(clase, host, time, resultado):
                 cdb.clases_puppet_host.insert(time=time,id_clase=clase_id, host=host,resultado=resultado)        
             else:
                 filahost.update_record(time=time,resultado=resultado) 
+
+#Elimina todas las clases asociadas a un host
+def limpiar_clases(host):
+    
+    sql="delete from clases_puppet_host where host='" +host+"'"
+    try:
+        cdb.executesql(sql)
+    except:
+        pass
+    
 
 def getTipo(host):
     
