@@ -117,12 +117,12 @@ class Thinclients(object):
         rows = []
 
         try:
-            host_search = args["cn"]
+            host_search = args["cn"] or ""
         except:
             host_search = ""
             
         try:
-            mac_search = args["mac"]
+            mac_search = args["mac"] or ""
         except:
             mac_search = ""
 
