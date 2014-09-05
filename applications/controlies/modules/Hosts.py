@@ -149,17 +149,17 @@ class Hosts(object):
         rows = []
 
         try:
-            host_search = args["cn"]
+            host_search = args["cn"] or ""
         except:
             host_search = ""
             
         try:
-            ip_search = args["ipHostNumber"]
+            ip_search = args["ipHostNumber"] or ""
         except:
             ip_search = ""
 
         try:
-            mac_search = args["macAddress"]
+            mac_search = args["macAddress"] or ""
         except:
             mac_search = ""
             

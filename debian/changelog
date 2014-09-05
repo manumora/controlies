@@ -2,8 +2,9 @@ controlies (0.6.5-12) unstable; urgency=low
 
   * Compatibilidad con Debian Wheezy: modificado subwsgihandler.py para que enrute correctamente las URL.
   * Compatibilidad con Debian Wheezy: modificado modulo Config.py para dar formato correcto a las fechas al construir el mensaje corro de resumen.
+  * Compatibilidad con Debian Wheezy: modificados modulos Hosts.py y Thinclients.py para que apliquen bien los filtros del grid.
 
- -- Manuel Mora Gordillo <manuito@gmail.com>  Fri, 18 Dec 2013 11:05:00 +0200
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Fri, 20 Jun 2014 08:33:00 +0200
 
 controlies (0.6.5-11) unstable; urgency=low
 
