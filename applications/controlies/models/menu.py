@@ -33,7 +33,7 @@ response.menu+=[
             ('Servidores LTSP',False, URL( 'hosts', 'ltspservers' )),
             ('Workstations', False,URL( 'hosts', 'workstations' )),
             ('Portátiles', False,URL( 'hosts', 'laptops' )),            
-            ('Clientes Ligeros', False,URL( 'thinclients', 'index' )),         
+            ('Equipos Alumnos', False,URL( 'thinclients', 'index' )),         
             #('Parámetros DHCP', False,URL( 'dhcpd', 'index' )),
             ]
    )]

@@ -48,10 +48,11 @@
                     }
                 },
                 
-                colNames:['Nombre','Mac'],
+                colNames:['Nombre','Mac','Usuario'],
                 colModel:[ 
                     {name:'cn',index:'cn', width:450, align:"center"},
-                    {name:'mac',index:'mac', width:450, align:"center"}
+                    {name:'mac',index:'mac', width:450, align:"center"},
+                    {name:'username',index:'username', width:450, align:"center"}
                 ], 
                 rowNum:25,
                 height:335,
@@ -62,7 +63,7 @@
                 autowidth: false,
                 viewrecords: true, 
                 sortorder: "desc", 
-                caption:"Clientes ligeros"    
+                caption:"Equipos de Alumnos"    
         
           }); 
           jQuery("#list").jqGrid('navGrid','#pager',{add:false,edit:false,del:false,search:false,refresh:false});
@@ -95,7 +96,14 @@
                         moveRecord();
                 } 
             }); 
-          
+            jQuery("#list").jqGrid('navButtonAdd','#pager',{
+                    caption: "Asignar", 
+                    buttonicon :'ui-icon-transferthick-e-w',
+                    onClickButton : function (){ 
+                        assignComputers();
+                } 
+            }); 
+            
           jQuery("#list").jqGrid('filterToolbar'); 
        
     }
@@ -125,6 +133,8 @@
             jQuery("#dialog-form").load("form.html", function() {
 
                 jQuery("#form_data #action").val("add");
+            	jQuery("#form_data #name").attr("readonly","true");
+            	jQuery("#form_data #name").css("background-color","#DDD");
                 jQuery("#form_data #messageForm").html("Todos los campos son obligatorios");                                     
         
                 x = (jQuery(window).width()-300)/2;
@@ -137,7 +147,7 @@
                     position: top,
                     modal: true,
                     width: 300,                     
-                    title: "Añadir Cliente Ligero"
+                    title: "Añadir Equipo Alumno"
                 }).dialog('option', 'position', [x, y]);
             });
     }
@@ -152,7 +162,11 @@
 
         jQuery("#dialog-form").html("").css("display","none");
         jQuery("#dialog-form").load("form.html", function() {                        
-            
+
+
+            jQuery("#p_typeTag").hide();
+            jQuery("#p_classroomTag").hide();
+            jQuery("#p_computerTag").hide();
             jQuery("#form_data #action").val("modify");
             jQuery("#form_data #name").attr("readonly","true");
             jQuery("#form_data #name").css("background-color","#DDD");
@@ -172,7 +186,7 @@
                     resizable: false,
                     modal: true,
                     width: 300,
-                    title: "Modificar Cliente Ligero"
+                    title: "Modificar Equipo Alumno"
                 }).dialog('option', 'position', [x, y]);                        
             });               
         });
@@ -217,7 +231,7 @@
             jQuery("#form_data #action").val("modify");
             jQuery("#form_data #name").attr("readonly","true");
             jQuery("#form_data #name").css("background-color","#DDD");
-            jQuery("#form_data #messageForm").html("Con esta opción moveremos de aula un Cliente Ligero<br>Si en el destino ya hay otro cliente ligero, lo sobreescribirá<br>Todos los campos son obligatorios");
+            jQuery("#form_data #messageForm").html("Con esta opción moveremos de aula un equipo<br>Si en el destino hay otro equipo con el mismo nombre se sobreescribirá<br>Todos los campos son obligatorios");
             
             jQuery.post('call/json/getHostData',{ name: name }, function(result) {
 
@@ -232,12 +246,32 @@
                     resizable: false,
                     modal: true,
                     width: 350,
-                    title: "Mover Cliente Ligero"
+                    title: "Mover Equipo Alumno"
                 }).dialog('option', 'position', [x, y]);                        
             });               
         });
     }
 
+	function assignComputers(){
+    	ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+        jQuery("#messageLoading").show();
+    
+        jQuery("#dialog-form").html("").css("display","none");
+        jQuery("#dialog-form").load("assignComputers.html", function() {    		
+            x = (jQuery(window).width()-600)/2;
+            y = (jQuery(window).height()-500)/2;
+    
+            jQuery("#messageLoading").hide();
+    
+            jQuery("#dialog-form").dialog({
+                resizable: false,
+                position: top,
+                modal: true,
+                width: 600,                     
+                title: "Asignar Portátiles de Alumnos"
+            }).dialog('option', 'position', [x, y]);
+        });	
+	}
 </script>
 
 

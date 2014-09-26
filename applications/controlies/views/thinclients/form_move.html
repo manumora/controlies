@@ -49,7 +49,7 @@
 		<table width="100%">
 		<tr>
 			<td><span id="nameTag">Origen</span><br><input type="text" id="name" name="name" size="10" maxlength="10"/></td>
-			<td><span id="purposeTag">Destino</span><br><input type="text" id="purpose" name="purpose" size="10" maxlength="10"/></td>				
+			<td><span id="purposeTag">Destino</span><br><select id="classroom" name="classroom"><option value="aula">Aula</option>{{ for i in range(1,51):}}{{= OPTION(str(i),_value=i) }}{{pass}}</select><select id="computer" name="computer"><option value="equipo">Equipo</option>{{ for i in range(1,36):}}{{= OPTION(str(i),_value=i) }}{{pass}}</select></td>
 		</tr>
 		</table>
     </div>
