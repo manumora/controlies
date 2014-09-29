@@ -109,6 +109,25 @@ class LdapConnection(object):
         """result = con.search_s( base_dn, ldap.SCOPE_SUBTREE, filter, attrs )
         return result"""
 
+    def searchOneLevel(self,baseDN,filter,retrieveAttributes):
+        
+        try:
+            ldap_result_id = self.connection.search(baseDN+",dc=instituto,dc=extremadura,dc=es", ldap.SCOPE_ONELEVEL, filter, retrieveAttributes)
+            result_set = []
+            while 1:
+                result_type, result_data = self.connection.result(ldap_result_id, 0)
+                if (result_data == []):
+                    break
+                else:
+                    if result_type == ldap.RES_SEARCH_ENTRY:
+                        result_set.append(result_data)
+            return result_set
+        except ldap.LDAPError, e:
+            logging.getLogger().debug('LDAP error search')
+        
+        """result = con.search_s( base_dn, ldap.SCOPE_SUBTREE, filter, attrs )
+        return result"""
+
     def add(self,baseDN,attr):
         try:
             self.connection.add_s(baseDN+",dc=instituto,dc=extremadura,dc=es", attr)

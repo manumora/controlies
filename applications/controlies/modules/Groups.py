@@ -29,6 +29,7 @@ import logging
 from math import floor
 from operator import itemgetter
 from Utils import Utils, LdapUtils
+from applications.controlies.modules.Users import Users
 
 class Groups(object):
 
@@ -151,7 +152,6 @@ class Groups(object):
 		
 
     def listUsers(self,args):
-		from applications.controlies.modules.Users import Users
 		# grid parameters
 		limit = int(args['rows'])
 		page = int(args['page'])
@@ -296,3 +296,23 @@ class Groups(object):
 		members.sort()
 
 		return members
+
+    def getGroupUsersData(self):
+        groupData = self.getGroupData()
+
+        rows = []
+        for i in groupData["memberuid"]:
+
+            u = Users(self.ldap,"","","","",i,"","","","")
+            userData = u.getUserData()
+            row = {
+                "id":userData["user"], 
+                "cn": userData["name"],
+                "sn": userData["surname"],
+                "uid": userData["user"],
+                "employeeNumber": userData["nif"]
+            }
+            rows.append(row)
+
+        newlist = sorted(rows, key=lambda k: k['sn']) 
+        return newlist
