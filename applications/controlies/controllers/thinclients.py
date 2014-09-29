@@ -91,7 +91,7 @@ def getUsers():
     g = Groups(l,"",request.vars['name'],"")
     response = g.getGroupUsersData()
     l.close()
-    return dict(response=sorted(response))  
+    return dict(response=response)  
 
 @service.json
 @auth.requires_login()
