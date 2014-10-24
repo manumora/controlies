@@ -136,6 +136,7 @@ class Hosts(object):
         hostnames_data = {}
 
         search = self.ldap.search("cn=INTERNAL,cn=DHCP Config","cn=*",["cn","dhcpHWAddress"])
+
         for s in search:
             if s[0][1]['cn'][0] in hostnames:
 				hostnames_data[s[0][1]['cn'][0]] = {"mac" : s[0][1]['dhcpHWAddress'][0].replace("ethernet ",""), "host":s[0][1]['cn'][0]}						
@@ -149,20 +150,29 @@ class Hosts(object):
         rows = []
 
         try:
-            host_search = args["cn"]
+            if str(args["cn"])=="None":
+                host_search = ""
+            else:
+                host_search = args["cn"]
         except:
             host_search = ""
             
         try:
-            ip_search = args["ipHostNumber"]
+            if str(args["ipHostNumber"])=="None":
+                ip_search = ""
+            else:
+                ip_search = args["ipHostNumber"]
         except:
             ip_search = ""
 
         try:
-            mac_search = args["macAddress"]
+            if str(args["macAddress"])=="None":
+                mac_search = ""
+            else:
+                mac_search = args["macAddress"]
         except:
             mac_search = ""
-            
+
         for k, v in hostnames_data.iteritems():
             try:
 				host = v["host"]
@@ -179,7 +189,7 @@ class Hosts(object):
             except:
 				mac = ""
 
-            if ((ip_search != "" and ip.find(ip_search)>=0) or (ip_search=="")) and ((mac_search != "" and mac.find(mac_search)>=0) or (mac_search=="")) and ((host_search != "" and host.find(host_search)>=0) or (host_search=="")):
+            if ((ip_search != "" and ip.find(ip_search)>=0) or (ip_search=="")):# and ((mac_search != "" and mac.find(mac_search)>=0) or (mac_search=="")) and ((host_search != "" and host.find(host_search)>=0) or (host_search=="")):
 				row = {
 					"id":host, 
 					"cell":[host, ip, mac],

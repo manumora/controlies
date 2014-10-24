@@ -9,7 +9,7 @@ def index():
 @service.json
 def getHostData():
     l=conecta()
-    h = Thinclients(l,request.vars['name'],"","")
+    h = Thinclients(l,request.vars['name'],"","","")
     response = h.getHostData()    
     l.close()
     return dict(response=response)
@@ -18,7 +18,7 @@ def getHostData():
 @auth.requires_login()
 def list():
     l=conecta()
-    h = Thinclients (l,"","","")
+    h = Thinclients (l,"","","","")
     a=request.vars
     response = h.list(a)    
     l.close()
@@ -28,7 +28,7 @@ def list():
 @auth.requires_login()
 def modify():
     l=conecta()
-    h = Thinclients(l,request.vars['name'],request.vars['mac'],"")
+    h = Thinclients(l,request.vars['name'],request.vars['mac'],request.vars['serial'],request.vars['username'])
     response=h.process(request.vars['action'])
     l.close()
     return dict(response=response)
@@ -37,7 +37,7 @@ def modify():
 @auth.requires_login()    
 def delete():
     l=conecta()
-    h = Thinclients(l,request.vars['host'],"","")
+    h = Thinclients(l,request.vars['host'],"","","")
     response=h.process("delete")
     l.close()
     return dict(response=response)
@@ -59,10 +59,10 @@ def move():
     newName = "a"+request.vars['classroom'].zfill(2)+"-"+type+request.vars['computer'].zfill(2)
   
     l=conecta()
-    t1 = Thinclients(l,newName,"","")
+    t1 = Thinclients(l,newName,"","","")
     t1.delete()
 
-    t2 = Thinclients(l,request.vars['name'],"","")
+    t2 = Thinclients(l,request.vars['name'],"","","")
     response = t2.move(newName)
     
     l.close()
@@ -72,7 +72,7 @@ def move():
 @auth.requires_login()
 def getNodes():
     l=conecta()
-    t = Thinclients(l,"","","")
+    t = Thinclients(l,"","","","")
     groups = t.getThinclientGroups()
     return dict(response=sorted(groups["groups"]))
 
@@ -80,7 +80,7 @@ def getNodes():
 @auth.requires_login()
 def getComputersNode():
     l=conecta()
-    t = Thinclients(l,"","","")
+    t = Thinclients(l,"","","","")
     computers = t.getAllComputersNode(request.vars['node'])
     return dict(response=sorted(computers["computers"]))
 
@@ -100,10 +100,10 @@ def saveAssignation():
     j=0
     for i in request.vars['computers[]']:
         try:
-            t = Thinclients(l,i,"",request.vars['students[]'][j])            
+            t = Thinclients(l,i,"","",request.vars['students[]'][j])            
             t.modifyUser();
         except:
-            t = Thinclients(l,i,"","")
+            t = Thinclients(l,i,"","","")
             t.modifyUser();        
         j=j+1
     return dict(response="OK")

@@ -28,16 +28,18 @@ import time
 from math import floor
 from operator import itemgetter
 from Utils import ValidationUtils
+from applications.controlies.modules.Users import Users
 
 class Thinclients(object):
 
     def __init__(self):
         pass
     
-    def __init__(self,ldap,name,mac,username):
+    def __init__(self,ldap,name,mac,serial,username):
         self.ldap = ldap
         self.name = name
         self.mac = mac
+        self.serial = serial
         self.username = username
 
     def validation(self,action):
@@ -63,6 +65,12 @@ class Thinclients(object):
             if not self.equalMAC():
 				if self.existsMAC():
 					return "macAlreadyExists"
+
+        if self.username != "":
+            u = Users(self.ldap,"","","","",self.username,"","","","")
+            exists = u.existsUsername()
+            if not exists:
+                return "userNotExists"            
 
         return "OK"
 
@@ -112,7 +120,7 @@ class Thinclients(object):
         if args['sord'] == "asc":
             reverseSort = True
         
-        search = self.ldap.search("cn=THINCLIENTS,cn=DHCP Config","cn=*",["cn","dhcpHWAddress","uniqueIdentifier"])
+        search = self.ldap.search("cn=THINCLIENTS,cn=DHCP Config","cn=*",["cn","dhcpHWAddress","uniqueIdentifier","dhcpComments"])
         filter="(|(dhcpOption=*subnet*)(dhcpOption=*log*))"
         rows = []
 
@@ -148,15 +156,20 @@ class Thinclients(object):
                 except:
                     username = ""
 
+                try:
+                    serial = i[0][1]["dhcpComments"][0].replace("serial-number","").strip()
+                except:
+                    serial = ""
+
                 if ((host_search != "" and host.find(host_search)>=0) or (host_search=="")) and ((mac_search != "" and mac.find(mac_search)>=0) or (mac_search=="")):
     				nodeinfo=i[0][0].replace ("cn=","").split(",")
     				row = {
     					"id":host, 
-    					"cell":[host, mac, username, nodeinfo[1]],
+    					"cell":[host, mac, username, serial],
     					"cn":host,
     					"dhcpHWAddress":mac,
                         "uniqueIdentifier":username,
-    					"groupName":mac
+                        "serial":serial
     				}             
     				rows.append(row)
 
@@ -194,9 +207,9 @@ class Thinclients(object):
             attr = [
             ('objectclass', ['top','dhcpHost','lisPerson']),
             ('cn', [self.name] ),
-            ('dhcpComments', ['serial-number: '] ), 
+            ('dhcpComments', ['serial-number ' + self.serial] ), 
             ('dhcpHWAddress', ['ethernet ' + self.mac] ),
-            ('uniqueIdentifier', ['user-name: ']),
+            ('uniqueIdentifier', ['user-name ' + self.username]),
             ]
                         
         self.ldap.add("cn="+self.name +",cn="+classroom+",cn=THINCLIENTS,cn=DHCP Config", attr)
@@ -204,17 +217,21 @@ class Thinclients(object):
         return "OK"
         
     def modify(self):
-
-        attr = [(ldap.MOD_REPLACE, 'dhcpHWAddress', ['ethernet ' + self.mac])]
-        self.ldap.modify("cn="+self.name+",cn="+self.getGroup()+",cn=THINCLIENTS,cn=DHCP Config", attr)
-
+        if self.getTypeComputer()=="o":
+            attr = [(ldap.MOD_REPLACE, 'dhcpHWAddress', ['ethernet ' + self.mac])]
+        else:
+            attr = [
+            (ldap.MOD_REPLACE, 'dhcpHWAddress', ['ethernet ' + self.mac] ),
+            (ldap.MOD_REPLACE, 'dhcpComments', ['serial-number ' + self.serial] ),      
+            (ldap.MOD_REPLACE, 'uniqueIdentifier', ['user-name ' + self.username] )       
+            ]
+            
+        self.ldap.modify("cn="+self.name+",cn="+self.getGroup()+",cn=THINCLIENTS,cn=DHCP Config", attr)            
         return "OK"
 
     def modifyUser(self):
-
         attr = [(ldap.MOD_REPLACE, 'uniqueIdentifier', ['user-name ' + self.username])]
         self.ldap.modify("cn="+self.name+",cn="+self.getGroup()+",cn=THINCLIENTS,cn=DHCP Config", attr)
-        print attr
         return "OK"
     
     def delete(self):
@@ -230,7 +247,9 @@ class Thinclients(object):
         self.delete()
 
         self.name= purpose
-        self.mac= data['mac']		
+        self.mac= data['mac']
+        self.serial= data['serial']
+        self.username= data['username']	
         self.add()
 
         return "OK"
@@ -244,18 +263,18 @@ class Thinclients(object):
         
         return False
         
-    def existsMAC(self):
+    def existsMAC(self):     
         result = self.ldap.search("cn=THINCLIENTS,cn=DHCP Config","dhcpHWAddress=*",["dhcpHWAddress"])
         #for i in range (0, len(result) - 1):
         for i in range (0, len(result)):
-            if result [i][0][1]['dhcpHWAddress'][0].replace ("ethernet ", "") == self.mac:
+            if result [i][0][1]['dhcpHWAddress'][0].replace ("ethernet", "").strip() == self.mac:
 				return True
         
         return False
 
     def equalMAC(self):
         result = self.ldap.search("cn=THINCLIENTS,cn=DHCP Config","cn="+self.name,["dhcpHWAddress"])
-        if result[0][0][1]['dhcpHWAddress'][0].replace ("ethernet ", "") == self.mac:
+        if result[0][0][1]['dhcpHWAddress'][0].replace("ethernet", "").strip() == self.mac:
             return True
         
         return False
@@ -266,11 +285,19 @@ class Thinclients(object):
 
     def getHostData(self):
         g = self.getGroup()
-        result = self.ldap.search("cn="+g+",cn=THINCLIENTS,cn=DHCP Config","cn="+self.name,["cn","dhcpHWAddress"])
+        result = self.ldap.search("cn="+g+",cn=THINCLIENTS,cn=DHCP Config","cn="+self.name,["cn","dhcpHWAddress","dhcpComments","uniqueIdentifier"])
+
+        serial=""
+        username=""
+        if self.getTypeComputer()=="p":                    
+            serial = result[0][0][1]["dhcpComments"][0].replace("serial-number","").strip()
+            username = result[0][0][1]["uniqueIdentifier"][0].replace("user-name","").strip()
 
         dataHost = {
             "cn":self.name,
-            "mac":result[0][0][1]["dhcpHWAddress"][0].replace("ethernet","").strip()
+            "mac":result[0][0][1]["dhcpHWAddress"][0].replace("ethernet","").strip(),
+            "serial":serial,
+            "username":username
         }
         return dataHost    
 
