@@ -6,6 +6,8 @@ CAMBIOS
   -Compatibilidad con Debian Wheezy: modificado subwsgihandler.py para que enrute correctamente las URL.
   -Compatibilidad con Debian Wheezy: modificado modulo Config.py para dar formato correcto a las fechas al 
    construir el mensaje de correo con el resumen de estado del centro.
+  -Compatibilidad con Debian Wheezy: modificados modulos Hosts.py y Thinclients.py para que apliquen bien los
+   filtros del grid.
 
 20 Mayo 2014
 

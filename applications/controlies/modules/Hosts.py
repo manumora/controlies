@@ -150,26 +150,17 @@ class Hosts(object):
         rows = []
 
         try:
-            if str(args["cn"])=="None":
-                host_search = ""
-            else:
-                host_search = args["cn"]
+            host_search = args["cn"] or ""
         except:
             host_search = ""
             
         try:
-            if str(args["ipHostNumber"])=="None":
-                ip_search = ""
-            else:
-                ip_search = args["ipHostNumber"]
+            ip_search = args["ipHostNumber"] or ""
         except:
             ip_search = ""
 
         try:
-            if str(args["macAddress"])=="None":
-                mac_search = ""
-            else:
-                mac_search = args["macAddress"]
+            mac_search = args["macAddress"] or ""
         except:
             mac_search = ""
 

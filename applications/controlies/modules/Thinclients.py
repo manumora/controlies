@@ -125,18 +125,12 @@ class Thinclients(object):
         rows = []
 
         try:
-            if str(args["cn"])=="None":
-                host_search = ""
-            else:
-                host_search = args["cn"]                
+            host_search = args["cn"] or ""
         except:
             host_search = ""
             
         try:
-            if str(args["mac"])=="None":
-                mac_search = ""
-            else:
-                mac_search = args["mac"]
+            mac_search = args["mac"] or ""
         except:
             mac_search = ""
 
