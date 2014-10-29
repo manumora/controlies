@@ -136,6 +136,7 @@
 'Group ID': 'ID de Grupo',
 'Group uniquely assigned to user %(id)s': 'Grupo asignado únicamente al usuario %(id)s',
 'Groups': 'Grupos',
+'Guardar Datos Configuración': 'Guardar Datos Configuración',
 'Hello World': 'Hola Mundo',
 'help': 'ayuda',
 'Home': 'Inicio',

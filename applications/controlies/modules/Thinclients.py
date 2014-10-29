@@ -227,7 +227,7 @@ class Thinclients(object):
         attr = [(ldap.MOD_REPLACE, 'uniqueIdentifier', ['user-name ' + self.username])]
         self.ldap.modify("cn="+self.name+",cn="+self.getGroup()+",cn=THINCLIENTS,cn=DHCP Config", attr)
         return "OK"
-    
+
     def delete(self):
         group = self.getGroup()
         if group != "noGroup":

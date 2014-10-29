@@ -46,10 +46,17 @@ def getAllUsers():
 @auth.requires_login()       
 def delete():
     l=conecta()
-    u = Users(l,"","","","",request.vars['user'],"","","","")
-    response = u.delete()  
+
+    if(isinstance(request.vars['user[]'], str)):        
+        u = Users(l,"","","","",request.vars['user[]'],"","","","")
+        u.delete()  
+    else:
+        for h in request.vars['user[]']:
+            u = Users(l,"","","","",h,"","","","")
+            u.delete()
+
     l.close()                          
-    return dict(response=response)
+    return dict(response="OK")
 
 @service.json
 @auth.requires_login()    

@@ -37,10 +37,17 @@ def modify():
 @auth.requires_login()    
 def delete():
     l=conecta()
-    h = Thinclients(l,request.vars['host'],"","","")
-    response=h.process("delete")
+    
+    if(isinstance(request.vars['host[]'], str)):
+        t = Thinclients(l,request.vars['host[]'],"","","")
+        t.process("delete")
+    else:
+        for h in request.vars['host[]']:
+            t = Thinclients(l,h,"","","")
+            t.process("delete")
+            
     l.close()
-    return dict(response=response)
+    return dict(response="OK")
 
 @service.json
 @auth.requires_login()
@@ -67,6 +74,22 @@ def move():
     
     l.close()
     return dict(response=response)
+
+@service.json
+@auth.requires_login()
+def removeAssigns():
+    l=conecta()
+    
+    if(isinstance(request.vars['host[]'], str)):
+        t = Thinclients(l,request.vars['host[]'],"","","")
+        t.modifyUser()
+    else:
+        for h in request.vars['host[]']:
+            t = Thinclients(l,h,"","","")
+            t.modifyUser()
+            
+    l.close()
+    return dict(response="OK")
 
 @service.json
 @auth.requires_login()

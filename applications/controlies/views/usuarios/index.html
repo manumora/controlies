@@ -21,16 +21,10 @@
             <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>Este elemento quedará permanentemente eliminado. ¿Está seguro?</p>
         </div>
 
-        <div id="dialog-alert" title="Atención" style="display:none;">
-            <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>Para operar sobre un registro debe seleccionarlo previamente.</p>
-        </div>
-
-
 <script type="text/javascript">  
     
     jQuery(function() {
         jQuery("#dialog-confirm").dialog({ autoOpen: false });
-        jQuery("#dialog-alert").dialog({ autoOpen: false });
     });
     
                 
@@ -60,11 +54,12 @@
                 rowNum:25,
                 height:335,
                 width: 900,
-                rowList:[25,50,75],  
+                rowList:[25,50,100,500,1000],  
                 pager: '#pager', 
                 sortname: 'cn', 
                 autowidth: false,
                 viewrecords: true, 
+                multiselect: true,
                 sortorder: "desc", 
                 caption:"Usuarios"    
         
@@ -72,21 +67,24 @@
           jQuery("#list").jqGrid('navGrid','#pager',{add:false,edit:false,del:false,search:false,refresh:false});
         
             jQuery("#list").jqGrid('navButtonAdd','#pager',{
-                    caption: "Insertar",
+            		caption:"",
+                    title: "Insertar",
                     buttonicon :'ui-icon-plus',
                     onClickButton : function (){ 
                         addRecord();
                     } 
             }); 
             jQuery("#list").jqGrid('navButtonAdd','#pager',{
-                    caption: "Modificar", 
+            		caption:"",
+                    title: "Modificar", 
                     buttonicon :'ui-icon-pencil',
                     onClickButton : function (){ 
                         modifyRecord();
                 } 
             }); 
             jQuery("#list").jqGrid('navButtonAdd','#pager',{
-                    caption: "Borrar", 
+            		caption:"",
+                    title: "Borrar", 
                     buttonicon :'ui-icon-trash',
                     onClickButton : function (){ 
                         deleteRecord();
@@ -96,24 +94,7 @@
           
           jQuery("#list").jqGrid('filterToolbar'); 
        
-    }
-    
-    
-    function rowSelected(){
-            var uid = jQuery("#list").jqGrid('getGridParam','selrow'); 
-        
-            if( uid == null ){
-                jQuery( "#dialog-alert" ).dialog({
-                    resizable: false,
-                    height:150,
-                    width:290,
-                    modal: true,
-                    buttons: { "Aceptar": function() { $( this ).dialog( "close" ); }}
-                }).dialog('open');
-                return false;
-            }
-            return uid;
-    }           
+    }    
     
     function addRecord(){
     		ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
@@ -143,104 +124,105 @@
     }
     
     function modifyRecord(){
-    		ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+		ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
                     var uid;
     
-                    jQuery("#messageLoading").show();
+        jQuery("#messageLoading").show();
+        
+        var rows = rowsSelected(1);
+        if(rows.length!=1)
+            return false;
+
+        jQuery("#dialog-form").html("").css("display","none");
+        jQuery("#dialog-form").load("form.html", function() {
+            
+            getAllGroups();
+            
+            jQuery("#form_data #action").val("modify");
+            jQuery("#form_data #user").attr("readonly","true");
+            jQuery("#form_data #user").css("background-color","#DDD");
+            jQuery("#form_data #messageForm").html("Si deja la contraseña en blanco no se modificará<br>El resto de campos son obligatorios");
+            
+            jQuery.post('call/json/getUserData',{ username: rows[0] }, function(result) {
+                //var result = jQuery.parseJSON(data);
+
+                if(result.response['type']=="teacher")
+                    var textType = "Profesor";
+                else
+                    var textType = "Alumno";
                     
-                    var uid = rowSelected();
-                    if(uid==false)
-                        return false;
-    
-                    jQuery("#dialog-form").html("").css("display","none");
-                    jQuery("#dialog-form").load("form.html", function() {
-                        
-                        getAllGroups();
-                        
-                        jQuery("#form_data #action").val("modify");
-                        jQuery("#form_data #user").attr("readonly","true");
-                        jQuery("#form_data #user").css("background-color","#DDD");
-                        jQuery("#form_data #messageForm").html("Si deja la contraseña en blanco no se modificará<br>El resto de campos son obligatorios");
-                        
-                        jQuery.post('call/json/getUserData',{ username: uid }, function(result) {
-                            //var result = jQuery.parseJSON(data);
-    
-                            if(result.response['type']=="teacher")
-                                var textType = "Profesor";
-                            else
-                                var textType = "Alumno";
-                                
-                            var dep = Array(result.response['groups']['departments']);
-    
-                            jQuery("#form_data #type").replaceWith(textType+"<input type='hidden' id='type' name='type' value='"+result.response['type']+"'/>");
-                            jQuery("#form_data #name").val(result.response['name']);
-                            jQuery("#form_data #nif").val(result.response['nif']);       
-                            jQuery("#form_data #user").val(result.response['user']);
-                            jQuery("#form_data #surname").val(result.response['surname']);
-                            if (result.response['photo']!='')
-                                jQuery("#form_data #photo").attr("src","data:image/png;base64,"+result.response['photo']);                       
-    
-                            $.each(result.response['groups']['departments'], function(i, l){
-                                jQuery('#form_data input:checkbox[value='+l+']').attr('checked', true);                          
-                            });
-    
-                            $.each(result.response['groups']['classrooms'], function(i, l){
-                                jQuery('#form_data input:checkbox[value='+l+']').attr('checked', true);                          
-                            });                     
-    
-                            x = (jQuery(window).width()-350)/2;
-                            y = (jQuery(window).height()-500)/2;
-                            
-                            jQuery("#messageLoading").hide();
-                            
-                            jQuery("#dialog-form").dialog({
-                                resizable: false,
-                                modal: true,
-                                width: 350,
-                                title: "Modificar Usuario"
-                            }).dialog('option', 'position', [x, y]);                        
-                        });               
-                    });
+                var dep = Array(result.response['groups']['departments']);
+
+                jQuery("#form_data #type").replaceWith(textType+"<input type='hidden' id='type' name='type' value='"+result.response['type']+"'/>");
+                jQuery("#form_data #name").val(result.response['name']);
+                jQuery("#form_data #nif").val(result.response['nif']);       
+                jQuery("#form_data #user").val(result.response['user']);
+                jQuery("#form_data #surname").val(result.response['surname']);
+                if (result.response['photo']!='')
+                    jQuery("#form_data #photo").attr("src","data:image/png;base64,"+result.response['photo']);                       
+
+                $.each(result.response['groups']['departments'], function(i, l){
+                    jQuery('#form_data input:checkbox[value='+l+']').attr('checked', true);                          
+                });
+
+                $.each(result.response['groups']['classrooms'], function(i, l){
+                    jQuery('#form_data input:checkbox[value='+l+']').attr('checked', true);                          
+                });                     
+
+                x = (jQuery(window).width()-350)/2;
+                y = (jQuery(window).height()-500)/2;
+                
+                jQuery("#messageLoading").hide();
+                
+                jQuery("#dialog-form").dialog({
+                    resizable: false,
+                    modal: true,
+                    width: 350,
+                    title: "Modificar Usuario"
+                }).dialog('option', 'position', [x, y]);                        
+            });               
+        });
     }
     
     function deleteRecord(){
-    		ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
-            var uid = rowSelected();
-            if(uid==false)
-                return false;
-        
-            jQuery( "#dialog-confirm" ).dialog({
-                resizable: false,
-                height:160,
-                width:350,
-                modal: true,
-                buttons: {
-                    "Borrar": function() {
-                        jQuery.post("call/json/delete","user="+uid, function(data){
-                            jQuery("#dialog-confirm").dialog( "close" );
-                            jQuery("#list").trigger("reloadGrid");
-                        });
-                    },
-                    "Cancelar": function() {
-                        $(this).dialog( "close" );
-                    }
+		ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+
+        var rows = rowsSelected();
+        if(rows.length==0)
+            return false;
+                
+        jQuery( "#dialog-confirm" ).dialog({
+            resizable: false,
+            height:160,
+            width:350,
+            modal: true,
+            buttons: {
+                "Borrar": function() {
+                    jQuery.post("call/json/delete",{user:rows}, function(data){
+                        jQuery("#dialog-confirm").dialog( "close" );
+                        jQuery("#list").trigger("reloadGrid");
+                    });
+                },
+                "Cancelar": function() {
+                    $(this).dialog( "close" );
                 }
-            }).dialog('open');
+            }
+        }).dialog('open');
     }
     
     function getAllGroups(){
-            $.post("{{=URL(c='grupos',f='call',args=['json','getAllGroups'])}}",   function(groups) {
-                //var groups = $.parseJSON(data);                 
-                
-                $.each( groups.departments, function(i, l){
-                    jQuery("#form_data #departments").append("<option value='"+l+"'>"+l+"</option>");
-                 });
-                $.each( groups.classrooms, function(i, l){
-                    jQuery("#form_data #classrooms").append("<option value='"+l+"'>"+l+"</option>");
-                 });                         
-                jQuery("#form_data #departments").multiselect(); 
-                jQuery("#form_data #classrooms").multiselect();                       
-            });             
+        $.post("{{=URL(c='grupos',f='call',args=['json','getAllGroups'])}}",   function(groups) {
+            //var groups = $.parseJSON(data);                 
+            
+            $.each( groups.departments, function(i, l){
+                jQuery("#form_data #departments").append("<option value='"+l+"'>"+l+"</option>");
+             });
+            $.each( groups.classrooms, function(i, l){
+                jQuery("#form_data #classrooms").append("<option value='"+l+"'>"+l+"</option>");
+             });                         
+            jQuery("#form_data #departments").multiselect(); 
+            jQuery("#form_data #classrooms").multiselect();                       
+        });             
     }
 
 	function createHomeDirectory(username,type){	

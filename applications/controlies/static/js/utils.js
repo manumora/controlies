@@ -138,6 +138,31 @@ function modalConfirm(message, funct){
 	return true;
 }
 
+function printDialog(text){
+    jQuery( "#dialog-alerts p" ).html(text);
+    jQuery( "#dialog-alerts" ).dialog({
+        resizable: false,
+        height:150,
+        width:290,
+        modal: true,
+        buttons: { "Aceptar": function() { $( this ).dialog( "close" ); }}
+    }).dialog('open');
+    return false;
+}
+
+function rowsSelected(max=666){ 
+	var uid = jQuery("#list").jqGrid('getGridParam','selarrrow');
+
+    if( uid.length == 0){
+    	printDialog("Debe seleccionar al menos un registro.");
+    }
+
+    if( uid.length > 1 && max==1){
+    	printDialog("Debe seleccionar un único registro.");
+    }
+    return uid;
+}    
+
 jQuery(document).ready(function(){
     $.datepicker.regional['es'] = {
         closeText: 'Cerrar',
