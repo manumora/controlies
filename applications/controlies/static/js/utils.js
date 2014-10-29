@@ -150,7 +150,9 @@ function printDialog(text){
     return false;
 }
 
-function rowsSelected(max=666){ 
+function rowsSelected(max){ 
+	max = max || 666;
+	
 	var uid = jQuery("#list").jqGrid('getGridParam','selarrrow');
 
     if( uid.length == 0){
