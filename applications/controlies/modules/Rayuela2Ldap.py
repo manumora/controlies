@@ -367,7 +367,9 @@ class Rayuela(object):
         """Da de alta en cada grupo a los usuarios correspondientes"""
 
         for grupo in lista_grupos:
+            print grupo
             for usuario in lista_grupos[grupo]:
+                print usuario
                 attr=[(ldap.MOD_ADD, 'member', ['uid=' + usuario + ',ou=People,dc=instituto,dc=extremadura,dc=es'] ),
                     (ldap.MOD_ADD, 'memberUid', [usuario] ) ]
                 try:

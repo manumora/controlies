@@ -38,10 +38,10 @@ class Users(object):
     def __init__(self,ldap,type,name,surname,nif,user,password,password2,departments,classrooms,foto=None):
         self.ldap = ldap
         self.type = type
-        self.name = name
-        self.surname = surname
-        self.nif = nif
-        self.user = user        
+        self.name = name.strip()
+        self.surname = surname.strip()
+        self.nif = nif.strip()
+        self.user = user.strip()  
         self.password = password
         self.password2 = password2
         self.departments = departments
@@ -59,6 +59,9 @@ class Users(object):
         
         if self.name == "":
             return "name"
+
+        if self.surname == "":
+            return "surname"
 
         if self.nif == "":
             return "nif"
@@ -113,7 +116,7 @@ class Users(object):
             
     def list(self,args):
         filter = self.buildFilter(args)
-        search = self.ldap.search("ou=People",filter,["employeeNumber","uid","cn","uidnumber","gidnumber","homedirectory"])
+        search = self.ldap.search("ou=People",filter,["employeeNumber","uid","cn","givenName","sn","uidnumber","gidnumber","homedirectory"])
 
         # grid parameters
         limit = int(args['rows'])
@@ -146,12 +149,19 @@ class Users(object):
                 
             if not "employeeNumber" in userdata: userdata["employeeNumber"]=["0"]
 
+            try:
+                givenName=userdata["givenName"][0]
+            except:
+                givenName=""
+                
+            cn = userdata["sn"][0]+", "+givenName
+
             if searchType == typeRow or searchType=="None":
                 row = {
                     "id":str(userdata["uid"][0]), 
-                    "cell":[typeRow, str(userdata["cn"][0]), str(userdata["uid"][0]), str(userdata["uidNumber"][0]), str(userdata["gidNumber"][0]), str(userdata["employeeNumber"][0])], 
+                    "cell":[typeRow, str(cn), str(userdata["uid"][0]), str(userdata["uidNumber"][0]), str(userdata["gidNumber"][0]), str(userdata["employeeNumber"][0])], 
                     "type": typeRow,                    
-                    "cn":str(userdata["cn"][0]),
+                    "cn":str(cn),
                     "uidNumber":str(userdata["uidNumber"][0]),
                     "gidNumber":str(userdata["gidNumber"][0]),                
                     "employeeNumber":str(userdata["employeeNumber"][0])
@@ -223,8 +233,9 @@ class Users(object):
         ('objectclass', ['top','posixAccount','shadowAccount','person','inetOrgPerson']),
         ('uid', [self.user]),
         ('cn', [name.strip()] ),
-        ('employeenumber', [self.nif] ),        
-        ('sn', [name.strip()] ),
+        ('employeenumber', [self.nif] ),
+        ('givenName', [self.name] ),        
+        ('sn', [self.surname] ),
         ('uidnumber', [maxID] ),
         ('gidnumber', [maxID] ),    
         ('loginshell', ['/bin/bash'] ),
@@ -276,8 +287,9 @@ class Users(object):
         
         attr = [
         (ldap.MOD_REPLACE, 'cn', [name.strip()] ),
-        (ldap.MOD_REPLACE, 'employeenumber', [self.nif] ),      
-        (ldap.MOD_REPLACE, 'sn', [name.strip()] )       
+        (ldap.MOD_REPLACE, 'employeenumber', [self.nif] ),
+        (ldap.MOD_REPLACE, 'givenName', [self.name] ),
+        (ldap.MOD_REPLACE, 'sn', [self.surname] )       
         ]
 
         if self.password!="":
@@ -414,7 +426,7 @@ class Users(object):
         
     def getUserData(self):
         self.getUserGroups()
-        result = self.ldap.search("ou=People","uid="+str(self.user),["uid","cn","sn","employeenumber","homedirectory","uidnumber","gidnumber","jpegPhoto"])
+        result = self.ldap.search("ou=People","uid="+str(self.user),["uid","cn","givenName","sn","employeenumber","homedirectory","uidnumber","gidnumber","jpegPhoto"])
         
         if len(result) == 0:
             return { "user":"", "name":"", "surname":"", "nif":"", "photo":"", "type":"","uidnumber":"","gidnumber":"", "groups":[] }
@@ -427,11 +439,18 @@ class Users(object):
             photo = base64.b64encode(result[0][0][1]["jpegPhoto"][0])
         except:
             photo = ""
+
         userdata=result[0][0][1]  
         if "employeeNumber" not in userdata: userdata["employeeNumber"]=["0"]
+        
+        try:
+            givenName = userdata["givenName"][0]
+        except:
+            givenName = ""
+
         dataUser = {
             "user":userdata["uid"][0],
-            "name":userdata["cn"][0],
+            "name":givenName,
             "surname":userdata["sn"][0],
             "nif":userdata["employeeNumber"][0],
             "uidnumber":userdata["uidNumber"][0],

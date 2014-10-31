@@ -68,7 +68,7 @@ def modify_user():
     if 'multiselect_departments' in request.vars: departments = request.vars['multiselect_departments']
     if 'multiselect_classrooms' in request.vars:classrooms = request.vars['multiselect_classrooms']
 
-    u = Users(l,request.vars['type'],request.vars['name'],"",request.vars['nif'],request.vars['user'],request.vars['password'],request.vars['password2'],departments,classrooms)
+    u = Users(l,request.vars['type'],request.vars['name'],request.vars['surname'],request.vars['nif'],request.vars['user'],request.vars['password'],request.vars['password2'],departments,classrooms)
     response = u.process(request.vars['action'])
     l.close()
     return dict(response = response)    

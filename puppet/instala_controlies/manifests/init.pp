@@ -1,7 +1,7 @@
 
 class instala_controlies {
 
-   $version="0.6.5-14"
+   $version="0.6.6-1"
    $paquete_client="controlies-client_${version}_all.deb"
    $paquete_thinclient="controlies-thinclient_${version}_all.deb"
 

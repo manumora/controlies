@@ -76,8 +76,8 @@ function print_grid(){
 				pager_id = "p_"+subgrid_table_id;
 				$("#"+subgrid_id).html("<table id='"+subgrid_table_id+"' class='scroll'></table><div id='"+pager_id+"' class='scroll'></div>");
 				jQuery("#"+subgrid_table_id).jqGrid({
-					//url:"{{=URL(c='grupos',f='call',args=['json','getUsers'])}}",
-					url:"/controlies/init/grupos/call/json/getUsers?row_id="+row_id,
+					url:"{{=URL(c='grupos',f='call',args=['json','getUsers'])}}?row_id="+row_id,
+					//url:"/controlies/init/grupos/call/json/getUsers?row_id="+row_id,
 					//data: "{}",            
 					mtype: 'GET', 
 					datatype: "json", 
