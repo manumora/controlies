@@ -1,6 +1,17 @@
 CAMBIOS
 =======
 
+3 Noviembre 2014
+  -Integracion de controlies-seguimiento con los portatiles wheezy
+  -Tareas puppet adaptadas a equipos Wheezy
+
+
+Octubre 2014
+  -Cambios para añadir mas datos a los nodos de portatiles en ldap 
+  -Asignacion automatica de alumnos
+  -Multicheck en Usuarios y Equipos de alumnos
+  -Separacion de los campos Nombre y Apellidos de los usuarios
+
 15 Junio 2014
 
   -Compatibilidad con Debian Wheezy: modificado subwsgihandler.py para que enrute correctamente las URL.
