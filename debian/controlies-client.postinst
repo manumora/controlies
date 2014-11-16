@@ -28,8 +28,7 @@ case "$1" in
     echo "exit 0" >> /etc/$DIR/PostSession/Default
     chmod +x /etc/$DIR/PostSession/Default
     chmod 755 /usr/share/controlies-client/PostSession
-    chmod 755 /etc/dhcp/dhclient-exit-hooks.d/controlies-seguimiento
-    chmod 755 /sbin/dhclient-script-networkmanager
+    chmod 755 /usr/share/controlies-client/controlies-seguimiento
 
     ######################################################
     # Seguimiento equipos
@@ -58,7 +57,15 @@ case "$1" in
     service cups restart
 
     ######################################################
-    # Avahi server
+    # Seguimiento equipos y usuarios en portatiles y pc con NetworkManager
+    # Añadimos llamada al script controlies-seguimiento en rc.local, si no está previamente.
+    if ! grep "/usr/share/controlies-client/controlies-seguimiento" /etc/rc.local
+    then
+        sed -i -e '$i \/usr/share/controlies-client/controlies-seguimiento &\n' /etc/rc.local
+    fi
+
+    ######################################################
+    # Avahi server 
     chmod 755 /usr/bin/controlies
 
     ######################################################

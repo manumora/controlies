@@ -1,27 +1,42 @@
 #!/bin/sh
 
+#Unifica seguimiento-equipo y seguimiento-usuario en un solo script
+#Se ejecuta en portatiles, en los que puede no haber conexión de red inicialmente
+#si se conectan por wifi. Esto hace que la llamada normal a seguimiento-equipo y 
+#seguimiento-usuario fallen al no tener conectividad, con lo que no quedaría 
+#registrado en controlies.
+#Este script espera a que haya conexión con nm-online y entonces lanza los 
+#scripts de seguimiento. nm-online esta en network-manager
+#http://stackoverflow.com/questions/21489093/how-to-detect-when-networking-initialized-in-etc-init-d-script-on-redhat-6
+#
 
-AHORA=$(/bin/date)
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-
-#Verificamos que es una IP valida: 172.*.*.*  o 192.*.*.*
-IP=$(ifconfig | grep -E 'inet addr:(172|192)')
-
-if [ "$IP" != "" ]
+#Si existe nm-online, estamos en un portatil o un pc con network-manager
+if test -e /usr/bin/nm-online
 then
-   #Ahora que hay red válida, llamamos a sequimiento de equipo
-   /usr/share/controlies-client/seguimiento_equipo
+    #Espera hasta estar online, durante un máximo de una hora.
+    if /usr/bin/nm-online -t 3600
+    then
+	AHORA=$(/bin/date)
 
-   #Si hay un usuario logueado, hacemos un seguimiento_usuario
-   USUARIO=$(who | grep "(:0)" | head -1 | cut -d" " -f1)
-   if [ "$USUARIO" != "" ]
-   then
+        #Primero comprobamos si estamos dentro del centro educativo y tenemos red, con un timeout de 3 segundos.
+        ping -c 1 ldap -W 3 > /dev/null 2>&1
+	if [ $? -eq 0 ]
+	then
+	   #Ahora que hay red válida, llamamos a sequimiento de equipo
+	   /usr/share/controlies-client/seguimiento_equipo
 
-            OLD_USER=$USER
-            export USER=$USUARIO
-            /etc/X11/Xsession.d/99seguimiento_usuario
-            export USER=$OLD_USER
-   fi
+	   #Si hay un usuario logueado, hacemos un seguimiento_usuario
+	   USUARIO=$(who | grep "(:0)" | head -1 | cut -d" " -f1)
+	   if [ "$USUARIO" != ""  -a "$USUARIO" != "(unknown)" ]
+	   then
+		OLD_USER=$USER
+		export USER=$USUARIO
+		/etc/X11/Xsession.d/99seguimiento_usuario
+		export USER=$OLD_USER
+	   fi
+	fi
+    fi
 fi
 
 exit 0

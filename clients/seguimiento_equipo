@@ -3,69 +3,73 @@
 equipo=$(hostname -s)
 dominio=$(host -d -t CNAME servidor | grep domain | cut -f1 -d".")
 
-#Determinamos que tipo de equipo es en función del facter use. Si no tiene el facter lo consideramos workstation.
-tipo="WORKSTATION"
-if [ -e /usr/bin/facter ]
+#Primero comprobamos si estamos dentro del centro educativo y tenemos red, con un timeout de 3 segundos.
+ping -c 1 ldap -W 3 > /dev/null 2>&1
+if [ $? -eq 0 ]
 then
-      use=$(facter | grep ^use | cut -d" " -f3)
-      use=${use:0:4}
-      case $use in
-           "ltsp") tipo="LTSP"
-                          ;;
-           "work") tipo="WORKSTATION"
-                          ;;
-           "port") tipo="PORTATIL"
-                          ;;
-      esac
+	#Determinamos que tipo de equipo es en función del facter use. Si no tiene el facter lo consideramos workstation.
+	tipo="WORKSTATION"
+	if [ -e /usr/bin/facter ]
+	then
+	      use=$(facter | grep ^use | cut -d" " -f3)
+	      use=${use:0:4}
+	      case $use in
+		   "ltsp") tipo="LTSP"
+		                  ;;
+		   "work") tipo="WORKSTATION"
+		                  ;;
+		   "port") tipo="PORTATIL"
+		                  ;;
+	      esac
+	fi
+
+	#Hora ultimo arranque
+	s=$(expr $(date "+%s") - $(cat /proc/uptime | cut -d"." -f1))
+	ult_boot=$(date +"%F %X" -d @${s})
+
+
+	#Si pkgsync está lanzado, apt-get check y update darán error por bloqueo. En ese caso lo mejor es no
+	#actualizar esos campos y dejarlos para la proxima llamada al script.
+
+	#Estado paquetes
+	echo "apt-get check: "  > /tmp/apt-get.log
+	apt-get check >> /tmp/apt-get.log 2>&1
+	check_result=$?
+
+	echo "----------------------------------------------------------------"  >>   /tmp/apt-get.log
+	echo "apt-get update: "  >> /tmp/apt-get.log
+	apt-get update >> /tmp/apt-get.log 2>&1
+	update_result=$?
+
+	#Echo si está bloqueado el sistema de paquetes....
+	grep "/var/lib/dpkg/lock" /tmp/apt-get.log > /dev/null
+	no_bloqueado=$?
+
+	if [ $no_bloqueado -ne 0 ]
+	then
+	   #No aparece /var/lib/dpkg/lock en el log, luego los apt-get se han realizado sin problemas
+	   #Ultimo pkgsync
+	   ult_pkgsync=$(stat -c '%z' /var/log/pkgsync.log | cut -d"." -f1)
+
+	   grep NO_PUBKEY /tmp/apt-get.log > /dev/null
+	   key_result=$?
+
+	   if [ $check_result -ne 0 -o $update_result -ne 0 -o $key_result -eq 0 ]
+	   then
+	       pkg_status="ERROR"
+	   else
+	       pkg_status="OK"
+	   fi
+	   #Inserción en bbdd
+	   peticion="http://ldap.$dominio/controlies/init/registro/actualizahost?host=$equipo&tipohost=$tipo&ultimoarranque=$ult_boot&ultimopkgsync=$ult_pkgsync&estadopaquetes=$pkg_status"
+	   actualiza=$(wget -q -O - "$peticion" 2>/dev/null)
+	   curl -X POST --data-binary @/tmp/apt-get.log http://ldap.$dominio/controlies/init/registro/actualizalogpkgsync/$equipo
+	else
+	   #Inserción en bbdd
+	   peticion="http://ldap.$dominio/controlies/init/registro/actualizahost?host=$equipo&tipohost=$tipo&ultimoarranque=$ult_boot"
+	   actualiza=$(wget -q -O - "$peticion" 2>/dev/null)
+	fi
 fi
-
-#Hora ultimo arranque
-s=$(expr $(date "+%s") - $(cat /proc/uptime | cut -d"." -f1))
-ult_boot=$(date +"%F %X" -d @${s})
-
-
-#Si pkgsync está lanzado, apt-get check y update darán error por bloqueo. En ese caso lo mejor es no
-#actualizar esos campos y dejarlos para la proxima llamada al script.
-
-#Estado paquetes
-echo "apt-get check: "  > /tmp/apt-get.log
-apt-get check >> /tmp/apt-get.log 2>&1
-check_result=$?
-
-echo "----------------------------------------------------------------"  >>   /tmp/apt-get.log
-echo "apt-get update: "  >> /tmp/apt-get.log
-apt-get update >> /tmp/apt-get.log 2>&1
-update_result=$?
-
-#Echo si está bloqueado el sistema de paquetes....
-grep "/var/lib/dpkg/lock" /tmp/apt-get.log > /dev/null
-no_bloqueado=$?
-
-if [ $no_bloqueado -ne 0 ]
-then
-   #No aparece /var/lib/dpkg/lock en el log, luego los apt-get se han realizado sin problemas
-   #Ultimo pkgsync
-   ult_pkgsync=$(stat -c '%z' /var/log/pkgsync.log | cut -d"." -f1)
-
-   grep NO_PUBKEY /tmp/apt-get.log > /dev/null
-   key_result=$?
-
-   if [ $check_result -ne 0 -o $update_result -ne 0 -o $key_result -eq 0 ]
-   then
-       pkg_status="ERROR"
-   else
-       pkg_status="OK"
-   fi
-   #Inserción en bbdd
-   peticion="http://ldap.$dominio/controlies/init/registro/actualizahost?host=$equipo&tipohost=$tipo&ultimoarranque=$ult_boot&ultimopkgsync=$ult_pkgsync&estadopaquetes=$pkg_status"
-   actualiza=$(wget -q -O - "$peticion" 2>/dev/null)
-   curl -X POST --data-binary @/tmp/apt-get.log http://ldap.$dominio/controlies/init/registro/actualizalogpkgsync/$equipo
-else
-   #Inserción en bbdd
-   peticion="http://ldap.$dominio/controlies/init/registro/actualizahost?host=$equipo&tipohost=$tipo&ultimoarranque=$ult_boot"
-   actualiza=$(wget -q -O - "$peticion" 2>/dev/null)
-fi
-
 
 
 
