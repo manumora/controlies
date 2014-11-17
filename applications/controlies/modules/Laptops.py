@@ -166,7 +166,6 @@ class Laptops(object):
             sql = sql + " GROUP BY l.id_laptop"
             
         sql = sql + " ORDER BY "+args['sidx']+" "+args['sord']+", lh.datetime desc"
-
         result = self.DB.executesql(sql)
 
         rows = []
@@ -212,10 +211,11 @@ class Laptops(object):
 
         sql = "INSERT INTO laptops (id_laptop,serial_number,name,battery_sn,charger_sn,mac_eth0,mac_wlan0,id_trademark)"
         sql = sql+" VALUES (null,'"+self.serial_number+"','"+self.name+"','"+self.battery_sn+"','"+self.charger_sn+"','"+self.mac_eth0+"','"+self.mac_wlan0+"',"+self.id_trademark+")"
+        print sql        
         result = self.DB.executesql(sql)
+        self.id_laptop = self.getMaxId()
 
-        max = self.getMaxId()
-        lh = LaptopsHistory(self.DB,"",max,"1","0","","","","Nuevo en el sistema")
+        lh = LaptopsHistory(self.DB,"",self.id_laptop,"1","0","","","","Nuevo en el sistema","")
         lh.add()
 
         return "OK"
@@ -263,15 +263,21 @@ class Laptops(object):
     def getLaptopData(self):
 		
         sql="SELECT l.id_laptop, l.serial_number, l.id_trademark, lt.trademark, lt.model, l.name, l.battery_sn, l.charger_sn, mac_eth0, mac_wlan0 "
-        sql=sql+"FROM laptops l, laptops_trademarks lt WHERE l.id_trademark=lt.id_trademark AND l.id_laptop='"+str(self.id_laptop)+"'"
-
+        sql=sql+" FROM laptops l"
+        sql=sql+" LEFT JOIN laptops_trademarks lt  ON l.id_trademark=lt.id_trademark"
+        sql=sql+" WHERE l.id_laptop='"+str(self.id_laptop)+"'"
         result = self.DB.executesql(sql)
         
+        try:
+            trademark = str(result[0][3]+"/"+result[0][4])
+        except:
+            trademark = ""
+            
         dataLaptop = {
             "id_laptop":str(result[0][0]),
             "serial_number":result[0][1],
             "id_trademark":str(result[0][2]),
-            "trademark":str(result[0][3]+"/"+result[0][4]),
+            "trademark":trademark,
             "name":str(result[0][5]),
             "battery_sn":str(result[0][6]),
             "charger_sn":str(result[0][7]),
@@ -304,4 +310,6 @@ class Laptops(object):
         result = self.DB.executesql(sql)
         
         return str(result[0][0])
-        
+    
+    def getIdLaptop(self):
+        return self.id_laptop    

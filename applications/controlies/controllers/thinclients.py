@@ -1,7 +1,10 @@
 # coding: utf8
 from applications.controlies.modules.Thinclients import Thinclients
+from applications.controlies.modules.Users import Users
 from applications.controlies.modules.Groups import Groups
-    
+from applications.controlies.modules.Laptops import Laptops
+from applications.controlies.modules.LaptopsHistory import LaptopsHistory
+
 def index():
     if not auth.user: redirect(URL(c='default'))
     return dict()
@@ -131,7 +134,103 @@ def saveAssignation():
         j=j+1
     return dict(response="OK")
 
+@auth.requires_login()
+def addHistory(l,username,id_laptop,computer_name):
+    
+    lh = LaptopsHistory(cdb,"",id_laptop,"","","","","","","")
+    lastUsername = lh.getLastHistory()
+
+    if username!="" and lastUsername['username']!=username:
+        u = Users(l,"","","","",username,"","","","")
+        userData = u.getUserData()
+        
+        if userData["uidnumber"]!="": # Si existe el usuario
+            lh.set_id_state(2) # Asignado
+            
+            if userData["type"]=="student":
+                lh.set_id_user_type(2)
+            elif userData["type"]=="teacher":
+                lh.set_id_user_type(1)
+
+            lh.set_computer_name(computer_name)    
+            lh.set_username(username)
+            lh.set_name(userData["name"]+" "+userData["surname"])
+            lh.set_nif(userData["nif"])
+            lh.set_comment("Volcado masivo ControlIES")
+            lh.add()
+    
+    elif username=="" and lastUsername['username']!="":
+        lh.set_id_state(1) # No Asignado
+        lh.set_computer_name(computer_name)        
+        lh.set_comment("Volcado masivo ControlIES")
+        lh.add()
+
+@service.json
+@auth.requires_login()
+def databaseDumpExec():
+    
+    try:
+        if request.vars['massive_desasignation']=="ok":    
+            # Get all students asigned laptops    
+            sql="SELECT id_laptop FROM laptops_historical lh" 
+            sql=sql+" WHERE lh.id_state=2 AND lh.id_user_type=2"
+            sql=sql+" AND lh.id_historical IN (SELECT MAX(lh2.id_historical) FROM laptops_historical lh2 WHERE lh2.id_laptop=lh.id_laptop)"
+            sql=sql+" GROUP BY id_laptop"
+            sql=sql+" ORDER BY id_laptop"
+            result = cdb.executesql(sql)
+            
+            for r in result:
+                lh = LaptopsHistory(cdb,"",r[0],1,"","","","","Desasignación masiva ControlIES")
+                lh.add()
+    except:
+        pass
+
+    
+    l=conecta()
+    t = Thinclients(l,"","","","")
+    result = t.getAllComputers()
+    
+    for c in result["computers"]:
+        
+        print c
+        computer_name = c["cn"].strip()
+        serial = c["serial"].replace("serial-number","").strip()
+        username = c["username"].replace("user-name","").strip()
+        mac = c["mac"].replace("ethernet","").strip()
+        
+        if serial!="":        
+            lap = Laptops(cdb,"","","","","","","","")
+            id_laptop = lap.existsSerialNumber(serial)
+            if id_laptop:
+                addHistory(l,username,id_laptop,computer_name)
+                
+            else: # Si no existe el portatil
+                #try:
+                    if request.vars['add_laptop']=="ok":  
+                        print serial
+                        lap = Laptops(cdb,"", serial, "", "", "", "", mac, str(0))
+
+                        lap.add()
+                        
+                        addHistory(l,username,lap.getIdLaptop(),computer_name)
+                #except:
+                #    pass
+
+    l.close()
+
+    return dict(response = "OK")   
+
+"""SELECT serial_number, username
+FROM laptops l, laptops_historical lh 
+LEFT JOIN states s ON lh.id_state=s.id_state  
+WHERE lh.id_state=2 AND lh.id_user_type=2
+AND l.id_laptop=lh.id_laptop  
+AND lh.id_historical IN (SELECT MAX(lh2.id_historical) FROM laptops_historical lh2 WHERE lh2.id_laptop=l.id_laptop)  
+"""
 #necesaria estas funciones en el controlador para poder cargar las vistas correspondientes:    
+
+def databaseDump():
+    return dict()
 
 def form():
     return dict()

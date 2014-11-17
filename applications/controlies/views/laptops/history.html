@@ -25,18 +25,19 @@
                     }
                 },
                 
-                colNames:['Fecha/Hora','Estado','Login','Nombre','Comentario'],
+                colNames:['Fecha/Hora','Estado','Equipo','Login','Nombre','Comentario'],
                 colModel:[ 
                     {name:'datetime',index:'datetime', width:70, align:"center"},
                     {name:'state',index:'state', width:60, align:"center"},
-                    {name:'username',index:'username', width:50, align:"center"},
-                    {name:'name',index:'name', width:100, align:"center"},             
-                    {name:'comment',index:'comment', width:100, align:"center"}
+                    {name:'computer_name',index:'computer_name', width:40, align:"center"},
+                    {name:'username',index:'username', width:60, align:"center"},
+                    {name:'name',index:'name', width:100, align:"center"},                      
+                    {name:'comment',index:'comment', width:120, align:"center"}
                 ],
                 postData:{id_laptop:$("#form_history #id_laptop").val()},
                 rowNum:25,
                 height:150,
-                width: 780,
+                width: 860,
                 rowList:[25,50,75],  
                 pager: '#pager_history', 
                 sortname: 'datetime', 
@@ -49,21 +50,24 @@
           jQuery("#list_history").jqGrid('navGrid','#pager_history',{add:false,edit:false,del:false,search:false,refresh:false});
         
         jQuery("#list_history").jqGrid('navButtonAdd','#pager_history',{
-                caption: "Insertar",
+                caption: "",
+                title: "Insertar",
                 buttonicon :'ui-icon-plus',
                 onClickButton : function (){ 
                     addRecordHistory();
                 } 
         });
         jQuery("#list_history").jqGrid('navButtonAdd','#pager_history',{
-                caption: "Modificar", 
+                caption: "", 
+                title: "Modificar",
                 buttonicon :'ui-icon-pencil',
                 onClickButton : function (){ 
                     modifyRecordHistory();
             } 
         }); 
         jQuery("#list_history").jqGrid('navButtonAdd','#pager_history',{
-                caption: "Borrar", 
+                caption: "", 
+                title: "Borrar",
                 buttonicon :'ui-icon-trash',
                 onClickButton : function (){ 
                     deleteRecordHistory();
@@ -100,7 +104,7 @@
             jQuery("#form_data_history #messageFormHistory").html("Los campos marcados con asterisco son obligatorios");                                     
     
             x = (jQuery(window).width()-400)/2;
-            y = (jQuery(window).height()-300)/2;
+            y = (jQuery(window).height()-500)/2;
     
             jQuery("#messageLoading").hide();
     
@@ -137,7 +141,8 @@
 				jQuery("#form_data_history #id_state").val(result.response['id_state']);				
 				jQuery("#form_data_history #id_laptop").val(result.response['id_laptop']);
 				jQuery("#form_data_history #username").val(result.response['username']);
-				jQuery("#form_data_history #id_user_type").val(result.response['id_user_type']);	
+				jQuery("#form_data_history #id_user_type").val(result.response['id_user_type']);
+				jQuery("#form_data_history #computer_name").val(result.response['computer_name']);
 				jQuery("#form_data_history #name").val(result.response['name']);
 				jQuery("#form_data_history #nif").val(result.response['nif']);
 				jQuery("#form_data_history #comment").val(result.response['comment']);					
@@ -145,7 +150,7 @@
 				showFields();
 				
 				x = (jQuery(window).width()-400)/2;
-				y = (jQuery(window).height()-300)/2;
+				y = (jQuery(window).height()-500)/2;
 				
 				jQuery("#messageLoading").hide();
 				
@@ -202,7 +207,7 @@
     }
 </script>
  
-<form id="form_history">
+<form id="form_history" style="padding: 0px;">
     <input type="hidden" id="id_laptop" name="id_laptop"/>    
     <div style="text-align:center;">
 		    <b>Marca / Modelo:</b>&nbsp;<span id="id_trademark"></span>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
@@ -210,14 +215,8 @@
     </div>
     <br><br>
     <div>
-        <div id="table_history" class="centerGrid">
-            <table width="100%" align="center">
-            <tr>
-                <td style="width:2%"></td>
-                <td style="text-align:center;"><table id="list_history" width="100%"></table></td>
-                <td style="width:2%"></td>
-            </tr>
-            </table>
+        <div id="table_history" style="margin: 0 auto;"><!-- class="centerGrid">-->
+        	<table id="list_history" width="100%"></table>
             <div id="pager_history" style=""></div> 
             <div id="filter_history" style="margin-left:30%;display:none">Buscar nada</div>
         </div>

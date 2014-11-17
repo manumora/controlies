@@ -45,7 +45,7 @@
 	function getDataLDAP(){
     	ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
 		jQuery.post('call/json/getDataLDAP', jQuery("#form_data_history").serialize(), function(result) {
-			jQuery("#form_data_history #name").val(result.response['name']);
+			jQuery("#form_data_history #name").val(result.response['surname']+", "+result.response['name']);
 			jQuery("#form_data_history #nif").val(result.response['nif']);
 			switch(result.response['type']){
 				case 'teacher': jQuery("#form_data_history #id_user_type").val(1); break;
@@ -60,6 +60,7 @@
 		jQuery("#form_data_history #nifP").hide();
 		jQuery("#form_data_history #nameP").hide();
 		jQuery("#form_data_history #commentP").hide();
+		jQuery("#form_data_history #computer_nameP").hide();
 	}
 	
 	function resetFields(){
@@ -67,6 +68,7 @@
 		jQuery("#form_data_history #id_user_type").val("none");
 		jQuery("#form_data_history #nif").val("");
 		jQuery("#form_data_history #name").val("");
+		jQuery("#form_data_history #computer_name").val("");
 	}
 	
 	function showFields(){
@@ -80,9 +82,11 @@
 				jQuery("#form_data_history #nifP").show();
 				jQuery("#form_data_history #nameP").show();
 				jQuery("#form_data_history #commentP").show();
+				jQuery("#form_data_history #computer_nameP").show();
 				break;
-			case '1':
 			case '4':
+				jQuery("#form_data_history #computer_nameP").show();
+			case '1':
 				resetFields();
 				jQuery("#form_data_history #commentP").show();
 				break;
@@ -108,14 +112,15 @@
 				<option value="none">Seleccione...</option>
 			</select>
 		</p>
-		<p id="usernameP"><span id="usernameTag">Login (*)</span><br><input type="text" id="username" name="username" size="15" maxlength="200" onblur="javascript:getDataLDAP();"/></p>
+		<p id="computer_nameP"><span id="computer_nameTag">Nombre del Equipo</span><br><input type="text" id="computer_name" name="computer_name" size="20" maxlength="30"/></p>
+		<p id="usernameP"><span id="usernameTag">Login (*)</span><br><input type="text" id="username" name="username" size="15" maxlength="80" onblur="javascript:getDataLDAP();"/></p>
 		<p id="id_user_typeP"><span id="id_user_typeTag">Tipo usuario (*)</span><br>
 			<select type="text" id="id_user_type" name="id_user_type">
 				<option value="none">Seleccione...</option>
 			</select>
 		</p>    
 		<p id="nifP"><span id="nifTag">NIF / NIE</span><br><input type="text" id="nif" name="nif" size="20" maxlength="200"/></p>
-		<p id="nameP"><span id="nameTag">Nombre y Apellidos</span><br><input type="text" id="name" name="name" size="35" maxlength="200"/></p>
+		<p id="nameP"><span id="nameTag">Apellidos, Nombre</span><br><input type="text" id="name" name="name" size="35" maxlength="200"/></p>
 		<p id="commentP"><span id="commentTag">Comentario</span><br><input type="text" id="comment" name="comment" size="35" maxlength="200"/></p>
     </div>
     <div id="messageHistory" style="text-align:center; font-weight:bold; color:red; padding:3px; "></div>

@@ -134,6 +134,16 @@ class Thinclients(object):
         except:
             mac_search = ""
 
+        try:
+            user_search = args["username"] or ""
+        except:
+            user_search = ""
+
+        try:
+            serial_search = args["serial"] or ""
+        except:
+            serial_search = ""
+
         # esto hay que cambiarlo: tenemos 4 groups en thinclientes
         for i in search[6:len(search)]:
             if len(i[0][0].split(","))>6:
@@ -155,7 +165,7 @@ class Thinclients(object):
                 except:
                     serial = ""
 
-                if ((host_search != "" and host.find(host_search)>=0) or (host_search=="")) and ((mac_search != "" and mac.find(mac_search)>=0) or (mac_search=="")):
+                if ((host_search != "" and host.find(host_search)>=0) or (host_search=="")) and ((mac_search != "" and mac.find(mac_search)>=0) or (mac_search=="")) and ((serial_search != "" and serial.find(serial_search)>=0) or (serial_search=="")) and ((user_search != "" and username.find(user_search)>=0) or (user_search=="")):
     				nodeinfo=i[0][0].replace ("cn=","").split(",")
     				row = {
     					"id":host, 
@@ -356,5 +366,22 @@ class Thinclients(object):
         search = self.ldap.searchOneLevel("cn="+node+",cn=THINCLIENTS,cn=DHCP Config","cn=*",["cn"])
         for g in search:
             computers.append (g[0][1]["cn"][0])
+
+        return { "computers":computers }
+
+    def getAllComputers(self):
+        computers = []
+        search = self.ldap.search("cn=THINCLIENTS,cn=DHCP Config","cn=*",["cn","uniqueIdentifier","dhcpComments","dhcpHWAddress"])
+        for g in search:
+            try:
+                computer = {
+                    "cn" : g[0][1]["cn"][0],
+                    "username": g[0][1]["uniqueIdentifier"][0],
+                    "serial": g[0][1]["dhcpComments"][0],
+                    "mac": g[0][1]["dhcpHWAddress"][0]
+                }
+                computers.append (computer)
+            except:
+                pass
 
         return { "computers":computers }

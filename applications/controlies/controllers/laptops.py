@@ -74,33 +74,33 @@ def delete():
 @service.json
 @auth.requires_login()
 def listHistory():    
-    l = LaptopsHistory(cdb,"",request.vars["id_laptop"],"","","","","","")
+    l = LaptopsHistory(cdb,"",request.vars["id_laptop"],"","","","","","","")
     response = l.list(request.vars)
     return response
 
 @service.json
 @auth.requires_login()    
 def modifyHistory():
-    l = LaptopsHistory(cdb,request.vars["id_historical"],request.vars["id_laptop"],request.vars["id_state"],request.vars["id_user_type"],request.vars["nif"].strip(),request.vars["username"].strip(),request.vars["name"].strip(),request.vars["comment"])
+    l = LaptopsHistory(cdb,request.vars["id_historical"],request.vars["id_laptop"],request.vars["id_state"],request.vars["id_user_type"],request.vars["nif"].strip(),request.vars["username"].strip(),request.vars["name"].strip(),request.vars["comment"],request.vars["computer_name"])
     response = l.process(request.vars["action"])
     return dict(response = response)   
 
 @service.json
 @auth.requires_login()       
 def deleteHistory():
-    l = LaptopsHistory(cdb,request.vars["id_historical"],"","","","","","","")
+    l = LaptopsHistory(cdb,request.vars["id_historical"],"","","","","","","","")
     response = l.delete()                         
     return dict(response=response)
 
 @service.json
 def getAllStates():
-    l = LaptopsHistory(cdb,"","","","","","","","")
+    l = LaptopsHistory(cdb,"","","","","","","","","")
     response = l.getAllStates()
     return dict(response=response)
 
 @service.json
 def getAllUserTypes():
-    l = LaptopsHistory(cdb,"","","","","","","","")
+    l = LaptopsHistory(cdb,"","","","","","","","","")
     response = l.getAllUserTypes()
     return dict(response=response)
 
@@ -114,13 +114,13 @@ def getDataLDAP():
 
 @service.json
 def getDataHistory():
-    l = LaptopsHistory(cdb,request.vars["id_historical"],"","","","","","","")
+    l = LaptopsHistory(cdb,request.vars["id_historical"],"","","","","","","","")
     response = l.getDataHistory()
     return dict(response=response)
 
 @service.json
 def getDataLastHistory():
-    l = LaptopsHistory(cdb,"",request.vars["id_laptop"],"","","","","","")
+    l = LaptopsHistory(cdb,"",request.vars["id_laptop"],"","","","","","","")
     response = l.getLastHistory()
     return dict(response=response)
 
