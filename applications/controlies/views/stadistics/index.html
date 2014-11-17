@@ -1,0 +1,125 @@
+{{extend 'layout.html'}}
+
+<script>
+    $(function() {        
+        $("#tabsLDAP").tabs().css("font-size","13px");
+        $("#tabsBD").tabs().css("font-size","13px");
+        		
+        getInfoLDAP();
+    });
+    
+    function getInfoLDAP(){
+        jQuery.post('call/json/getInfoLDAP', function(result) {                                                            
+            jQuery.each(result.info, function(i, l){
+                jQuery("#"+i).val(l);               
+            });            
+        });
+    }
+
+
+</script>
+<table width="100%" cellspacing="12">
+<tr>
+	<td style="width: 45%">	
+	    <div id="tabsLDAP" style="width:45%">
+	        <ul>
+	            <li><a href="#tabsLDAP1"><span id="actions">LDAP</span></a></li>
+	        </ul>
+	        <div id="tabsLDAP1" style="padding:3px;">
+	            <table width="100%"> 
+	                 <tr>
+	                     <td>Profesores</td>
+	                     <td><input type="text" id="teachers" size="5"  name="teachers" style="text-align: right" readonly="true"/></td>
+	                 </tr>
+	                 <tr>
+	                     <td>Alumnos</td>
+	                     <td><input type="text" id="students" size="5"  name="students" style="text-align: right" readonly="true"/></td>
+	                 </tr>
+	                 <tr>
+	                     <td><b>Total Usuarios</b></td>
+	                     <td><input type="text" id="total-users" size="5"  name="total-users" style="text-align: right; font-weight: bold;" readonly="true"/></td>
+	                 </tr>
+	                 <tr><td><br></td></tr>
+	                 <tr>
+	                     <td>Servidores de aula</td>
+	                     <td><input type="text" id="ltspservers" size="5"  name="ltspservers" style="text-align: right" readonly="true"/></td>
+	                 </tr>
+	                 <tr>
+	                     <td>Workstations</td>
+	                     <td><input type="text" id="workstations" size="5"  name="workstations" style="text-align: right" readonly="true"/></td>
+	                 </tr>
+	                 <tr>
+	                     <td>Portátiles Profesores</td>
+	                     <td><input type="text" id="laptops" size="5"  name="laptops" style="text-align: right" readonly="true"/></td>
+	                 </tr>
+	                 <tr>
+	                     <td>Portátiles Alumnos</td>
+	                     <td><input type="text" id="student-laptops" size="5"  name="student-laptops" style="text-align: right" readonly="true"/></td>
+	                 </tr>
+	                 <tr>
+	                     <td>Clientes Ligeros</td>
+	                     <td><input type="text" id="thinclients" size="5"  name="thinclients" style="text-align: right" readonly="true"/></td>
+	                 </tr>
+	                 <tr>
+	                     <td><b>Total Equipos</b></td>
+	                     <td><input type="text" id="total-computers" size="5"  name="total-computers" style="text-align: right; font-weight: bold;" readonly="true"/></td>
+	                 </tr>
+	                 <tr><td><br></td></tr>
+	                 <tr>
+	                     <td>Cursos</td>
+	                     <td><input type="text" id="course" size="5"  name="course" style="text-align: right" readonly="true"/></td>
+	                 </tr>
+	                 <tr>
+	                     <td>Departamentos</td>
+	                     <td><input type="text" id="departments" size="5"  name="departments" style="text-align: right" readonly="true"/></td>
+	                 </tr>
+	            </table>
+	        </div>
+	    </div>       
+	</td>
+<!--	<td style="width: 10%"></td>
+	<td style="width: 45%">	
+	    <div id="tabsBD">
+	        <ul>
+	            <li><a href="#tabsBD1"><span id="actions">Base de datos</span></a></li>
+	        </ul>
+	        <div id="tabsBD1" style="padding:3px;">
+	            <table width="100%"> 
+	                 <tr>
+	                     <td>Profesores</td>
+	                     <td><input type="text" id="teachers" size="5"  name="teachers"/></td>
+	                 </tr>
+	                 <tr>
+	                     <td>Alumnos</td>
+	                     <td><input type="text" id="students" size="5"  name="students"/></td>
+	                 </tr>
+	                 <tr>
+	                     <td>Servidores de aula</td>
+	                     <td><input type="text" id="ltspservers" size="5"  name="ltspservers"/></td>
+	                 </tr>
+	                 <tr>
+	                     <td>Workstations</td>
+	                     <td><input type="text" id="workstations" size="5"  name="workstations"/></td>
+	                 </tr>
+	                 <tr>
+	                     <td>Portátiles Profesores</td>
+	                     <td><input type="text" id="laptops" size="5"  name="laptops"/></td>
+	                 </tr>
+	                 <tr>
+	                     <td>Portátiles Alumnos</td>
+	                     <td><input type="text" id="student-laptops" size="5"  name="student-laptops"/></td>
+	                 </tr>
+	                 <tr>
+	                     <td>Cursos</td>
+	                     <td><input type="text" id="course" size="5"  name="course"/></td>
+	                 </tr>
+	                 <tr>
+	                     <td>Departamentos</td>
+	                     <td><input type="text" id="departments" size="5"  name="departments"/></td>
+	                 </tr>
+	            </table>
+	        </div>
+	    </div>       
+	</td>
+</tr>-->
+</table>
