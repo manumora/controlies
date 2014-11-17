@@ -3,6 +3,7 @@ controlies (0.6.6-1) unstable; urgency=low
   * Separación de los campos Nombre y Apellidos de los usuarios
   * Integracion de controlies-seguimiento con los portatiles wheezy
   * Tareas puppet adaptadas a equipos Wheezy
+  * Volcado masivo de asignacion de portatiles de LDAP a la BD
 
  -- Manuel Mora Gordillo <manuito@gmail.com>  Wed, 31 Oct 2014 13:55:00 +0200
 
