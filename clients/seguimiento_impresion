@@ -27,22 +27,27 @@ TEATITLE=$(python -c "import sys, urllib as ul; print ul.quote_plus(sys.argv[1])
 dominio=$(host -d -t CNAME servidor | grep domain | cut -f1 -d".")
 paginas=$(pkpgcounter "$TEADATAFILE")
 
-
-#Hay que convertir el valor de TEACLIENTHOST en un nombre de equipo.
-if [ "$TEACLIENTHOST" == "localhost" ]
+#Primero comprobamos si estamos dentro del centro educativo y tenemos red, con un timeout de 3 segundos.
+ping -c 1 ldap -W 3 > /dev/null 2>&1
+if [ $? -eq 0 ]
 then
-   equipo=$(hostname -s)
-else
-   if valid_ip $TEACLIENTHOST
-   then
-      equipo=$(host $TEACLIENTHOST | cut -d" " -f5 | cut -d"." -f1)
-   else
-      equipo=$TEACLIENTHOST
-   fi
-fi
 
-peticion="http://ldap.$dominio/controlies/init/registro/actualizalogprinter?impresora=$TEAPRINTERNAME&jobid=$TEAJOBID&usuario=$TEAUSERNAME&host=$equipo&trabajo=$TEATITLE&paginas=$paginas&copias=$TEACOPIES&tamanio=$TEAJOBSIZE"
-actualiza=$(wget -q -O - $peticion 2>/dev/null)
+	#Hay que convertir el valor de TEACLIENTHOST en un nombre de equipo.
+	if [ "$TEACLIENTHOST" == "localhost" ]
+	then
+	   equipo=$(hostname -s)
+	else
+	   if valid_ip $TEACLIENTHOST
+	   then
+	      equipo=$(host $TEACLIENTHOST | cut -d" " -f5 | cut -d"." -f1)
+	   else
+	      equipo=$TEACLIENTHOST
+	   fi
+	fi
+
+	peticion="http://ldap.$dominio/controlies/init/registro/actualizalogprinter?impresora=$TEAPRINTERNAME&jobid=$TEAJOBID&usuario=$TEAUSERNAME&host=$equipo&trabajo=$TEATITLE&paginas=$paginas&copias=$TEACOPIES&tamanio=$TEAJOBSIZE"
+	actualiza=$(wget -q -O - $peticion 2>/dev/null)
+fi
 
 exit 0
 

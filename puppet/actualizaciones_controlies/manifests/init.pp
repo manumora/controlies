@@ -1,4 +1,3 @@
-
 stage { [final]: }
 
 Stage[main] -> Stage[final]
@@ -8,7 +7,7 @@ class { actualizaciones_controlies: stage => final }
 class actualizaciones_controlies {
 
   case $use {
-      "ltsp-server": {
+      "ltsp-server", "ltsp-wheezy": {
 				# configuracion del despertado automatico de los thinclients para el seguimiento de los mismos.
 				        file {"/usr/share/controlies-client/":
 						owner => root, group => root, mode => 755,
@@ -42,14 +41,21 @@ class actualizaciones_controlies {
 		#		   minute  => 45
 		#		}
 
-			}
-        "portatil-profesor-2011","portatil-alumno-2011": {
-		file {"/etc/dhcp/dhclient.conf":
-			owner => root, group => root, mode => 644,
-			source => "puppet:///actualizaciones_controlies/dhclient.conf",
-		}        
 	}
 	default: {}
+    }
+
+    package { "pkpgcounter":
+             ensure => installed,
+             before => File["/usr/share/pyshared/pkpgpdls/zjstream.py"],
+
+    }    
+	
+    # Asegurando la existencia de la carpeta
+    file {"/usr/share/pyshared/pkpgpdls":
+          owner => root, group => root, mode => 755,
+          ensure => directory,
+          before => File["/usr/share/pyshared/pkpgpdls/zjstream.py"],    
     }
 
     #Seguimiento impresión, parchea un bug en pkpgcounter.

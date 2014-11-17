@@ -6,48 +6,62 @@ equipo=$(hostname -s)
 usuario=$USER
 dominio=$(host -d -t CNAME servidor | grep domain | cut -f1 -d".")
 
-
-#Determinamos que tipo de equipo es en función del facter use. Si no tiene el facter lo consideramos workstation.
-tipo="WORKSTATION"
-if [ -e /usr/bin/facter ]
+#Primero comprobamos si estamos dentro del centro educativo y tenemos red, con un timeout de 3 segundos.
+ping -c 1 ldap -W 3 > /dev/null 2>&1
+if [ $? -eq 0 ]
 then
-      use=$(facter | grep ^use | cut -d" " -f3)
-      case $use in
-           ltsp*) tipo="LTSP"
-                          ;;
-           work*) tipo="WORKSTATION"
-                          ;;
-           port*) tipo="PORTATIL"
-                          ;;
-           *) tipo="WORKSTATION"
-                          ;;
-      esac
-fi
-
-#Si es un LTSP, debemos saber si es profesor, ya que los alumnos tambien hacen login (indirectamente) en el equipo del profesor
-#y aparecerían registrados en él.
-#OJO: aqui el comparador es =. No usar ==, ya que estos scripts NO los ejecuta bash y el == no funciona.
-if [ $tipo = "LTSP" ]
-then 
-	es_profe=$(id -nG $usuario | grep teachers | wc -l)
-	if [ $es_profe -ne 0 ]
+	#Determinamos que tipo de equipo es en función del facter use. Si no tiene el facter lo consideramos workstation.
+	tipo="WORKSTATION"
+	if [ -e /usr/bin/facter ]
 	then
-	  peticion="http://ldap.$dominio/controlies/init/registro/login?usuario=$usuario&maquina=$equipo&tipohost=$tipo"
-	  actualiza=$(wget -q -O - $peticion 2>/dev/null)
+	      use=$(facter | grep ^use | cut -d" " -f3)
+	      case $use in
+		   ltsp*) tipo="LTSP"
+		                  ;;
+		   work*) tipo="WORKSTATION"
+		                  ;;
+		   port*) tipo="PORTATIL"
+		                  ;;
+		   *) tipo="WORKSTATION"
+		                  ;;
+	      esac
 	fi
-else
-    #Si es un PORTATIL además hay que intentar averiguar en que aula está para pasar ese dato.
-    if [ $tipo = "PORTATIL" ]
-    then
-        #Obtiene el nombre del pc del profesor preguntando al servidor de aula por XMLRPC.
-        aula=$(python -c "import xmlrpclib; s = xmlrpclib.Server('http://192.168.0.254:6800'); print s.getHostName()" 2> /dev/null)
-        #Quita el sufijo y el "-", quedando solo el prefijo.
-        aula=${aula%-*}
-        peticion="http://ldap.$dominio/controlies/init/registro/login?usuario=$usuario&maquina=$equipo&tipohost=$tipo&aula=$aula"
-    else
-        peticion="http://ldap.$dominio/controlies/init/registro/login?usuario=$usuario&maquina=$equipo&tipohost=$tipo"    
-    fi    
-    actualiza=$(wget -q -O - $peticion 2>/dev/null)
-fi
 
+	#Si es un LTSP, debemos saber si es profesor, ya que los alumnos tambien hacen login (indirectamente) en el equipo del profesor
+	#y aparecerían registrados en él.
+	#OJO: aqui el comparador es =. No usar ==, ya que estos scripts NO los ejecuta bash y el == no funciona.
+	if [ $tipo = "LTSP" ]
+	then 
+		es_profe=$(id -nG $usuario | grep teachers | wc -l)
+		if [ $es_profe -ne 0 ]
+		then
+		  peticion="http://ldap.$dominio/controlies/init/registro/login?usuario=$usuario&maquina=$equipo&tipohost=$tipo"
+		  actualiza=$(wget -q -O - $peticion 2>/dev/null)
+		fi
+	else
+	    #Si es un PORTATIL además hay que intentar averiguar en que aula está para pasar ese dato.
+	    if [ $tipo = "PORTATIL" ]
+	    then
+
+		#Ahora comprobamos si estamos dentro de un aula, haciendo ping al servidor de aula con un timeout de 3 segundos.
+                ping -c 1 -W 3 192.168.0.254  > /dev/null 2>&1
+                resultado=$?
+                aula=""
+                if [ $resultado -eq 0 ]
+                then
+		        #Obtiene el nombre del pc del profesor preguntando al servidor de aula por XMLRPC. Pone un timeout de 5 segundos para obtener respuesta.
+			aula=$(python -c "import xmlrpclib; import socket; s = xmlrpclib.Server('http://192.168.0.254:6800'); socket.setdefaulttimeout(5); print s.getHostName(); socket.setdefaulttimeout(None)" 2> /dev/null)
+
+			#Quita el sufijo y el "-", quedando solo el prefijo.
+			aula=${aula%-*}
+                fi
+                test -z $aula && aula="NO"
+		peticion="http://ldap.$dominio/controlies/init/registro/login?usuario=$usuario&maquina=$equipo&tipohost=$tipo&aula=$aula"
+	    else
+		peticion="http://ldap.$dominio/controlies/init/registro/login?usuario=$usuario&maquina=$equipo&tipohost=$tipo"    
+	    fi
+
+	    actualiza=$(wget -q -O - $peticion 2>/dev/null)
+	fi
+fi
 

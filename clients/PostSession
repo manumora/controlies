@@ -4,5 +4,10 @@ equipo=$(hostname -s)
 usuario=$1
 dominio=$(host -d -t CNAME servidor | grep domain | cut -f1 -d".")
 
-peticion="http://ldap.$dominio/controlies/init/registro/logout?usuario=$usuario&maquina=$equipo"
-actualiza=$(wget -q -O - $peticion 2>/dev/null)
+#Primero comprobamos si estamos dentro del centro educativo y tenemos red, con un timeout de 3 segundos.
+ping -c 1 ldap -W 3 > /dev/null 2>&1
+if [ $? -eq 0 ]
+then
+   peticion="http://ldap.$dominio/controlies/init/registro/logout?usuario=$usuario&maquina=$equipo"
+   actualiza=$(wget -q -O - $peticion 2>/dev/null)
+fi
