@@ -124,6 +124,14 @@
                         databaseDump();
                 } 
             });
+            jQuery("#list").jqGrid('navButtonAdd','#pager',{
+                    caption: "",
+                    title: "Buscar duplicados", 
+                    buttonicon :'ui-icon-search',
+                    onClickButton : function (){ 
+                        findDuplicate();
+                } 
+            });
           jQuery("#list").jqGrid('filterToolbar'); 
        
     }
@@ -331,6 +339,27 @@
                 modal: true,
                 width: 600,
                 title: "Volcar a Base de Datos (BETA)"
+            }).dialog('option', 'position', [x, y]);                                       
+        });
+    }
+
+    function findDuplicate(){
+    	ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+        jQuery("#messageLoading").show();       
+
+        jQuery("#dialog-form").html("").css("display","none");
+        jQuery("#dialog-form").load("findDuplicate.html", function() {                        
+
+            x = (jQuery(window).width()-600)/2;
+            y = (jQuery(window).height()-300)/2;
+            
+            jQuery("#messageLoading").hide();
+            
+            jQuery("#dialog-form").dialog({
+                resizable: false,
+                modal: true,
+                width: 600,
+                title: "Buscar duplicados"
             }).dialog('option', 'position', [x, y]);                                       
         });
     }

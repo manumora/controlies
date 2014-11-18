@@ -134,7 +134,6 @@ class LaptopsHistory(object):
         now = datetime.datetime.now()
         sql = "INSERT INTO laptops_historical (id_historical,id_laptop,computer_name,datetime,username,name,id_user_type,nif,comment,id_state) "
         sql = sql+" VALUES (null,"+ str(self.id_laptop) +",'"+self.computer_name+"','"+ now.strftime('%Y-%m-%d %H:%M:%S')+"','"+self.username+"','"+self.name+"',"+ str(self.id_user_type)+",'"+ self.nif+"','"+self.comment+"','"+ str(self.id_state)+"')"
-        print sql
         result = self.DB.executesql(sql)
 
         #self.DB.laptops_historical.insert (id_laptop=self.id_laptop, datetime=now.strftime('%Y-%m-%d %H:%M:%S'), username=self.username, name = self.name, id_user_type=self.id_user_type,nif=self.nif,comment=self.comment, id_state=self.id_state)

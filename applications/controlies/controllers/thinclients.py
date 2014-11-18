@@ -192,7 +192,6 @@ def databaseDumpExec():
     
     for c in result["computers"]:
         
-        print c
         computer_name = c["cn"].strip()
         serial = c["serial"].replace("serial-number","").strip()
         username = c["username"].replace("user-name","").strip()
@@ -205,29 +204,63 @@ def databaseDumpExec():
                 addHistory(l,username,id_laptop,computer_name)
                 
             else: # Si no existe el portatil
-                #try:
+                try:
                     if request.vars['add_laptop']=="ok":  
-                        print serial
                         lap = Laptops(cdb,"", serial, "", "", "", "", mac, str(0))
 
                         lap.add()
                         
                         addHistory(l,username,lap.getIdLaptop(),computer_name)
-                #except:
-                #    pass
+                except:
+                    pass
 
     l.close()
 
     return dict(response = "OK")   
 
-"""SELECT serial_number, username
-FROM laptops l, laptops_historical lh 
-LEFT JOIN states s ON lh.id_state=s.id_state  
-WHERE lh.id_state=2 AND lh.id_user_type=2
-AND l.id_laptop=lh.id_laptop  
-AND lh.id_historical IN (SELECT MAX(lh2.id_historical) FROM laptops_historical lh2 WHERE lh2.id_laptop=l.id_laptop)  
-"""
+@service.json
+@auth.requires_login()
+def findDuplicates():
+    l=conecta()
+    t = Thinclients(l,"","","","")
+    result = t.getAllComputers()
+    
+    serials = []
+    macs = []
+    users = []
+        
+    for c in result["computers"]:
+        try:
+            serial = c["serial"].replace("serial-number","").strip()
+            if serial!="":
+                serials.append(serial)
+        except:
+            pass
+
+        try:
+            mac = c["mac"].replace("ethernet","").strip()
+            if mac!="":
+                macs.append(mac)
+        except:
+            pass
+
+        try:
+            user = c["username"].replace("user-name","").strip()
+            if user!="":
+                users.append(user)
+        except:
+            pass
+
+    s = set([x for x in serials if serials.count(x) > 1])
+    m = set([x for x in macs if macs.count(x) > 1])
+    u = set([x for x in users if users.count(x) > 1])
+        
+    return dict({"users":sorted(u), "macs":sorted(m), "serials":sorted(s)})
+
 #necesaria estas funciones en el controlador para poder cargar las vistas correspondientes:    
+
+def findDuplicate():
+    return dict()
 
 def databaseDump():
     return dict()

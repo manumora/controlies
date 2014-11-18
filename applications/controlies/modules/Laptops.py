@@ -210,8 +210,7 @@ class Laptops(object):
         #self.DB.commit()
 
         sql = "INSERT INTO laptops (id_laptop,serial_number,name,battery_sn,charger_sn,mac_eth0,mac_wlan0,id_trademark)"
-        sql = sql+" VALUES (null,'"+self.serial_number+"','"+self.name+"','"+self.battery_sn+"','"+self.charger_sn+"','"+self.mac_eth0+"','"+self.mac_wlan0+"',"+self.id_trademark+")"
-        print sql        
+        sql = sql+" VALUES (null,'"+self.serial_number+"','"+self.name+"','"+self.battery_sn+"','"+self.charger_sn+"','"+self.mac_eth0+"','"+self.mac_wlan0+"',"+self.id_trademark+")"  
         result = self.DB.executesql(sql)
         self.id_laptop = self.getMaxId()
 
