@@ -1,0 +1,54 @@
+<script language="javascript">
+
+    $(function() {
+        $("#cancelButton")
+            .button({ icons: { primary: "ui-icon-close"}})
+            .click( function(){ $('#dialog-form').dialog('close'); });
+        send();
+    });
+
+    function send(){
+    	ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+
+        jQuery.post('call/json/findDuplicates', jQuery("#form_data").serialize(), function(result) {
+        	if (result.serials.length>0){
+        		jQuery("#response").append("<br><h4><b>Números de serie repetidos:</b></h4>");
+        		
+        		for(i=0;i<result.serials.length;i++){
+        			jQuery("#response").append(result.serials[i]+"<br/>");		
+        		}
+        	}else{
+        		jQuery("#response").append("<br><h4><b>No hay números de serie repetidos</b></h4>");
+        	}
+        	
+        	if (result.users.length>0){
+        		jQuery("#response").append("<br><h4><b>Usuarios con más de un portátil asignado:</b></h4>");
+        		
+        		for(i=0;i<result.users.length;i++){
+        			jQuery("#response").append(result.users[i]+"<br/>");		
+        		}
+        	}else{
+        		jQuery("#response").append("<br><h4><b>No hay usuarios repetidos</b></h4>");
+        	}
+
+        	if (result.macs.length>0){
+        		jQuery("#response").append("<br><h4><b>Macs repetidas</b></h4>");
+        		
+        		for(i=0;i<result.macs.length;i++){
+        			jQuery("#response").append(result.macs[i]+"<br/>");		
+        		}
+        	}else{
+        		jQuery("#response").append("<br><h4><b>No hay Macs repetidas</b></h4>");
+        	}
+
+        });
+
+        return false;
+    }
+    
+</script>
+ 
+<div id="response" style="height:400px; overflow:auto; background-color: #000; color:#EEE; padding-left: 1em;"></div>
+<br>
+<div style="text-align:center;"><button type="button" id="cancelButton" style="width:100px;">Cerrar</button></div>
+

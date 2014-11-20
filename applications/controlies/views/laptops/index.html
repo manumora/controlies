@@ -72,28 +72,32 @@
           jQuery("#list").jqGrid('navGrid','#pager',{add:false,edit:false,del:false,search:false,refresh:false});
         
             jQuery("#list").jqGrid('navButtonAdd','#pager',{
-                    caption: "Insertar",
+                    caption: "",
+                    title: "Insertar",
                     buttonicon :'ui-icon-plus',
                     onClickButton : function (){ 
                         addRecord();
                     } 
             }); 
             jQuery("#list").jqGrid('navButtonAdd','#pager',{
-                    caption: "Modificar", 
+                    caption: "", 
+                    title: "Modificar",
                     buttonicon :'ui-icon-pencil',
                     onClickButton : function (){ 
                         modifyRecord();
                 } 
             }); 
             jQuery("#list").jqGrid('navButtonAdd','#pager',{
-                    caption: "Borrar", 
+                    caption: "", 
+                    title: "Borrar",
                     buttonicon :'ui-icon-trash',
                     onClickButton : function (){ 
                         deleteRecord();
                 } 
-            }); 
+            }).navSeparatorAdd("#pager",{sepclass : "ui-separator"}); 
             jQuery("#list").jqGrid('navButtonAdd','#pager',{
-                    caption: "Historial", 
+                    caption: "", 
+                    title: "Historial",
                     buttonicon :'ui-icon-clock',
                     onClickButton : function (){ 
                         history();
@@ -240,7 +244,7 @@
 					jQuery("#form_history #serial_number").html(result.response['serial_number']);
 					jQuery("#form_history #id_trademark").html(result.response['trademark']);					
 
-					x = (jQuery(window).width()-850)/2;
+					x = (jQuery(window).width()-900)/2;
 					y = (jQuery(window).height()-500)/2;
 					
 					jQuery("#messageLoading").hide();
@@ -248,7 +252,7 @@
 					jQuery("#dialog-form").dialog({
 						resizable: false,
 						modal: true,
-						width: 850,
+						width: 900,
 						title: "Historial Dispositivo"
 					}).dialog('option', 'position', [x, y]);                        
 				});               

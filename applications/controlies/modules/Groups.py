@@ -148,7 +148,7 @@ class Groups(object):
 		# sort rows
 		result = sorted(rows, key=itemgetter(sortBy), reverse=reverseSort)
 
-		return { "page":page, "total":totalPages, "records":len(search), "rows":result[start:finish] }
+		return { "page":page, "total":totalPages, "records":len(rows), "rows":result[start:finish] }
 		
 
     def listUsers(self,args):
@@ -160,8 +160,6 @@ class Groups(object):
 
 		# sort by field
 		sortBy = args['sidx']
-		if sortBy == "cn":
-			sortBy = "id"
 
 		# reverse Sort
 		reverseSort = False
@@ -177,8 +175,8 @@ class Groups(object):
 			userData = u.getUserData()
 			row = {
 				"id":userData["user"], 
-				"cell":[userData["name"],userData["user"],userData["nif"]],
-				"cn": userData["name"],
+				"cell":[userData["surname"]+", "+userData["name"],userData["user"],userData["nif"]],
+				"cn": userData["surname"]+", "+userData["name"],
 				"uid": userData["user"],
 				"employeeNumber": userData["nif"]
 			}
@@ -307,8 +305,7 @@ class Groups(object):
             userData = u.getUserData()
             row = {
                 "id":userData["user"], 
-                "cn": userData["name"],
-                "sn": userData["surname"],
+                "sn": userData["surname"]+", "+userData["name"],
                 "uid": userData["user"],
                 "employeeNumber": userData["nif"]
             }

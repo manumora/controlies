@@ -30,7 +30,7 @@ class LaptopsHistory(object):
     def __init__(self):
         pass
     
-    def __init__(self,DB,id_historical,id_laptop,id_state,id_user_type,nif,username,name,comment):
+    def __init__(self,DB,id_historical,id_laptop,id_state,id_user_type,nif,username,name,comment,computer_name):
         self.DB = DB
         self.id_historical = str(id_historical)        
         self.id_laptop = str(id_laptop)
@@ -46,7 +46,8 @@ class LaptopsHistory(object):
         self.username = str(username)
         self.name = str(name)
         self.comment = str(comment)
-        
+        self.computer_name = str(computer_name)
+                
     def validation(self,action):
 
         if self.id_state == "none":
@@ -97,9 +98,10 @@ class LaptopsHistory(object):
 
             row = {
                 "id":reg['laptops_historical']['id_historical'],
-                "cell":[new_dataformat,reg['states']['state'],reg['laptops_historical']['username'],reg['laptops_historical']['name'],reg['laptops_historical']['comment']],
+                "cell":[new_dataformat,reg['states']['state'],reg['laptops_historical']['computer_name'],reg['laptops_historical']['username'],reg['laptops_historical']['name'],reg['laptops_historical']['comment']],
                 "datetime":new_dataformat,
                 "state":reg['states']['state'],
+                "computer_name":reg['laptops_historical']['computer_name'],
                 "username":reg['laptops_historical']['username'],
                 "name":reg['laptops_historical']['name'],
                 "comment":reg['laptops_historical']['comment']
@@ -130,8 +132,8 @@ class LaptopsHistory(object):
 
     def add(self): 
         now = datetime.datetime.now()
-        sql = "INSERT INTO laptops_historical (id_historical,id_laptop,datetime,username,name,id_user_type,nif,comment,id_state) "
-        sql = sql+" VALUES (null,"+ str(self.id_laptop) +",'"+ now.strftime('%Y-%m-%d %H:%M:%S')+"','"+self.username+"','"+self.name+"',"+ str(self.id_user_type)+",'"+ self.nif+"','"+self.comment+"','"+ str(self.id_state)+"')"
+        sql = "INSERT INTO laptops_historical (id_historical,id_laptop,computer_name,datetime,username,name,id_user_type,nif,comment,id_state) "
+        sql = sql+" VALUES (null,"+ str(self.id_laptop) +",'"+self.computer_name+"','"+ now.strftime('%Y-%m-%d %H:%M:%S')+"','"+self.username+"','"+self.name+"',"+ str(self.id_user_type)+",'"+ self.nif+"','"+self.comment+"','"+ str(self.id_state)+"')"
         result = self.DB.executesql(sql)
 
         #self.DB.laptops_historical.insert (id_laptop=self.id_laptop, datetime=now.strftime('%Y-%m-%d %H:%M:%S'), username=self.username, name = self.name, id_user_type=self.id_user_type,nif=self.nif,comment=self.comment, id_state=self.id_state)
@@ -142,7 +144,7 @@ class LaptopsHistory(object):
             
     def modify(self):
         now = datetime.datetime.now()
-        self.DB(self.DB.laptops_historical.id_historical==self.id_historical).update(username=self.username, name=self.name, id_user_type=self.id_user_type, nif=self.nif, comment = self.comment, id_state = self.id_state, datetime=now.strftime('%Y-%m-%d %H:%M:%S'))        
+        self.DB(self.DB.laptops_historical.id_historical==self.id_historical).update(computer_name=self.computer_name, username=self.username, name=self.name, id_user_type=self.id_user_type, nif=self.nif, comment = self.comment, id_state = self.id_state, datetime=now.strftime('%Y-%m-%d %H:%M:%S'))        
         self.DB.commit()
         return "OK"
 
@@ -182,7 +184,7 @@ class LaptopsHistory(object):
         sql="SELECT * FROM laptops_historical WHERE id_historical='"+str(self.id_historical)+"'"
         result = self.DB.executesql(sql)
 
-        data = {"id_historical":"","id_laptop":"","username":"","name":"","id_user_type":"","nif":"","comment":"","id_state":""}
+        data = {"id_historical":"","id_laptop":"","username":"","name":"","id_user_type":"","nif":"","comment":"","id_state":"","computer_name":""}
         if len(result)>0:
             data = {
                 "id_historical":str(result[0][0]),
@@ -192,7 +194,8 @@ class LaptopsHistory(object):
                 "id_user_type":str(result[0][5]),
                 "nif":str(result[0][6]),
                 "comment":str(result[0][7]),
-                "id_state":str(result[0][8])
+                "id_state":str(result[0][8]),
+                "computer_name":str(result[0][9]),
             }
 
         return data
@@ -221,3 +224,30 @@ class LaptopsHistory(object):
                 return str(r[0])
                     
         return False
+    
+    def set_id_laptop(self,id_laptop):
+        self.id_laptop = str(id_laptop)
+
+    def set_id_state(self,id_state):
+        self.id_state = str(id_state)   
+
+    def set_id_user_type(self,id_user_type):
+        try:
+            self.id_user_type = int(id_user_type)
+        except ValueError:
+            self.id_user_type = 0
+
+    def set_nif(self,nif):
+        self.nif = str(nif)  
+
+    def set_computer_name(self,computer_name):
+        self.computer_name = str(computer_name)  
+
+    def set_username(self,username):
+        self.username = str(username)  
+
+    def set_name(self,name):
+        self.name = str(name)  
+
+    def set_comment(self,comment):
+        self.comment = str(comment)  

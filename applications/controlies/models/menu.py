@@ -32,7 +32,7 @@ response.menu+=[
             ('Grupos', False,URL( 'grupos', 'index' )),
             ('Servidores LTSP',False, URL( 'hosts', 'ltspservers' )),
             ('Workstations', False,URL( 'hosts', 'workstations' )),
-            ('Portátiles', False,URL( 'hosts', 'laptops' )),            
+            ('Portátiles Profesores', False,URL( 'hosts', 'laptops' )),            
             ('Equipos Alumnos', False,URL( 'thinclients', 'index' )),         
             #('Parámetros DHCP', False,URL( 'dhcpd', 'index' )),
             ]
@@ -73,6 +73,7 @@ response.menu+=[('Base de Datos', False, None,[
 
 response.menu+=[('Informes', False, None,[            
             ('Compromisos Portátiles', False,URL( 'reports', 'laptops')),
+            ('Estadísticas', False,URL( 'stadistics', 'index')),
             #('Impresoras', False,URL( 'reports', 'printers')),
             #('Usuarios', False,URL( 'reports', 'users')),
             ]

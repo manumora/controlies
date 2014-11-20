@@ -33,8 +33,9 @@ except:
 
 cdb.define_table('laptops_historical', 
                         Field('id_historical','integer'),
-                        Field('id_laptop','integer'),                        
+                        Field('id_laptop','integer'),
                         Field('datetime','datetime'),
+                        Field('computer_name','string'),
                         Field('username','string'),
                         Field('name','string'),
                         Field('id_user_type','integer'),
