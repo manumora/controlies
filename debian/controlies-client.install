@@ -11,5 +11,5 @@ clients/rpc/RPCServer.py usr/share/controlies-client
 clients/rpc/controlies-client etc/init.d
 clients/rpc/97controlies-client etc/NetworkManager/dispatcher.d
 clients/rpc/controlies.dhcp etc/dhcp/dhclient-exit-hooks.d
-clients/controlies-seguimiento usr/share/controlies-seguimiento
+clients/controlies-seguimiento usr/share/controlies-client
 
