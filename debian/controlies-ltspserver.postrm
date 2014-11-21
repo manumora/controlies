@@ -1,5 +1,5 @@
 #!/bin/sh
-# postrm script for controlies-client
+# postrm script for controlies-ltspserver
 #
 
 set -e
@@ -14,22 +14,22 @@ case "$1" in
 	#####################################################
 	# Registro Post Session
 	if [ -f "/etc/$DIR/PostSession/Default" ]; then
-		sed -i.bak '/\/usr\/share\/controlies-client\/PostSession \$LOGNAME/d' /etc/$DIR/PostSession/Default
+		sed -i.bak '/\/usr\/share\/controlies-ltspserver\/PostSession \$LOGNAME/d' /etc/$DIR/PostSession/Default
 	fi
 
 	######################################################
 	# Seguimiento equipos
-	sed -i.bak '/@reboot root \/usr\/share\/controlies-client\/seguimiento_equipo/d' /etc/crontab
-        sed -i.bak '/\*\/57 \* \* \* \* root \/usr\/share\/controlies-client\/seguimiento_equipo/d' /etc/crontab
+	sed -i.bak '/@reboot root \/usr\/share\/controlies-ltspserver\/seguimiento_equipo/d' /etc/crontab
+        sed -i.bak '/\*\/57 \* \* \* \* root \/usr\/share\/controlies-ltspserver\/seguimiento_equipo/d' /etc/crontab
 	service cron restart
 
         ######################################################
         # controlies-seguimiento fuera de rc.local
-        sed -i.bak '/\/usr\/share\/controlies-client\/controlies-seguimiento/d' /etc/rc.local
+        sed -i.bak '/\/usr\/share\/controlies-ltspserver\/controlies-seguimiento/d' /etc/rc.local
 
 	######################################################
 	# Servicio RPC
-	update-rc.d controlies-client remove
+	update-rc.d controlies-ltspserver remove
     ;;
     upgrade|abort-upgrade|abort-remove|abort-deconfigure)
     ;;
