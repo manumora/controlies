@@ -32,20 +32,6 @@ class instala_controlies {
 			refreshonly => true,
 		}
 
-		file {"/var/cache/$paquete_client":
-		 	owner => root, group => root, mode => 755,
-			source => "puppet:///instala_controlies/$paquete_client",
-			notify => Exec["instala_controlies_client"]
-		}
-		exec { "instala_controlies_ltspserver":
-			path => "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-			command => "apt-get remove --purge controlies-client; dpkg -i --force-confnew  --force-overwrite $paquete_client; apt-get -f -y install ",
-		#		command => "dpkg -i --force-confnew  --force-overwrite $paquete_client; apt-get -f -y install ",
-			cwd => "/var/cache",
-			unless => "dpkg -l | grep controlies-client | grep $version | grep ^ii",
-			require => File["/var/cache/$paquete_client"],
-		}
-
 		#################################
 		# Paquete ltspservers
 		#################################
