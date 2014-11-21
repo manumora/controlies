@@ -1,0 +1,77 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          controlies-ltspserver
+# Required-Start:    $local_fs $remote_fs hostname
+# Required-Stop:     $local_fs $remote_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: ControlIES ltspserver daemon
+# Description:       Debian init script for ControlIES ltspserver
+### END INIT INFO
+#
+# Author:	Manuel Mora Gordillo <manuito at gmail.com>
+#                                                                                                                                      
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+NAME=LTSPServer
+message="ControlIES ltspserver daemon"
+
+rundir=/var/run 
+logfile=/var/log/controlies-ltspserver.log
+daemon="/usr/bin/python"
+
+pidfileRPC=$rundir/controlies-ltspserver/RPCServer.pid
+applicationRPC=/usr/share/controlies-ltspserver/RPCServer.py
+
+pidfileAvahi=$rundir/controlies-ltspserver/avahiRoute.pid
+applicationAvahi=/usr/share/controlies-ltspserver/avahiRoute.py
+
+test -x $DAEMON || exit 0
+test -r $applicationRPC || exit 0
+test -r $applicationAvahi || exit 0
+
+. /lib/lsb/init-functions
+
+if [ ! -d /var/run/controlies-ltspserver ]; then
+	rm -rf /var/run/controlies-ltspserver
+	mkdir -p /var/run/controlies-ltspserver
+fi
+
+case "$1" in
+    start)
+		log_daemon_msg "Starting $message"
+		[ ! -f $logfile ] && touch $logfile
+		start-stop-daemon --start --quiet --pidfile=$pidfileRPC --make-pidfile --exec $daemon $applicationRPC &
+		start-stop-daemon --start --quiet --pidfile=$pidfileAvahi --make-pidfile --exec $daemon $applicationAvahi &
+		log_end_msg 0
+		;;
+	
+    stop)
+		log_daemon_msg "Stopping $message"
+		start-stop-daemon --stop --quiet --pidfile $pidfileRPC
+		start-stop-daemon --stop --quiet --pidfile $pidfileAvahi
+		log_end_msg 0
+		;;
+	
+    reload)
+	    	log_daemon_msg "Reloading $message"
+		start-stop-daemon --stop --quiet --signal HUP --pidfile $pidfileRPC &
+		start-stop-daemon --stop --quiet --signal HUP --pidfile $pidfileAvahi &
+	    	log_end_msg 0
+	    	;;
+    	
+    restart|force-reload)
+		#log_daemon_msg "Restarting $message"
+		$0 stop
+		sleep 1
+		$0 start
+		log_end_msg 0
+		;;
+	*)
+		log_success_msg "Usage: $0 {start|stop|restart|force-reload|reload}"
+		exit 1
+		;;
+esac
+
+exit 0

@@ -1,0 +1,15 @@
+clients/PostSession usr/share/controlies-ltspserver
+clients/seguimiento_equipo usr/share/controlies-ltspserver
+clients/99seguimiento_usuario etc/X11/Xsession.d
+clients/seguimiento_impresion usr/share/controlies-ltspserver
+clients/tea4cups.conf etc/cups
+clients/tea4cups usr/lib/cups/backend
+clients/avahi/controlies usr/bin
+clients/avahi/controlies.desktop etc/xdg/autostart
+clients/avahi/sessionControl.py usr/share/controlies-ltspserver
+clients/avahi/avahiRoute.py usr/share/controlies-ltspserver
+clients/rpc/RPCServer.py usr/share/controlies-ltspserver
+clients/daemon/controlies-ltspserver etc/init.d
+clients/daemon/97controlies-ltspserver etc/NetworkManager/dispatcher.d
+clients/daemon/controlies.dhcp etc/dhcp/dhclient-exit-hooks.d
+clients/controlies-seguimiento usr/share/controlies-ltspserver

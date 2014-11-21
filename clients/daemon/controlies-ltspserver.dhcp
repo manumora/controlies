@@ -1,0 +1,4 @@
+#!/bin/sh
+
+#restart controlies-ltspserver to get new network addresses
+invoke-rc.d controlies-ltspserver restart
