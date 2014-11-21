@@ -11,5 +11,5 @@ clients/avahi/avahiRoute.py usr/share/controlies-ltspserver
 clients/rpc/RPCServer.py usr/share/controlies-ltspserver
 clients/daemon/controlies-ltspserver etc/init.d
 clients/daemon/97controlies-ltspserver etc/NetworkManager/dispatcher.d
-clients/daemon/controlies.dhcp etc/dhcp/dhclient-exit-hooks.d
+clients/daemon/controlies-ltspserver.dhcp etc/dhcp/dhclient-exit-hooks.d
 clients/controlies-seguimiento usr/share/controlies-ltspserver
