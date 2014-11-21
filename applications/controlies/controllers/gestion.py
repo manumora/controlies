@@ -6,6 +6,7 @@ from applications.controlies.modules.SQLiteConnection import SQLiteConnection
 from applications.controlies.modules.Laptops import Laptops
 from applications.controlies.modules.LaptopsHistory import LaptopsHistory
 from applications.controlies.modules.Config import Config
+from applications.controlies.modules.Thinclients import Thinclients
 
 import xmlrpclib
 import gluon.contrib.simplejson
@@ -266,6 +267,19 @@ def getLaptops():
 
     return dict(response=response)
 
+@service.json   
+@auth.requires_login()    
+def getLaptopsPupils():
+    try:
+        classroom = request.vars['classroom'].split("-")
+        l=conecta()
+        t = Thinclients(l,"","","","")
+        computers = t.getAllComputersNode(classroom[0])
+        response = computers["computers"]
+    except:
+        response=[]    
+
+    return dict(response=response)
 
 @service.json   
 @auth.requires_login()    
@@ -279,7 +293,8 @@ def getLTSPStatus():
     directory = "/tmp/"
     fileNameServers = directory+"controliesSerFDidisDSs43"
     fileNameTeachers = directory+"controliesTeaRssdASWe234"
-
+    fileNameLaptops = directory+"controliesFsdfeRw34DSdz4Y"
+    
     try:
         f = open(fileNameServers, 'r')
         computers = f.read().split(" ")
@@ -294,7 +309,46 @@ def getLTSPStatus():
     except:
         teachers=()
 
-    return dict(computers=computers,teachers=teachers)
+    try:
+        f = open(fileNameLaptops, 'r')
+        laptops = f.read().split(" ")
+        laptops.sort()
+        
+        numbers={}
+        
+        for i in laptops:
+            classroom = i.split("-")
+            
+            if classroom[0] in numbers:
+                numbers[classroom[0]] = int(numbers[classroom[0]])+1
+            elif classroom[0]!="":
+                numbers[classroom[0]] = 1  
+         
+    except:
+        numbers={}
+
+    return dict(computers=computers,teachers=teachers,laptops=numbers)
+
+@service.json   
+@auth.requires_login()    
+def getLaptopsStatus():
+
+    """import memcache
+    shared = memcache.Client(['127.0.0.1:11211'], debug=0)    
+    fileNameServers = shared.get('fileNameServers')
+    fileNameTeachers = shared.get('fileNameTeachers')"""
+
+    directory = "/tmp/"
+    fileNameLaptops = directory+"controliesFsdfeRw34DSdz4Y"
+
+    try:
+        f = open(fileNameLaptops, 'r')
+        laptops = f.read().split(" ")
+        laptops.sort()
+    except:
+        laptops=()
+        
+    return dict(computers=laptops)
 
 @service.json   
 @auth.requires_login()    

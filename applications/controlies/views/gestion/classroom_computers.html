@@ -72,60 +72,39 @@
         
         $( "#selectable0Classroom" ).selectable();
         
-		$("#dialogAlert").dialog({ autoOpen: false });
-		
-        getLTSPServers();
-        getWorkstations();
-        getLaptops();
+		$("#dialogAlert").dialog({ autoOpen: false });		
     });
     
-    function getLTSPServers(){
-        jQuery.post('call/json/getLTSPServers', function(result) {                                                            
+    function getLaptopsPupils(){
+        jQuery.post('call/json/getLaptopsPupils', { classroom: jQuery("#classroom").val() }, function(result) {                                                            
             jQuery.each(result.response, function(i, l){
-                jQuery('#selectable0Classroom').append('<li class="ui-state-default" id="selectable-'+l+'"><div id="pcName" style="font-size:11px;">'+l+'</div>{{=IMG(_src=URL(r=request,c="static",f="images/turnOff.png"),_class="thumb-image")}}<div id="userName" style="font-size:11px;"></div></li>');               
-            });            
-        });
-    }
-
-    function getWorkstations(){
-        jQuery.post('call/json/getWorkstations', function(result) {                                                            
-            jQuery.each(result.response, function(i, l){
-                jQuery('#selectable1').append('<li class="ui-state-default" id="selectableWorkstations-'+l+'"><div id="pcName" style="font-size:11px;">'+l+'</div>{{=IMG(_src=URL(r=request,c="static",f="images/turnOff.png"),_class="thumb-image")}}<div id="userNameWorkstation" style="font-size:11px;"></div></li>');               
-            });            
-        });
-    }
-
-    function getLaptops(){
-        jQuery.post('call/json/getLaptops', function(result) {                                                            
-            jQuery.each(result.response, function(i, l){
-                jQuery('#selectable2').append('<li class="ui-state-default" id="selectableLaptops-'+l+'"><div id="pcName" style="font-size:11px;">'+l+'</div>{{=IMG(_src=URL(r=request,c="static",f="images/turnOff.png"),_class="thumb-image")}}<div id="userNameLaptop" style="font-size:11px;"></div></li>');               
+                jQuery('#selectable0Classroom').append('<li class="ui-state-default" id="selectableLaptops-'+l+'"><div id="pcName" style="font-size:11px;">'+l+'</div>{{=IMG(_src=URL(r=request,c="static",f="images/turnOff.png"),_class="thumb-image")}}<div id="userNameLaptop" style="font-size:11px;"></div></li>');               
             });
-            
-            getLTSPStatus();
+            getLaptopsStatus();
         });
     }
 
    
-    function getLTSPStatus(){
+    function getLaptopsStatus(){
         
-        jQuery.post('call/json/getLTSPStatus', function(result) {     
+        jQuery.post('call/json/getLaptopsStatus', function(result) {     
 
 
             jQuery('#selectable li .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/turnOff.png")}}');
             jQuery('#selectable li #userName').html('');
             
             jQuery.each(result.computers, function(i, l){                
-                jQuery('#selectable0Classroom #selectable-'+l+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/turnOn.png")}}');           
+                jQuery('#selectable0Classroom #selectableLaptops-'+l+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/turnOn.png")}}');           
             });
 
-            $.each(result.teachers, function(i, l){
+            /*$.each(result.teachers, function(i, l){
                 var teacher = l.split(".");
                 var computer = teacher[0].split("@");
                 jQuery('#selectable0Classroom #selectable-'+computer[1]+' #userName').html(computer[0]);
                 jQuery('#selectable0Classroom #selectable-'+computer[1]+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/nobody.png")}}');
-            });
+            });*/
             
-            setTimeout("getLTSPStatus()",10000);            
+            setTimeout("getLaptopsStatus()",10000);            
         });
     }
 
@@ -136,8 +115,8 @@
 			return;
 		}			
 	
-		jQuery("#dialog-form").html("").css("display","none");
-		jQuery("#dialog-form").load("execCommandClassroom.html", function(data) {				
+		jQuery("#dialog-form-pupils").html("").css("display","none");
+		jQuery("#dialog-form-pupils").load("execCommandClassroom.html", function(data) {				
 	                                       
             x = (jQuery(window).width()-750)/2;
             y = (jQuery(window).height()-500)/2;
@@ -145,7 +124,7 @@
             jQuery("#messageLoading").hide();
     		jQuery("#form_data").hide();
     		
-            jQuery("#dialog-form").dialog({
+            jQuery("#dialog-form-pupils").dialog({
                 resizable: false,
                 position: top,
                 modal: true,
@@ -165,15 +144,15 @@
 			return;
 		}
 	
-		jQuery("#dialog-form").html("").css("display","none");
-		jQuery("#dialog-form").load("wakeupThin.html", function(data) {				
+		jQuery("#dialog-form-pupils").html("").css("display","none");
+		jQuery("#dialog-form-pupils").load("wakeupThin.html", function(data) {				
 	                                       
             x = (jQuery(window).width()-750)/2;
             y = (jQuery(window).height()-550)/2;
     
             jQuery("#messageLoading").hide();
     
-            jQuery("#dialog-form").dialog({
+            jQuery("#dialog-form-pupils").dialog({
                 resizable: false,
                 position: top,
                 modal: true,
@@ -191,15 +170,15 @@
 			return;
 		}
 	
-		jQuery("#dialog-form").html("").css("display","none");
-		jQuery("#dialog-form").load("execCommandClassroom.html", function(data) {				
+		jQuery("#dialog-form-pupils").html("").css("display","none");
+		jQuery("#dialog-form-pupils").load("execCommandClassroom.html", function(data) {				
 	                                       
             x = (jQuery(window).width()-750)/2;
             y = (jQuery(window).height()-500)/2;
     
             jQuery("#messageLoading").hide();
     
-            jQuery("#dialog-form").dialog({
+            jQuery("#dialog-form-pupils").dialog({
                 resizable: false,
                 position: top,
                 modal: true,
@@ -217,15 +196,15 @@
 			return;
 		}
 	
-		jQuery("#dialog-form").html("").css("display","none");
-		jQuery("#dialog-form").load("viewComputers.html", function(data) {				
+		jQuery("#dialog-form-pupils").html("").css("display","none");
+		jQuery("#dialog-form-pupils").load("viewComputers.html", function(data) {				
 	                                       
             x = (jQuery(window).width()-750)/2;
             y = (jQuery(window).height()-500)/2;
     
             jQuery("#messageLoading").hide();
     
-            jQuery("#dialog-form").dialog({
+            jQuery("#dialog-form-pupils").dialog({
                 resizable: false,
                 position: top,
                 modal: true,
@@ -236,6 +215,7 @@
 	}
 
 </script>
+<input type="hidden" name="classroom" id="classroom"/>
 <table width="100%" cellspacing="12">
 <tr>
 	<td>
@@ -274,13 +254,13 @@
 	<td>    
 	    <div id="tabsHostsClassroom">
 	        <ul>
-	            <li><a href="#tabsHostsClassroom1"><span id="actions">Servidores</span></a></li>
+	            <li><a href="#tabsHostsClassroom1"><span id="actions">Equipos</span></a></li>
 	        </ul>
 	        <div id="tabsHostsClassroom1" style="padding:3px;">  
 	            <table>
 	                <tr>
 	                    <td id="tableSelectable0Classroom">
-	                        <ol id="selectable0Classroom" style="width:650px;"></ol>
+	                        <ol id="selectable0Classroom" style="width:635px;"></ol>
 	                    </td>
 	                </tr>
 	            </table>
@@ -290,7 +270,7 @@
 </tr>
 </table>
 
-<div id="dialog-form"></div>
+<div id="dialog-form-pupils"></div>
 
 <div id="dialog-details"></div>
 

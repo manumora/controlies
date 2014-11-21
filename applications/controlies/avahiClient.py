@@ -30,8 +30,8 @@ import tempfile
 #import memcache
 
 typeComputers = "_workstation._tcp"
-#typeTeachers = "_controlaula._udp"
 typeTeachers = "_controlies._udp"
+typeLaptops = "_laptops._tcp"
 
 """fs = tempfile.NamedTemporaryFile(delete=False, prefix='controlies_')
 ft = tempfile.NamedTemporaryFile(delete=False, prefix='controlies_')
@@ -41,7 +41,7 @@ fileNameTeachers = ft.name"""
 directory = "/tmp/"
 fileNameServers = directory+"controliesSerFDidisDSs43"
 fileNameTeachers = directory+"controliesTeaRssdASWe234"
-
+fileNameLaptops = directory+"controliesFsdfeRw34DSdz4Y"
 
 if os.path.isfile(fileNameServers):
 	os.remove(fileNameServers)
@@ -49,11 +49,16 @@ if os.path.isfile(fileNameServers):
 if os.path.isfile(fileNameTeachers):
 	os.remove(fileNameTeachers)
 
+if os.path.isfile(fileNameLaptops):
+	os.remove(fileNameLaptops)
+
 f = open(fileNameServers, 'w')
 f = open(fileNameTeachers, 'w')
+f = open(fileNameLaptops, 'w')
 
 os.chmod(fileNameServers,0755)
 os.chmod(fileNameTeachers,0755)
+os.chmod(fileNameLaptops,0755)
 
 def newComputer(interface, protocol, name, stype, domain, flags):
 	computerToAdd = name.split(" ")
@@ -69,9 +74,10 @@ def removeComputer(interface, protocol, name, stype, domain, flags):
 	f.close()
 
 	computersList = computersList.replace(computerToDelete[0]+" ","")
+	filteredComputersList = ' '.join(set(computersList.split(' ')))
 
 	f = open(fileNameServers, 'w')      
-	f.write(computersList)
+	f.write(filteredComputersList)
 	f.close()	
 
 def newTeacher(interface, protocol, name, stype, domain, flags):
@@ -88,11 +94,31 @@ def removeTeacher(interface, protocol, name, stype, domain, flags):
 	f.close()
 
 	computersList = computersList.replace(computerToDelete[0]+" ","")
+	filteredComputersList = ' '.join(set(computersList.split(' ')))
 
 	f = open(fileNameTeachers, 'w')        
-	f.write(computersList)
+	f.write(filteredComputersList)
 	f.close()
 
+def newLaptop(interface, protocol, name, stype, domain, flags):
+	laptopToAdd = name.split(" ")
+	
+	f = open(fileNameLaptops, 'a')
+	f.write(laptopToAdd[0]+" ")
+	f.close()
+
+def removeLaptop(interface, protocol, name, stype, domain, flags):
+	laptopToDelete = name.split(" ")
+	f = open(fileNameLaptops, 'r')
+	computersList = f.read()
+	f.close()
+
+	computersList = computersList.replace(laptopToDelete[0]+" ","")
+	filteredComputersList = ' '.join(set(computersList.split(' ')))
+
+	f = open(fileNameLaptops, 'w')        
+	f.write(filteredComputersList)
+	f.close()
 
 """shared = memcache.Client(['127.0.0.1:11211'], debug=0)
 shared.set('fileNameServers', fileNameServers)
@@ -109,5 +135,9 @@ sbrowser.connect_to_signal("ItemRemove", removeComputer)
 sbrowser = dbus.Interface(bus.get_object(avahi.DBUS_NAME, server.ServiceBrowserNew(avahi.IF_UNSPEC, avahi.PROTO_UNSPEC, typeTeachers, 'local', dbus.UInt32(0))), avahi.DBUS_INTERFACE_SERVICE_BROWSER)
 sbrowser.connect_to_signal("ItemNew", newTeacher)
 sbrowser.connect_to_signal("ItemRemove", removeTeacher)
+
+sbrowser = dbus.Interface(bus.get_object(avahi.DBUS_NAME, server.ServiceBrowserNew(avahi.IF_UNSPEC, avahi.PROTO_UNSPEC, typeLaptops, 'local', dbus.UInt32(0))), avahi.DBUS_INTERFACE_SERVICE_BROWSER)
+sbrowser.connect_to_signal("ItemNew", newLaptop)
+sbrowser.connect_to_signal("ItemRemove", removeLaptop)
 
 gobject.MainLoop().run()

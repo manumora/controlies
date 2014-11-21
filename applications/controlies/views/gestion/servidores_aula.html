@@ -243,9 +243,11 @@
 	
 		jQuery("#dialog-form").html("").css("display","none");
 		jQuery("#dialog-form").load("classroom_computers.html", function(data) {				
-	                                       
+			jQuery("#classroom").val(selected);
+        	getLaptopsPupils();                
+        	  
             x = (jQuery(window).width()-850)/2;
-            y = (jQuery(window).height()-500)/2;
+            y = (jQuery(window).height()-520)/2;
     
             jQuery("#messageLoading").hide();
     
