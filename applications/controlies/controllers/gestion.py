@@ -487,7 +487,10 @@ def getMonitorizados():
     sql="select host from monitorizados"
     consulta=cdb.executesql(sql)
     return {"monitorizados": consulta}
-  
+
+def classroom_computers():
+    return dict()
+
 def execCommand():
     return dict()
 

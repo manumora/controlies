@@ -82,7 +82,7 @@ def getDomain():
 	return dom
 
 def getIP():
-    active = ""
+	active = ""
 	ignore = ['lo','pan0']
 	for ifaceName in interfaces():
 		if ifaceName not in ignore:
