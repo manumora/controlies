@@ -60,11 +60,6 @@
             .button({ icons: { primary: "ui-icon-play"}})
             .click(function(){ execCommandClassroom() });     
 
-        $( "#viewComputers" )
-            .css("font-size","11px")        
-            .button({ icons: { primary: "ui-icon-play"}})
-            .click(function(){ viewComputers() });   
-
         $( "#classroomDetails" )
             .css("font-size","11px")        
             .button({ icons: { primary: "ui-icon-circle-close"}})
@@ -72,7 +67,7 @@
         
         $( "#selectable0Classroom" ).selectable();
         
-		$("#dialogAlert").dialog({ autoOpen: false });		
+		$("#dialogAlert-pupils").dialog({ autoOpen: false });	
     });
     
     function getLaptopsPupils(){
@@ -80,11 +75,10 @@
             jQuery.each(result.response, function(i, l){
                 jQuery('#selectable0Classroom').append('<li class="ui-state-default" id="selectableLaptops-'+l+'"><div id="pcName" style="font-size:11px;">'+l+'</div>{{=IMG(_src=URL(r=request,c="static",f="images/turnOff.png"),_class="thumb-image")}}<div id="userNameLaptop" style="font-size:11px;"></div></li>');               
             });
-            getLaptopsStatus();
         });
+        getLaptopsStatus();       
     }
 
-   
     function getLaptopsStatus(){
         
         jQuery.post('call/json/getLaptopsStatus', function(result) {     
@@ -103,10 +97,9 @@
                 jQuery('#selectable0Classroom #selectable-'+computer[1]+' #userName').html(computer[0]);
                 jQuery('#selectable0Classroom #selectable-'+computer[1]+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/nobody.png")}}');
             });*/
-            
-            setTimeout("getLaptopsStatus()",10000);            
+            timer = setTimeout("getLaptopsStatus()",10000);            
         });
-    }
+    }   
 
 	function shutdown(){
 		var selected = computersSelected();
@@ -189,31 +182,6 @@
 	}
 
 
-	function viewComputers(){
-		var selected = computersSelected();
-		if(selected.length!=1){
-			modalAlert("Para realizar la acci&oacute;n debe seleccionar un equipo");
-			return;
-		}
-	
-		jQuery("#dialog-form-pupils").html("").css("display","none");
-		jQuery("#dialog-form-pupils").load("viewComputers.html", function(data) {				
-	                                       
-            x = (jQuery(window).width()-750)/2;
-            y = (jQuery(window).height()-500)/2;
-    
-            jQuery("#messageLoading").hide();
-    
-            jQuery("#dialog-form-pupils").dialog({
-                resizable: false,
-                position: top,
-                modal: true,
-                width: 750,
-                title: "Ver Equipos"
-            }).dialog('option', 'position', [x, y]);            
-		});		
-	}
-
 </script>
 <input type="hidden" name="classroom" id="classroom"/>
 <table width="100%" cellspacing="12">
@@ -272,11 +240,11 @@
 
 <div id="dialog-form-pupils"></div>
 
-<div id="dialog-details"></div>
+<div id="dialog-details-pupils"></div>
 
-<div id="dialogAlert" title="Atenci&oacute;n">
+<div id="dialogAlert-pupils" title="Atenci&oacute;n">
     <p>
         <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 7px 0;"></span>
-        <span id="dialogAlertMessage"></span>
+        <span id="dialogAlert-pupilsMessage"></span>
     </p>
 </div>

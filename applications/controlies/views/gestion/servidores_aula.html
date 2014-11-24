@@ -15,7 +15,9 @@
     #selectable2 li { margin: 3px 3px 3px 0; padding: 1px; float: left; width: 80px; height: 95px; font-size: 1px; text-align: center; cursor:pointer; }
 
 	.ui-menu { position: absolute; width: 100px; }
-</style>
+	
+	.computersON { display:none; border-radius: 50%; margin-left:50px; margin-top:45px; padding:2px; color:white; background-color:red; font-size:11px; position: absolute; }
+</style> 
 
 {{extend 'layout.html'}}
 
@@ -97,7 +99,7 @@
     function getLTSPServers(){
         jQuery.post('call/json/getLTSPServers', function(result) {                                                            
             jQuery.each(result.response, function(i, l){
-                jQuery('#selectable0').append('<li class="ui-state-default" id="selectable-'+l+'"><div id="pcName" style="font-size:11px;">'+l+'</div>{{=IMG(_src=URL(r=request,c="static",f="images/turnOff.png"),_class="thumb-image")}}<div id="userName" style="font-size:11px;"></div></li>');               
+                jQuery('#selectable0').append('<li class="ui-state-default" id="selectable-'+l+'"><div id="pcName" style="font-size:11px;">'+l+'</div><div id="computersON" class="computersON"></div>{{=IMG(_src=URL(r=request,c="static",f="images/turnOff.png"),_class="thumb-image")}}<div id="userName" style="font-size:11px;"></div></li>');               
             });            
         });
     }
@@ -126,8 +128,9 @@
         jQuery.post('call/json/getLTSPStatus', function(result) {     
 
 
-            jQuery('#selectable li .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/turnOff.png")}}');
-            jQuery('#selectable li #userName').html('');
+            jQuery('li .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/turnOff.png")}}');
+            jQuery('li #userName').html('');
+            jQuery('li #computersON').hide();
             
             jQuery.each(result.computers, function(i, l){                
                 jQuery('#selectable0 #selectable-'+l+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/turnOn.png")}}');           
@@ -148,10 +151,16 @@
                 jQuery('#selectable2 #selectableLaptops-'+computer[1]+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/nobody.png")}}');
 
             });
-            
+                 
+            jQuery.each(result.laptops, function(i, l){
+                jQuery('#selectable0 #selectable-'+i+'-pro #computersON').show();
+                jQuery('#selectable0 #selectable-'+i+'-pro #computersON').html(l);           
+            });
+              
             setTimeout("getLTSPStatus()",10000);            
         });
     }
+
 
 	function shutdown(){
 		var selected = computersSelected();
@@ -233,7 +242,8 @@
 		});		
 	}
 
-
+	var timer;
+	
 	function viewComputers(){
 		var selected = computersSelected();
 		if(selected.length!=1){
@@ -244,8 +254,9 @@
 		jQuery("#dialog-form").html("").css("display","none");
 		jQuery("#dialog-form").load("classroom_computers.html", function(data) {				
 			jQuery("#classroom").val(selected);
-        	getLaptopsPupils();                
-        	  
+        	getLaptopsPupils();    
+        	
+        	timer =""; 
             x = (jQuery(window).width()-850)/2;
             y = (jQuery(window).height()-520)/2;
     
@@ -256,9 +267,10 @@
                 position: top,
                 modal: true,
                 width: 850,
-                title: "Equipos del aula"
+                title: "Equipos del aula",
+                close: function() { clearTimeout(timer); },
             }).dialog('option', 'position', [x, y]);            
-		});		
+		});			
 	}
 
 </script>

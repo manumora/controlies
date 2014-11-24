@@ -76,6 +76,21 @@ def base_datos():
 @auth.requires_login()
 def servidores_aula():
     if not auth.user: redirect(URL(c='default',f='index'))
+
+    l=conecta()
+    t = Thinclients(l,"","","","")
+    computers1 = t.getAllComputersNode("group1")    
+    computers2 = t.getAllComputersNode("group2")
+    computers3 = t.getAllComputersNode("group3")
+    computers4 = t.getAllComputersNode("group4")
+    
+    all = computers1["computers"]+computers2["computers"]+computers3["computers"]+computers4["computers"]
+    for c in all:
+        t2 = Thinclients(l,c,"","","")
+        response = t2.move(c)
+    
+    l.close()
+    
     return dict()
     
 @service.json   
@@ -327,6 +342,7 @@ def getLTSPStatus():
     except:
         numbers={}
 
+    #numbers={"a35":15}
     return dict(computers=computers,teachers=teachers,laptops=numbers)
 
 @service.json   
