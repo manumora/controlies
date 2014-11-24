@@ -1,0 +1,12 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=1.0
+Type=Application
+Exec=/usr/bin/controlies-ltspserver
+Icon=
+Terminal=false
+Name[es_ES]=ControlIES
+Name=controlIES
+Comment[es_ES]=
+Coment=
+Categories=Application;Education;
