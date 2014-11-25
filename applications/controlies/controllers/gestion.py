@@ -372,12 +372,12 @@ def getLaptopsStatus():
 
 
     try:
-        f = open(fileNameTeachers, 'r')
-        t = f.read()
-        teachers = ' '.join(set(t.split(' '))).split(" ")   
-        teachers.sort()
+        f = open(fileNameLaptops, 'r')
+        l = f.read()
+        laptops = ' '.join(set(l.split(' '))).split(" ")   
+        laptops.sort()
     except:
-        teachers=()
+        laptops=()
    
     return dict(computers=laptops, pupils=pupils)
 
