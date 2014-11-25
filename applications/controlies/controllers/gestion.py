@@ -312,21 +312,24 @@ def getLTSPStatus():
     
     try:
         f = open(fileNameServers, 'r')
-        computers = f.read().split(" ")
+        c = f.read()
+        computers = ' '.join(set(c.split(' '))).split(" ")        
         computers.sort()
     except:
         computers=()
         
     try:
         f = open(fileNameTeachers, 'r')
-        teachers = f.read().split(" ")
+        t = f.read()
+        teachers = ' '.join(set(t.split(' '))).split(" ")   
         teachers.sort()
     except:
         teachers=()
 
     try:
         f = open(fileNameLaptops, 'r')
-        laptops = f.read().split(" ")
+        l = f.read() 
+        laptops = ' '.join(set(l.split(' '))).split(" ") 
         laptops.sort()
         
         numbers={}
@@ -356,15 +359,27 @@ def getLaptopsStatus():
 
     directory = "/tmp/"
     fileNameLaptops = directory+"controliesFsdfeRw34DSdz4Y"
+    fileNamePupils = directory+"controliesRtsdgDFXD34DFfeS"
+
 
     try:
-        f = open(fileNameLaptops, 'r')
-        laptops = f.read().split(" ")
-        laptops.sort()
+        f = open(fileNamePupils, 'r')
+        p = f.read() 
+        pupils = ' '.join(set(p.split(' '))).split(" ") 
+        pupils.sort()
     except:
-        laptops=()
-        
-    return dict(computers=laptops)
+        pupils=()
+
+
+    try:
+        f = open(fileNameTeachers, 'r')
+        t = f.read()
+        teachers = ' '.join(set(t.split(' '))).split(" ")   
+        teachers.sort()
+    except:
+        teachers=()
+   
+    return dict(computers=laptops, pupils=pupils)
 
 @service.json   
 @auth.requires_login()    

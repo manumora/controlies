@@ -32,6 +32,7 @@ import tempfile
 typeComputers = "_workstation._tcp"
 typeTeachers = "_controlies._udp"
 typeLaptops = "_laptops._tcp"
+typePupils = "_pupils._tcp"
 
 """fs = tempfile.NamedTemporaryFile(delete=False, prefix='controlies_')
 ft = tempfile.NamedTemporaryFile(delete=False, prefix='controlies_')
@@ -42,6 +43,7 @@ directory = "/tmp/"
 fileNameServers = directory+"controliesSerFDidisDSs43"
 fileNameTeachers = directory+"controliesTeaRssdASWe234"
 fileNameLaptops = directory+"controliesFsdfeRw34DSdz4Y"
+fileNamePupils = directory+"controliesRtsdgDFXD34DFfeS"
 
 if os.path.isfile(fileNameServers):
 	os.remove(fileNameServers)
@@ -52,13 +54,18 @@ if os.path.isfile(fileNameTeachers):
 if os.path.isfile(fileNameLaptops):
 	os.remove(fileNameLaptops)
 
+if os.path.isfile(fileNamePupils):
+	os.remove(fileNamePupils)
+
 f = open(fileNameServers, 'w')
 f = open(fileNameTeachers, 'w')
 f = open(fileNameLaptops, 'w')
+f = open(fileNamePupils, 'w')
 
 os.chmod(fileNameServers,0755)
 os.chmod(fileNameTeachers,0755)
 os.chmod(fileNameLaptops,0755)
+os.chmod(fileNamePupils,0755)
 
 def newComputer(interface, protocol, name, stype, domain, flags):
 	computerToAdd = name.split(" ")
@@ -120,6 +127,25 @@ def removeLaptop(interface, protocol, name, stype, domain, flags):
 	f.write(filteredComputersList)
 	f.close()
 
+def newPupil(interface, protocol, name, stype, domain, flags):
+	PupilToAdd = name.split(" ")
+	
+	f = open(fileNamePupils, 'a')
+	f.write(PupilToAdd[0]+" ")
+	f.close()
+
+def removePupil(interface, protocol, name, stype, domain, flags):
+	PupilToDelete = name.split(" ")
+	f = open(fileNamePupils, 'r')
+	PupilsList = f.read()
+	f.close()
+
+	PupilsList = PupilsList.replace(PupilToDelete[0]+" ","")
+	filteredPupilsList = ' '.join(set(PupilsList.split(' ')))
+
+	f = open(fileNamePupils, 'w')        
+	f.write(filteredPupilsList)
+	f.close()
 """shared = memcache.Client(['127.0.0.1:11211'], debug=0)
 shared.set('fileNameServers', fileNameServers)
 shared.set('fileNameTeachers', fileNameTeachers)"""
@@ -140,4 +166,7 @@ sbrowser = dbus.Interface(bus.get_object(avahi.DBUS_NAME, server.ServiceBrowserN
 sbrowser.connect_to_signal("ItemNew", newLaptop)
 sbrowser.connect_to_signal("ItemRemove", removeLaptop)
 
+sbrowser = dbus.Interface(bus.get_object(avahi.DBUS_NAME, server.ServiceBrowserNew(avahi.IF_UNSPEC, avahi.PROTO_UNSPEC, typePupils, 'local', dbus.UInt32(0))), avahi.DBUS_INTERFACE_SERVICE_BROWSER)
+sbrowser.connect_to_signal("ItemNew", newPupil)
+sbrowser.connect_to_signal("ItemRemove", removePupil)
 gobject.MainLoop().run()

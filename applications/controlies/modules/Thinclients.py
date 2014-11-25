@@ -367,6 +367,7 @@ class Thinclients(object):
         for g in search:
             computers.append (g[0][1]["cn"][0])
 
+        computers.sort()
         return { "computers":computers }
 
     def getAllComputers(self):

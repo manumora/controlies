@@ -33,6 +33,14 @@ function selectNone(){
 	$("#selectable"+getActiveTab()+" li").removeClass("ui-selected");
 }
 
+function selectAllClassroom(){	
+	$("#selectable0Classroom li").addClass("ui-selected");
+}
+
+function selectNoneClassroom(){
+	$("#selectable0Classroom li").removeClass("ui-selected");
+}
+
 function computersSelected(){
 	var selected = Array();
 	var activeTab = getActiveTab();
