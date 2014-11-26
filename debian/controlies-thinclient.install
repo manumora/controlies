@@ -3,3 +3,4 @@ clients/thinclients/S99_seguimiento_usuario usr/share/ldm/rc.d
 clients/thinclients/seguimiento_thinclient etc/init.d
 clients/thinclients/vigila_kb_thinclient usr/bin
 clients/thinclients/kb_vigilante etc/cron.d
+clients/avahi/sessionControl_thinclient.py usr/share/controlies-thinclient
