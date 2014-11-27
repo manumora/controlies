@@ -65,9 +65,7 @@
             .button({ icons: { primary: "ui-icon-circle-close"}})
             .click(function(){ getClassroomDetails(); });       
         
-        $( "#selectable0Classroom" ).selectable();
-        
-		$("#dialogAlert-pupils").dialog({ autoOpen: false });	
+        $( "#selectable0Classroom" ).selectable();        
     });
     
     function getLaptopsPupils(){
@@ -76,7 +74,9 @@
                 jQuery('#selectable0Classroom').append('<li class="ui-state-default" id="selectableLaptops-'+l+'"><div id="pcName" style="font-size:11px;">'+l+'</div>{{=IMG(_src=URL(r=request,c="static",f="images/turnOff.png"),_class="thumb-imagePupils")}}<div id="userNameLaptop" style="font-size:11px;"></div></li>');               
             });
         });
-        getLaptopsStatus();       
+        jQuery('#teacherComputer').html('<div id="pcName'+jQuery("#classroom").val()+'" style="font-size:11px; font-weight:bold; color:#1E95C4;">'+jQuery("#classroom").val()+'</div><div id="computersON'+jQuery("#classroom").val()+'" class="computersON"></div>{{=IMG(_src=URL(r=request,c="static",f="images/turnOff.png"),_class="thumb-image")}}<div id="userName'+jQuery("#classroom").val()+'"  style="font-size:11px; font-weight:bold; color:#1E95C4;"></div></li>');               
+        getLaptopsStatus();   
+	    getLTSPStatusTeacher();
     }
 
     function getLaptopsStatus(){
@@ -84,8 +84,8 @@
         jQuery.post('call/json/getLaptopsStatus', function(result) {     
 
 
-            jQuery('#selectable li .thumb-imagePupils').attr('src','{{=URL(r=request,c="static",f="images/turnOff.png")}}');
-            jQuery('#selectable li #userName').html('');
+            jQuery('li .thumb-imagePupils').attr('src','{{=URL(r=request,c="static",f="images/turnOff.png")}}');
+            jQuery('li #userNameLaptop').html('');
             
             jQuery.each(result.computers, function(i, l){                
                 jQuery('#selectable0Classroom #selectableLaptops-'+l+' .thumb-imagePupils').attr('src','{{=URL(r=request,c="static",f="images/turnOn.png")}}');           
@@ -94,13 +94,48 @@
             $.each(result.pupils, function(i, l){
                 var pupil = l.split(".");
                 var computer = pupil[0].split("@");
-                jQuery('#selectable0Classroom #selectable-'+computer[1]+' #userName').html(computer[0]);
-                jQuery('#selectable0Classroom #selectable-'+computer[1]+' .thumb-imagePupils').attr('src','{{=URL(r=request,c="static",f="images/nobody.png")}}');
+                jQuery('#selectable0Classroom #selectableLaptops-'+computer[1]+' #userNameLaptop').html(computer[0]);
+                jQuery('#selectable0Classroom #selectableLaptops-'+computer[1]+' .thumb-imagePupils').attr('src','{{=URL(r=request,c="static",f="images/nobody.png")}}');
             });
-            
+
             timer = setTimeout("getLaptopsStatus()",10000);            
         });
     }   
+
+    function getLTSPStatusTeacher(){
+        
+        jQuery.post('call/json/getLTSPStatus', function(result) {                 
+            jQuery.each(result.computers, function(i, l){                
+		try{
+			if(jQuery("#classroom").val()==l){
+		                jQuery('#teacherComputer .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/turnOn.png")}}');       
+
+			}
+		}catch(err){}
+            });
+
+            $.each(result.teachers, function(i, l){
+                var teacher = l.split(".");
+                var computer = teacher[0].split("@");
+
+		try{
+			if(jQuery("#classroom").val()==computer[1]){
+		                jQuery('#teacherComputer #userName'+computer[1]).html(computer[0]);
+		                jQuery('#teacherComputer .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/nobody.png")}}');
+			}
+		}catch(err){}
+            });
+
+            jQuery.each(result.laptops, function(i, l){
+		try{
+			if(jQuery("#classroom").val()==i+'-pro'){
+				jQuery('#teacherComputer #computersON'+i+'-pro').show();
+				jQuery('#teacherComputer #computersON'+i+'-pro').html(l);  
+			}
+		}catch(err){}        
+            });
+        });
+    }
 
 	function shutdown(){
 		var selected = computersSelected();
@@ -187,40 +222,40 @@
 <input type="hidden" name="classroom" id="classroom"/>
 <table width="100%" cellspacing="12">
 <tr>
-	<td>
+	<td  style="height:10%">
 		<div id="tabsActionsClassroom">
-        <ul>
-            <li><a href="#tabsActionsClassroom-1"><span id="actions">Acciones</span></a></li>
-        </ul>
-        <div id="tabsActionsClassroom-1" style="padding:1px;">
-            <table width="100%" cellpadding="0" cellspacing="0">
-                <tr>
-                    <td style="text-align:center;"><button id="selectAllClassroom" style="width:123px;">Selec. Todo</button></td>
-                </tr>
-                <tr>
-                    <td style="text-align:center;"><button id="selectNoneClassroom" style="width:123px;">Deselec. Todo</button></td>                       
-                </tr>
-                <!--<tr>
-                    <td style="text-align:center;">
-                    	<div style="vertical-align:center;">
-	                     	<button id="turnOnClassroom" style="vertical-align:middle; width: 94px;">Encender</button><button id="select" style="vertical-align:middle;"></button>
-                    	</div>
-						  <ul style="z-index: 1000">
-						    <li><a href="#">Thinclients</a></li>
-						  </ul>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="text-align:center;"><button id="turnOffClassroom" style="width:123px;">Apagar</button></td>
-                </tr>
-                <tr>
-                    <td style="text-align:center;"><button id="execCommandClassroom" style="width:123px;">Ej. comando</button></td>
-                </tr>-->       
-            </table>
-        </div>
-    </div>
+		<ul>
+		    <li><a href="#tabsActionsClassroom-1"><span id="actions">Acciones</span></a></li>
+		</ul>
+		<div id="tabsActionsClassroom-1" style="padding:1px;">
+		    <table width="100%" cellpadding="0" cellspacing="0">
+		        <tr>
+		            <td style="text-align:center;"><button id="selectAllClassroom" style="width:123px;">Selec. Todo</button></td>
+		        </tr>
+		        <tr>
+		            <td style="text-align:center;"><button id="selectNoneClassroom" style="width:123px;">Deselec. Todo</button></td>                       
+		        </tr>
+		        <!--<tr>
+		            <td style="text-align:center;">
+		            	<div style="vertical-align:center;">
+			             	<button id="turnOnClassroom" style="vertical-align:middle; width: 94px;">Encender</button><button id="select" style="vertical-align:middle;"></button>
+		            	</div>
+							  <ul style="z-index: 1000">
+							    <li><a href="#">Thinclients</a></li>
+							  </ul>
+		            </td>
+		        </tr>
+		        <tr>
+		            <td style="text-align:center;"><button id="turnOffClassroom" style="width:123px;">Apagar</button></td>
+		        </tr>-->
+		        <tr>
+		            <td style="text-align:center;"><button id="execCommandClassroom" style="width:123px;">Ej. comando</button></td>
+		        </tr>       
+		    </table>
+		</div>
+	    </div>
 	</td>
-	<td>    
+	<td rowspan="2">    
 	    <div id="tabsHostsClassroom">
 	        <ul>
 	            <li><a href="#tabsHostsClassroom1"><span id="actions">Equipos</span></a></li>
@@ -237,15 +272,12 @@
 	    </div>       
 	</td>
 </tr>
+<tr>
+	<td style="vertical-align:top;"><div style="text-align:center; border:1px solid; background-color:#FBFBFB" id="teacherComputer"></div></td>
+</tr>
 </table>
 
 <div id="dialog-form-pupils"></div>
 
 <div id="dialog-details-pupils"></div>
 
-<div id="dialogAlert-pupils" title="Atenci&oacute;n">
-    <p>
-        <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 7px 0;"></span>
-        <span id="dialogAlert-pupilsMessage"></span>
-    </p>
-</div>

@@ -414,6 +414,16 @@ def executeCommand():
     except:
         return dict(response="fail", host=request.vars["host"], message="Surgió un error")
 
+@service.json  
+@auth.requires_login()   
+def executeCommandLaptop():
+    try:
+        server = xmlrpclib.ServerProxy("http://"+request.vars["host"]+":6800")
+        s = server.exec_command_laptop(request.vars["ip"],request.vars["command"])
+        return dict(response="OK", host=request.vars["host"], message=s)
+    except:
+        return dict(response="fail", host=request.vars["host"], message="Surgió un error")
+    
 @auth.requires_login()
 def config():
 

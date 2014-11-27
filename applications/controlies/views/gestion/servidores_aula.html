@@ -14,8 +14,9 @@
     #selectable2 { list-style-type: none; margin: 0; padding: 0; }
     #selectable2 li { margin: 3px 3px 3px 0; padding: 1px; float: left; width: 80px; height: 95px; font-size: 1px; text-align: center; cursor:pointer; }
 
-    .ui-menu { position: absolute; width: 100px; }	
-    .computersON { display:none; width:12px; height:12px; border: 1px solid; border-color:black; border-radius: 75px; margin-left:50px; margin-top:45px; padding:2px; color:white; background-color:red; font-size:11px; position: absolute; }
+	.ui-menu { position: absolute; width: 100px; }
+	
+	.computersON { display:none; width:12px; height:12px; border: 1px solid; border-color:black; border-radius: 75px; margin-left:50px; margin-top:45px; padding:2px; color:white; background-color:red; font-size:11px; position: absolute; }
 </style> 
 
 {{extend 'layout.html'}}
@@ -130,11 +131,25 @@
             jQuery('li .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/turnOff.png")}}');
             jQuery('li #userName').html('');
             jQuery('li #computersON').hide();
-            
+
+	    try{
+		    jQuery('#teacherComputer .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/turnOff.png")}}');       
+                    jQuery('#teacherComputer #userName'+jQuery("#classroom").val()).html('');
+                    jQuery('#teacherComputer #computersON'+jQuery("#classroom").val()).hide();
+
+	    }catch(err){}
+
             jQuery.each(result.computers, function(i, l){                
                 jQuery('#selectable0 #selectable-'+l+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/turnOn.png")}}');           
                 jQuery('#selectable1 #selectableWorkstations-'+l+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/turnOn.png")}}');
                 jQuery('#selectable2 #selectableLaptops-'+l+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/turnOn.png")}}');
+
+		try{
+			if(jQuery("#classroom").val()==l){
+		                jQuery('#teacherComputer .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/turnOn.png")}}');       
+
+			}
+		}catch(err){}
             });
 
             $.each(result.teachers, function(i, l){
@@ -149,11 +164,24 @@
                 jQuery('#selectable2 #selectableLaptops-'+computer[1]+' #userNameLaptop').html(computer[0]);
                 jQuery('#selectable2 #selectableLaptops-'+computer[1]+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/nobody.png")}}');
 
+		try{
+			if(jQuery("#classroom").val()==computer[1]){
+		                jQuery('#teacherComputer #userName'+computer[1]).html(computer[0]);
+		                jQuery('#teacherComputer .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/nobody.png")}}');
+			}
+		}catch(err){}
             });
                  
             jQuery.each(result.laptops, function(i, l){
                 jQuery('#selectable0 #selectable-'+i+'-pro #computersON').show();
-                jQuery('#selectable0 #selectable-'+i+'-pro #computersON').html(l);           
+                jQuery('#selectable0 #selectable-'+i+'-pro #computersON').html(l);   
+
+		try{
+			if(jQuery("#classroom").val()==i+'-pro'){
+				jQuery('#teacherComputer #computersON'+i+'-pro').show();
+				jQuery('#teacherComputer #computersON'+i+'-pro').html(l);  
+			}
+		}catch(err){}        
             });
               
             setTimeout("getLTSPStatus()",10000);            

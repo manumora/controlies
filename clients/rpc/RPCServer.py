@@ -172,6 +172,15 @@ def exec_command (command):
         output = "Error al procesar el comando"
     return output
 
+def exec_command_laptop (ip,command):
+    import xmlrpclib
+    try:
+        server_laptop = xmlrpclib.ServerProxy("http://"+ip+":6800")
+        s = server_laptop.exec_command(command)
+        return s
+    except:
+        return "Surgió un error"
+
 IP = getIP()
 if IP!="":
 	server = XMLRPCServer (("", 6800))
@@ -182,4 +191,5 @@ if IP!="":
 	server.register_function (wakeupThinclients)
 	server.register_function (ping)
 	server.register_function (getHostName)
+	server.register_function (exec_command_laptop)
 	server.serve_forever ()

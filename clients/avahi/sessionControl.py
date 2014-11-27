@@ -35,8 +35,9 @@ import pwd, os
 loginname = ''
 def getLoginName():
     global loginname
-    if loginname == '':
-        loginname = pwd.getpwuid(os.getuid())[0]
+    data = pwd.getpwuid(os.getuid())
+    if loginname == '' and "profesor" in data[5]:
+        loginname = data[0]
 
     return loginname
 
