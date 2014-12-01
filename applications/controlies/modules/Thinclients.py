@@ -358,8 +358,13 @@ class Thinclients(object):
         return classroom[0]
     
     def getTypeComputer(self):
-        cadena = self.name.split("-")
-        return cadena[1][:1]
+        try:
+            c = self.name.split("-")
+            cadena = c[1][:1]
+        except:
+            cadena = ""
+             
+        return cadena
     
     def getAllComputersNode(self,node):
         computers = []
