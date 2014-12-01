@@ -179,7 +179,7 @@ def exec_command_laptop (ip,command):
         s = server_laptop.exec_command(command)
         return s
     except:
-        return "Surgió un error"
+        return "Error"
 
 IP = getIP()
 if IP!="":
