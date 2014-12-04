@@ -108,7 +108,7 @@ def getClassroomDetails():
     objUser = Users(l,"","","","",request.vars['teacher'],"","","","")
     teacherData = objUser.getUserData()
 
-    s = xmlrpclib.Server("http://" + request.vars['classroom'] + ":8900");
+    s = xmlrpclib.Server("http://" + request.vars['classroom'] + ":8900")
 
     users = s.Users()
 

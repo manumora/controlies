@@ -161,7 +161,7 @@ def wakeupThinclients(addresses):
 
 def exec_command (command):
     try:
-        if desdeLdap() :
+        if desdeLdap() or getIPRequest()=="192.168.0.254":
             process = subprocess.Popen(command.split(), stdout=subprocess.PIPE, stderr = subprocess.PIPE)
             output, error = process.communicate()
             if error!="":
@@ -175,9 +175,12 @@ def exec_command (command):
 def exec_command_laptop (ip,command):
     import xmlrpclib
     try:
-        server_laptop = xmlrpclib.ServerProxy("http://"+ip+":6800")
-        s = server_laptop.exec_command(command)
-        return s
+	if desdeLdap():
+		server_laptop = xmlrpclib.ServerProxy("http://"+ip+":6800")
+		s = server_laptop.exec_command(command)
+		return s
+        else:
+            return "No autorizado"
     except:
         return "Error"
 
