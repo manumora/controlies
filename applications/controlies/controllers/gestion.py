@@ -299,39 +299,24 @@ def getLaptopsPupils():
 @service.json   
 @auth.requires_login()    
 def getLTSPStatus():
-
-    """import memcache
-    shared = memcache.Client(['127.0.0.1:11211'], debug=0)    
-    fileNameServers = shared.get('fileNameServers')
-    fileNameTeachers = shared.get('fileNameTeachers')"""
-
-    directory = "/tmp/"
-    fileNameServers = directory+"controliesSerFDidisDSs43"
-    fileNameTeachers = directory+"controliesTeaRssdASWe234"
-    fileNameLaptops = directory+"controliesFsdfeRw34DSdz4Y"
     
     try:
-        f = open(fileNameServers, 'r')
-        c = f.read()
-        computers = ' '.join(set(c.split(' '))).split(" ")        
-        computers.sort()
+        rpcServer = xmlrpclib.ServerProxy("http://localhost:6969", allow_none=True)
     except:
-        computers=()
-        
+        pass
+    
     try:
-        f = open(fileNameTeachers, 'r')
-        t = f.read()
-        teachers = ' '.join(set(t.split(' '))).split(" ")   
-        teachers.sort()
+        computers = rpcServer.get_computers()
     except:
-        teachers=()
-
+        computers=()   
+                     
     try:
-        f = open(fileNameLaptops, 'r')
-        l = f.read() 
-        laptops = ' '.join(set(l.split(' '))).split(" ") 
-        laptops.sort()
-        
+        teachers = rpcServer.get_teachers()
+    except:
+        teachers=()   
+  
+    try:
+        laptops = rpcServer.get_laptops()        
         numbers={}
         
         for i in laptops:
@@ -345,37 +330,25 @@ def getLTSPStatus():
     except:
         numbers={}
 
-    #numbers={"a35":15}
     return dict(computers=computers,teachers=teachers,laptops=numbers)
 
 @service.json   
 @auth.requires_login()    
 def getLaptopsStatus():
-
-    """import memcache
-    shared = memcache.Client(['127.0.0.1:11211'], debug=0)    
-    fileNameServers = shared.get('fileNameServers')
-    fileNameTeachers = shared.get('fileNameTeachers')"""
-
-    directory = "/tmp/"
-    fileNameLaptops = directory+"controliesFsdfeRw34DSdz4Y"
-    fileNamePupils = directory+"controliesRtsdgDFXD34DFfeS"
-
+    
+    try:
+        rpcServer = xmlrpclib.ServerProxy("http://localhost:6969", allow_none=True)
+    except:
+        pass
 
     try:
-        f = open(fileNamePupils, 'r')
-        p = f.read() 
-        pupils = ' '.join(set(p.split(' '))).split(" ") 
-        pupils.sort()
+        pupils = rpcServer.get_pupils()
     except:
         pupils=()
 
 
     try:
-        f = open(fileNameLaptops, 'r')
-        l = f.read()
-        laptops = ' '.join(set(l.split(' '))).split(" ")   
-        laptops.sort()
+        laptops = rpcServer.get_laptops()
     except:
         laptops=()
    
@@ -417,9 +390,16 @@ def executeCommand():
 @service.json  
 @auth.requires_login()   
 def executeCommandLaptop():
+
     try:
-        server = xmlrpclib.ServerProxy("http://"+request.vars["host"]+":6800")
-        s = server.exec_command_laptop(request.vars["ip"],request.vars["command"])
+        server = xmlrpclib.ServerProxy("http://localhost:6969")
+        data = server.get_data_laptops(request.vars["host"])
+    except:
+        pass
+
+    try:
+        server = xmlrpclib.ServerProxy("http://"+data[0]["proxy"]+":6800")
+        s = server.exec_command_laptop(data[0]["ip"],request.vars["command"])
         return dict(response="OK", host=request.vars["host"], message=s)
     except:
         return dict(response="fail", host=request.vars["host"], message="Surgió un error")
@@ -587,6 +567,9 @@ def classroom_computers():
     return dict()
 
 def execCommand():
+    return dict()
+
+def execCommandClassroom():
     return dict()
 
 def call():

@@ -181,8 +181,10 @@ def exec_command_laptop (ip,command):
     except:
         return "Error"
 
-IP = getIP()
-if IP!="":
+#IP = getIP()
+#if IP!="":
+
+if __name__ == "__main__":
 	server = XMLRPCServer (("", 6800))
 	ldap_ip=socket.gethostbyname("ldap")
 	host_name=socket.gethostname()

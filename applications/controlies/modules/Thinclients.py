@@ -293,9 +293,16 @@ class Thinclients(object):
 
         serial=""
         username=""
-        if self.getTypeComputer()=="p":                    
-            serial = result[0][0][1]["dhcpComments"][0].replace("serial-number","").strip()
-            username = result[0][0][1]["uniqueIdentifier"][0].replace("user-name","").strip()
+        if self.getTypeComputer()=="p":
+            try:              
+                serial = result[0][0][1]["dhcpComments"][0].replace("serial-number","").strip()
+            except:
+                serial = ""
+                
+            try:
+                username = result[0][0][1]["uniqueIdentifier"][0].replace("user-name","").strip()
+            except:
+                username = ""
 
         dataHost = {
             "cn":self.name,

@@ -1,3 +1,10 @@
+controlies (0.6.6-4) unstable; urgency=low
+
+  * Nuevo sistema para detectar equipos y usuarios conectados
+  * Nueva funcionalidad para enviar comandos a los portatiles de las aulas
+
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Tue, 25 Nov 2014 11:35:00 +0200
+
 controlies (0.6.6-3) unstable; urgency=low
 
   * Se muestran los portatiles conectados

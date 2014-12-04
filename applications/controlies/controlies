@@ -11,16 +11,21 @@
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
 NAME=avahiClient
-message="controlies avahi daemon"
+message="controlies avahi&RPC daemon"
 
 rundir=/var/run 
-pidfile=$rundir/controlies/avahiclient.pid
 logfile=/var/log/controlies.log
 daemon="/usr/bin/python"
-application=/var/web2py/applications/controlies/avahiClient.py
+
+pidfile1=$rundir/controlies/RPCServer.pid
+application1=/var/web2py/applications/controlies/RPCServer.py
+
+pidfile2=$rundir/controlies/avahiclient.pid
+application2=/var/web2py/applications/controlies/avahiClient.py
 
 test -x $DAEMON || exit 0
-test -r $application || exit 0
+test -r $application1 || exit 0
+test -r $application2 || exit 0
 rm -rf /tmp/controlies*
 
 . /lib/lsb/init-functions
@@ -34,20 +39,23 @@ case "$1" in
     start)
 		log_daemon_msg "Starting $message"
 		[ ! -f $logfile ] && touch $logfile
-		start-stop-daemon --start --quiet --pidfile=$pidfile --make-pidfile --exec $daemon $application &
+		start-stop-daemon --start --quiet --pidfile=$pidfile1 --make-pidfile --exec $daemon $application1 &
+		start-stop-daemon --start --quiet --pidfile=$pidfile2 --make-pidfile --exec $daemon $application2 &
 		log_end_msg 0
 		;;
 	
     stop)
 		log_daemon_msg "Stopping $message"
-		start-stop-daemon --stop --quiet --pidfile $pidfile
+		start-stop-daemon --stop --quiet --pidfile $pidfile1
+		start-stop-daemon --stop --quiet --pidfile $pidfile2
 		rm -rf /tmp/controlies*
 		log_end_msg 0
 		;;
 	
     reload)
     	log_daemon_msg "Reloading $message"
-		start-stop-daemon --stop --quiet --signal HUP --pidfile $pidfile &
+		start-stop-daemon --stop --quiet --signal HUP --pidfile $pidfile1 &
+		start-stop-daemon --stop --quiet --signal HUP --pidfile $pidfile2 &
     	log_end_msg 0
     	;;
     	

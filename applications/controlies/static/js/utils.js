@@ -56,6 +56,20 @@ function computersSelected(){
 	return selected;
 }
 
+function computersSelectedClassroom(){
+	var selected = Array();
+	
+	var j=0;
+	
+	$("#tableSelectable0Classroom li").each(function(i, item){
+		if($("#"+item.id).hasClass('ui-selected')==true){
+			selected[j] = $("#"+item.id + ":eq(0) > #pcName").html();
+			j++;
+		}
+	});
+	return selected;
+}
+
 function connection(url,data,action){
 
 	var dataString = $.JSON.encode(data);

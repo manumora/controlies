@@ -26,130 +26,72 @@
 import dbus, gobject, avahi, os
 from dbus import DBusException
 from dbus.mainloop.glib import DBusGMainLoop
-import tempfile
-#import memcache
+import xmlrpclib
 
 typeComputers = "_workstation._tcp"
 typeTeachers = "_controlies._udp"
 typeLaptops = "_laptops._tcp"
 typePupils = "_pupils._tcp"
 
-"""fs = tempfile.NamedTemporaryFile(delete=False, prefix='controlies_')
-ft = tempfile.NamedTemporaryFile(delete=False, prefix='controlies_')
-fileNameServers = fs.name
-fileNameTeachers = ft.name"""
+rpcServer = xmlrpclib.ServerProxy("http://localhost:6969", allow_none=True)
 
-directory = "/tmp/"
-fileNameServers = directory+"controliesSerFDidisDSs43"
-fileNameTeachers = directory+"controliesTeaRssdASWe234"
-fileNameLaptops = directory+"controliesFsdfeRw34DSdz4Y"
-fileNamePupils = directory+"controliesRtsdgDFXD34DFfeS"
+#####################################################################################################
+def newComputer(interface, protocol, name, type, domain, flags):
+	try:
+		interface, protocol, name, type, domain, host, aprotocol, address, port, txt, flags = server.ResolveService(interface, protocol, name, type, domain, avahi.PROTO_UNSPEC, dbus.UInt32(0))
 
-if os.path.isfile(fileNameServers):
-	os.remove(fileNameServers)
+		if protocol == avahi.PROTO_INET:
+			rpcServer.append_computer(str(name), str(address))
+	except:
+		pass
 
-if os.path.isfile(fileNameTeachers):
-	os.remove(fileNameTeachers)
+def removeComputer(interface, protocol, name, type, domain, flags):
+        rpcServer.remove_computer(str(name))
 
-if os.path.isfile(fileNameLaptops):
-	os.remove(fileNameLaptops)
+#####################################################################################################
+def newTeacher(interface, protocol, name, type, domain, flags):
+	try:
+		interface, protocol, name, type, domain, host, aprotocol, address, port, txt, flags = server.ResolveService(interface, protocol, name, type, domain, avahi.PROTO_UNSPEC, dbus.UInt32(0))
+		n = name.split(".")[0].split("@")
 
-if os.path.isfile(fileNamePupils):
-	os.remove(fileNamePupils)
+		if protocol == avahi.PROTO_INET:
+			rpcServer.append_teacher(str(n[0]), str(n[1]), str(address))
+	except:
+		pass
 
-f = open(fileNameServers, 'w')
-f = open(fileNameTeachers, 'w')
-f = open(fileNameLaptops, 'w')
-f = open(fileNamePupils, 'w')
+def removeTeacher(interface, protocol, name, type, domain, flags):
+        rpcServer.remove_teacher(str(name))
 
-os.chmod(fileNameServers,0755)
-os.chmod(fileNameTeachers,0755)
-os.chmod(fileNameLaptops,0755)
-os.chmod(fileNamePupils,0755)
+#####################################################################################################
+def newLaptop(interface, protocol, name, type, domain, flags):
+	try:
+		interface, protocol, name, type, domain, host, aprotocol, address, port, txt, flags = server.ResolveService(interface, protocol, name, type, domain, avahi.PROTO_UNSPEC, dbus.UInt32(0))
 
-def newComputer(interface, protocol, name, stype, domain, flags):
-	computerToAdd = name.split(" ")
-	
-	f = open(fileNameServers, 'a')
-	f.write(computerToAdd[0]+" ")
-	f.close()
+		if protocol == avahi.PROTO_INET:
+			n = name.split(" ")[0]
+			local_address = ''.join([chr(byte) for byte in txt[1]]).replace("address=","")
+			rpcServer.append_laptop(str(n), str(n), str(local_address), str(address))
+	except:
+		pass
 
-def removeComputer(interface, protocol, name, stype, domain, flags):
-	computerToDelete = name.split(" ")
-	f = open(fileNameServers, 'r')
-	computersList = f.read()
-	f.close()
+def removeLaptop(interface, protocol, name, type, domain, flags):
+        rpcServer.remove_laptop(str(name))
 
-	computersList = computersList.replace(computerToDelete[0]+" ","")
-	filteredComputersList = ' '.join(set(computersList.split(' ')))
+#####################################################################################################
+def newPupil(interface, protocol, name, type, domain, flags):
+	try:
+		interface, protocol, name, type, domain, host, aprotocol, address, port, txt, flags = server.ResolveService(interface, protocol, name, type, domain, avahi.PROTO_UNSPEC, dbus.UInt32(0))
 
-	f = open(fileNameServers, 'w')      
-	f.write(filteredComputersList)
-	f.close()	
+		if protocol == avahi.PROTO_INET:
+			local_address = ''.join([chr(byte) for byte in txt[1]]).replace("address=","")
+			rpcServer.append_pupil(str(name), str(local_address), str(address))
+	except:
+		pass
 
-def newTeacher(interface, protocol, name, stype, domain, flags):
-	computerToAdd = name.split(" ")
-	
-	f = open(fileNameTeachers, 'a')
-	f.write(computerToAdd[0]+" ")
-	f.close()
+def removePupil(interface, protocol, name, type, domain, flags):
+        rpcServer.remove_pupil(str(name))
 
-def removeTeacher(interface, protocol, name, stype, domain, flags):
-	computerToDelete = name.split(" ")
-	f = open(fileNameTeachers, 'r')
-	computersList = f.read()
-	f.close()
-
-	computersList = computersList.replace(computerToDelete[0]+" ","")
-	filteredComputersList = ' '.join(set(computersList.split(' ')))
-
-	f = open(fileNameTeachers, 'w')        
-	f.write(filteredComputersList)
-	f.close()
-
-def newLaptop(interface, protocol, name, stype, domain, flags):
-	laptopToAdd = name.split(" ")
-	
-	f = open(fileNameLaptops, 'a')
-	f.write(laptopToAdd[0]+" ")
-	f.close()
-
-def removeLaptop(interface, protocol, name, stype, domain, flags):
-	laptopToDelete = name.split(" ")
-	f = open(fileNameLaptops, 'r')
-	computersList = f.read()
-	f.close()
-
-	computersList = computersList.replace(laptopToDelete[0]+" ","")
-	filteredComputersList = ' '.join(set(computersList.split(' ')))
-
-	f = open(fileNameLaptops, 'w')        
-	f.write(filteredComputersList)
-	f.close()
-
-def newPupil(interface, protocol, name, stype, domain, flags):
-	PupilToAdd = name.split(" ")
-	
-	f = open(fileNamePupils, 'a')
-	f.write(PupilToAdd[0]+" ")
-	f.close()
-
-def removePupil(interface, protocol, name, stype, domain, flags):
-	PupilToDelete = name.split(" ")
-	f = open(fileNamePupils, 'r')
-	PupilsList = f.read()
-	f.close()
-
-	PupilsList = PupilsList.replace(PupilToDelete[0]+" ","")
-	filteredPupilsList = ' '.join(set(PupilsList.split(' ')))
-
-	f = open(fileNamePupils, 'w')        
-	f.write(filteredPupilsList)
-	f.close()
-"""shared = memcache.Client(['127.0.0.1:11211'], debug=0)
-shared.set('fileNameServers', fileNameServers)
-shared.set('fileNameTeachers', fileNameTeachers)"""
-
+#####################################################################################################
 loop = DBusGMainLoop()
 bus = dbus.SystemBus(mainloop=loop)
 server = dbus.Interface( bus.get_object(avahi.DBUS_NAME, '/'), 'org.freedesktop.Avahi.Server')
@@ -169,4 +111,5 @@ sbrowser.connect_to_signal("ItemRemove", removeLaptop)
 sbrowser = dbus.Interface(bus.get_object(avahi.DBUS_NAME, server.ServiceBrowserNew(avahi.IF_UNSPEC, avahi.PROTO_UNSPEC, typePupils, 'local', dbus.UInt32(0))), avahi.DBUS_INTERFACE_SERVICE_BROWSER)
 sbrowser.connect_to_signal("ItemNew", newPupil)
 sbrowser.connect_to_signal("ItemRemove", removePupil)
+
 gobject.MainLoop().run()
