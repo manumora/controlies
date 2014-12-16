@@ -1,0 +1,11 @@
+Instrucciones:
+
+1) Al entrar en ControlIES se generarán las claves pública y privada:
+	- ldap:/var/web2py/applications/controlies/.ssh/id_rsa
+	- ldap:/var/web2py/applications/controlies/.ssh/id_rsa.pub
+
+2) Copiar el fichero id_rsa.pub mencionado anteriormente al directorio files de esta tarea puppet.
+
+3) Copiar esta tarea puppet a servidor:/etc/puppet/modules/
+
+4) Incluir la clase donde corresponda
