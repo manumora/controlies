@@ -39,6 +39,7 @@ clear_cache(){
 	rm -rf debian/controlies-client.substvars
 	rm -rf debian/controlies-ltspserver.substvars
 	rm -rf debian/files
+	rm -rf applications/controlies/.ssh/*
 	find ./ -iname "*.pyc" -print0 | xargs -0 rm -rf
 	find ./ -iname "*.*~" -print0 | xargs -0 rm -rf
 }
