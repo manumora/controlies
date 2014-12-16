@@ -21,7 +21,7 @@
 ############################################################################## */
 
 function getActiveTab(){
-	var active = $('#tabsHosts').tabs('option','selected');
+	var active = $('#tabsHosts').tabs('option','active');
 	return active;
 }
 

@@ -1,13 +1,26 @@
 <script language="javascript">
 
     $(function() {
+    	jQuery("#response").html("");
+    	
         $("#command").focus();
         $("#execButton").button({ icons: { primary: "ui-icon-disk"}});
         $("#cancelButton")
             .button({ icons: { primary: "ui-icon-close"}})
             .click( function(){ $('#dialog-form').dialog('close'); });
-    });
 
+		try {            
+	    	 if(!web2py_websocket('ws://127.0.0.1:8888/realtime/mygroup',function(e){
+	    	 	
+	    	 	jQuery("#response").append(e.data);			
+				var objDiv = document.getElementById("response");
+				objDiv.scrollTop = objDiv.scrollHeight;
+	    	 	
+	    	 })) alert("html5 websocket not supported by your browser, try Google Chrome");
+		}
+		catch(err) {}
+	});
+	
     function restartStyle(){
         $("#form_data p span").css("color","black");
         $('#message').html("");
@@ -20,7 +33,6 @@
 
 		var selected = computersSelected();
 				
-		jQuery("#execButton").attr("disabled", "disabled");
 		jQuery('#command').attr('readonly', true);
 
     	jQuery(".progress-label").text( "0%" );
@@ -34,13 +46,13 @@
 		
 		var each = 100/selected.length;		
 		var completed=0;
-		
+
 		for(i=0;i<selected.length;i++){						
+			//jQuery("#response").append("<br><h4><b>"+selected[i]+"</b></h4>");
 	        jQuery.post('call/json/'+command, "&host="+selected[i]+"&"+data, function(result) {
-	        	jQuery("#response").append("<br><h4><b>"+result.host+"</b></h4>");
 	            switch(result.response){
 	                case "OK":{
-						jQuery("#response").append(result.message.replace(/\n/g, "<br/>")+"<br/>");						
+						//jQuery("#response").append(result.message.replace(/\n/g, "<br/>")+"<br/>");		
 	                    break;
 	                }
 	                case "fail":{
@@ -48,15 +60,14 @@
 	                    break;
 	                }
 	            }
-	            
+
 				var objDiv = document.getElementById("response");
 				objDiv.scrollTop = objDiv.scrollHeight;
 				
 	            completed++;
 	            
-	            if(completed==selected.length){
-	            	jQuery("#execButton").removeAttr("disabled");
-	            	jQuery('#command').attr('readonly', false);
+	            if(completed==selected.length){	            	
+	            	$('#command').attr('readonly', false).val("");
 	            	$("#progressbar").progressbar({value:100});
 	            	$(".progress-label").text( "100%" );
 	            }else{
@@ -65,7 +76,6 @@
 	            	jQuery(".progress-label").text( percent + "%" );      	
 	            }
 	        });
-			
 		}		
         return false;
     }

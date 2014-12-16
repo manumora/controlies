@@ -151,7 +151,7 @@ def get_pupils():
 
 #************************************************************************************
 
-server = XMLRPCServer (("localhost", 6969), allow_none=True)
+server = XMLRPCServer (("localhost", 6969), allow_none=True, logRequests = False)
 server.register_function (append_computer)
 server.register_function (remove_computer)
 server.register_function (get_computers)

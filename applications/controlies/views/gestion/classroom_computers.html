@@ -7,7 +7,7 @@
 </style>
 
 <script>
-    $(function() {
+    $(function() {        
         $("#tabsActionsClassroom").tabs().css("font-size","13px");
         $("#tabsHostsClassroom").tabs().css("font-size","13px");
         
@@ -68,6 +68,7 @@
         $( "#selectable0Classroom" ).selectable();        
     });
     
+      
     function getLaptopsPupils(){
         jQuery.post('call/json/getLaptopsPupils', { classroom: jQuery("#classroom").val() }, function(result) {                                                            
             jQuery.each(result.response, function(i, l){

@@ -3,25 +3,40 @@
  * jqGrid Brazilian-Portuguese Translation
  * Sergio Righi sergio.righi@gmail.com
  * http://curve.com.br
+ * 
+ * Updated by Jonnas Fonini
+ * http://fonini.net
+ *
+ *
+ * Updated by Fabio Ferreira da Silva fabio_ferreiradasilva@yahoo.com.br
+ * 
+ *
  * Dual licensed under the MIT and GPL licenses:
  * http://www.opensource.org/licenses/mit-license.php
  * http://www.gnu.org/licenses/gpl.html
 **/
-$.jgrid = {
+$.jgrid = $.jgrid || {};
+$.extend($.jgrid,{
 	defaults : {
-		recordtext: "Ver {0} - {1} of {2}",
+		recordtext: "Ver {0} - {1} de {2}",
 	    emptyrecords: "Nenhum registro para visualizar",
 		loadtext: "Carregando...",
-		pgtext : "Página {0} de {1}"
+		pgtext : "Página {0} de {1}",
+		pgfirst : "First Page",
+		pglast : "Last Page",
+		pgnext : "Next Page",
+		pgprev : "Previous Page",
+		pgrecs : "Records per Page",
+		showhide: "Toggle Expand Collapse Grid"
 	},
 	search : {
 	    caption: "Procurar...",
 	    Find: "Procurar",
 	    Reset: "Resetar",
-	    odata : ['equal', 'not equal', 'less', 'less or equal','greater','greater or equal', 'begins with','does not begin with','is in','is not in','ends with','does not end with','contains','does not contain'],
-	    groupOps: [	{ op: "AND", text: "all" },	{ op: "OR",  text: "any" }	],
-		matchText: " iguala",
-		rulesText: " regras"
+	    odata: [{ oper:'eq', text:"igual"},{ oper:'ne', text:"diferente"},{ oper:'lt', text:"menor"},{ oper:'le', text:"menor ou igual"},{ oper:'gt', text:"maior"},{ oper:'ge', text:"maior ou igual"},{ oper:'bw', text:"inicia com"},{ oper:'bn', text:"não inicia com"},{ oper:'in', text:"está em"},{ oper:'ni', text:"não está em"},{ oper:'ew', text:"termina com"},{ oper:'en', text:"não termina com"},{ oper:'cn', text:"contém"},{ oper:'nc', text:"não contém"},{ oper:'nu', text:"nulo"},{ oper:'nn', text:"não nulo"}],
+	    groupOps: [	{ op: "AND", text: "todos" },{ op: "OR",  text: "qualquer um" }	],
+		operandTitle : "Click to select search operation.",
+		resetTitle : "Reset Search Value"
 	},
 	edit : {
 	    addCaption: "Incluir",
@@ -54,7 +69,7 @@ $.jgrid = {
 	},
 	del : {
     caption: "Apagar",
-	    msg: "Apagar registros selecionado(s)?",
+	    msg: "Apagar registro(s) selecionado(s)?",
 	    bSubmit: "Apagar",
 	    bCancel: "Cancelar"
 	},
@@ -68,7 +83,7 @@ $.jgrid = {
 	    searchtext: " ",
 	    searchtitle: "Procurar registros",
 	    refreshtext: "",
-	    refreshtitle: "Recarrgando Tabela",
+	    refreshtitle: "Recarregando tabela",
 	    alertcap: "Aviso",
 	    alerttext: "Por favor, selecione um registro",
 		viewtext: "",
@@ -81,7 +96,7 @@ $.jgrid = {
 	},
 	errors : {
 		errcap : "Erro",
-		nourl : "Nenhuma URL defenida",
+		nourl : "Nenhuma URL definida",
 		norecords: "Sem registros para exibir",
 	    model : "Comprimento de colNames <> colModel!"
 	},
@@ -102,6 +117,7 @@ $.jgrid = {
 			S: function (j) {return j < 11 || j > 13 ? ['º', 'º', 'º', 'º'][Math.min((j - 1) % 10, 3)] : 'º'},
 			srcformat: 'Y-m-d',
 			newformat: 'd/m/Y',
+			parseRe : /[#%\\\/:_;.,\t\s-]/,
 			masks : {
 	            ISO8601Long:"Y-m-d H:i:s",
 	            ISO8601Short:"Y-m-d",
@@ -115,7 +131,8 @@ $.jgrid = {
 	            UniversalSortableDateTime: "Y-m-d H:i:sO",
 	            YearMonth: "F, Y"
 	        },
-	        reformatAfterEdit : false
+	        reformatAfterEdit : false,
+			userLocalTime : false
 		},
 		baseLinkUrl: '',
 		showAction: '',
@@ -123,5 +140,5 @@ $.jgrid = {
 	    checkbox : {disabled:true},
 		idName : 'id'
 	}
-};
+});
 })(jQuery);

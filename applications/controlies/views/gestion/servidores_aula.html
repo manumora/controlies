@@ -22,6 +22,7 @@
 {{extend 'layout.html'}}
 
 <script>
+    
     $(function() {
         $("#tabsActions").tabs().css("font-size","13px");
         $("#tabsHosts").tabs().css("font-size","13px");
@@ -190,6 +191,7 @@
 
 
 	function shutdown(){
+		   		
 		var selected = computersSelected();
 		if(selected.length==0){
 			modalAlert("Para realizar la acci&oacute;n debe seleccionar al menos un equipo");
@@ -264,7 +266,8 @@
                 position: top,
                 modal: true,
                 width: 750,
-                title: "Ejecutar comando"
+                title: "Ejecutar comando",
+                close: function(ev, ui) { web2py_websocket_stop(); },
             }).dialog('option', 'position', [x, y]);            
 		});		
 	}

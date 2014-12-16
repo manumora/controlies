@@ -7,21 +7,28 @@
  * http://www.opensource.org/licenses/mit-license.php
  * http://www.gnu.org/licenses/gpl.html
 **/
-$.jgrid = {
+$.jgrid = $.jgrid || {};
+$.extend($.jgrid,{
 	defaults : {
 		recordtext: "Zobrazených {0} - {1} z {2} záznamov",
 	    emptyrecords: "Neboli nájdené žiadne záznamy",
 		loadtext: "Načítám...",
-		pgtext : "Strana {0} z {1}"
+		pgtext : "Strana {0} z {1}",
+		pgfirst : "First Page",
+		pglast : "Last Page",
+		pgnext : "Next Page",
+		pgprev : "Previous Page",
+		pgrecs : "Records per Page",
+		showhide: "Toggle Expand Collapse Grid"
 	},
 	search : {
 		caption: "Vyhľadávam...",
 		Find: "Hľadať",
 		Reset: "Reset",
-	    odata : ['rovná sa', 'nerovná sa', 'menšie', 'menšie alebo rovnajúce sa','väčšie', 'väčšie alebo rovnajúce sa', 'začína s', 'nezačína s', 'je v', 'nie je v', 'končí s', 'nekončí s', 'obahuje', 'neobsahuje'],
+	    odata: [{ oper:'eq', text:"rovná sa"},{ oper:'ne', text:"nerovná sa"},{ oper:'lt', text:"menšie"},{ oper:'le', text:"menšie alebo rovnajúce sa"},{ oper:'gt', text:"väčšie"},{ oper:'ge', text:"väčšie alebo rovnajúce sa"},{ oper:'bw', text:"začína s"},{ oper:'bn', text:"nezačína s"},{ oper:'in', text:"je v"},{ oper:'ni', text:"nie je v"},{ oper:'ew', text:"končí s"},{ oper:'en', text:"nekončí s"},{ oper:'cn', text:"obahuje"},{ oper:'nc', text:"neobsahuje"},{ oper:'nu', text:'is null'},{ oper:'nn', text:'is not null'}],
 	    groupOps: [	{ op: "AND", text: "všetkých" },	{ op: "OR",  text: "niektorého z" }	],
-		matchText: " hľadať podla",
-		rulesText: " pravidiel"
+		operandTitle : "Click to select search operation.",
+		resetTitle : "Reset Search Value"
 	},
 	edit : {
 		addCaption: "Pridať záznam",
@@ -102,6 +109,7 @@ $.jgrid = {
 			S: function (j) {return j < 11 || j > 13 ? ['st', 'nd', 'rd', 'th'][Math.min((j - 1) % 10, 3)] : 'th'},
 			srcformat: 'Y-m-d',
 			newformat: 'd/m/Y',
+			parseRe : /[#%\\\/:_;.,\t\s-]/,
 			masks : {
 		        ISO8601Long:"Y-m-d H:i:s",
 		        ISO8601Short:"Y-m-d",
@@ -115,7 +123,8 @@ $.jgrid = {
 		        UniversalSortableDateTime: "Y-m-d H:i:sO",
 		        YearMonth: "F, Y"
 		    },
-		    reformatAfterEdit : false
+		    reformatAfterEdit : false,
+			userLocalTime : false
 		},
 		baseLinkUrl: '',
 		showAction: '',
@@ -123,5 +132,5 @@ $.jgrid = {
 	    checkbox : {disabled:true},
 		idName : 'id'
 	}
-};
+});
 })(jQuery);

@@ -7,10 +7,17 @@ from applications.controlies.modules.Laptops import Laptops
 from applications.controlies.modules.LaptopsHistory import LaptopsHistory
 from applications.controlies.modules.Config import Config
 from applications.controlies.modules.Thinclients import Thinclients
+from applications.controlies.modules.Utils import Utils
 
 import xmlrpclib
 import gluon.contrib.simplejson
 from gluon.tools import Mail
+
+import re
+import cgi
+from applications.controlies.modules import ansi
+from applications.controlies.modules.ansi2html import ansi2html
+
 
 @service.json   
 @auth.requires_login()
@@ -90,6 +97,15 @@ def servidores_aula():
         response = t2.move(c)
     
     l.close()
+
+    
+    #try:
+        #dir_ssh = "/var/web2py/applications/controlies"
+    dir_ssh = "/home/manu/proyectos/controlies/applications/controlies"
+    if not os.path.isfile(dir_ssh+"/.ssh/id_rsa.pub"):
+        Utils.generateRSAkeys(dir_ssh)
+    #except:
+    #    pass
     
     return dict()
     
@@ -299,7 +315,8 @@ def getLaptopsPupils():
 @service.json   
 @auth.requires_login()    
 def getLTSPStatus():
-    
+
+
     try:
         rpcServer = xmlrpclib.ServerProxy("http://localhost:6969", allow_none=True)
     except:
@@ -377,15 +394,68 @@ def shutdown():
         return dict(response="fail", host=request.vars["host"], message="Surgió un error")
     
 
+
+"""
+def text2HTML(text):
+    
+    text2HTML = {'[1;30m' : '<span style="color:black">',
+                 '[1;31m' : '<span style="color:red">', 
+                 '[1;32m' : '<span style="color:green">',
+                 '[1;33m' : '<span style="color:yellow">',
+                 '[1;34m' : '<span style="color:blue">',
+                 '[1;35m' : '<span style="color:purple">',
+                 '[1;36m' : '<span style="color:cyan">',
+                 '[1;37m' : '<span style="color:white">',
+                 '[m' : '</span>'}
+
+    print text2HTML['[1;34m']
+    textcolor = text.split("m")[0]
+    parseHTML()"""
+
 @service.json  
 @auth.requires_login()   
 def executeCommand():
-    try:
+    """try:
         server = xmlrpclib.ServerProxy("http://"+request.vars["host"]+":6800")
         s = server.exec_command(request.vars["command"])
         return dict(response="OK", host=request.vars["host"], message=s)
     except:
-        return dict(response="fail", host=request.vars["host"], message="Surgió un error")
+        return dict(response="fail", host=request.vars["host"], message="Surgió un error")"""
+        
+    from applications.controlies.modules.SSHConnection import SSHConnection
+    from gluon.contrib.websocket_messaging import websocket_send
+
+    c = SSHConnection(request.vars["host"],"root","")
+    response = c.connectWithoutPass("/var/web2py/applications/controlies/.ssh/id_rsa")
+    #response = c.connectWithoutPass("/home/manu/proyectos/controlies/applications/controlies/.ssh/id_rsa")
+
+    try:
+        websocket_send('http://127.0.0.1:8888','<span style="font-size:14pt;">'+request.vars["host"]+'</span> > <span style="font-size:10pt;">'+request.vars["command"]+'</span><br>','mykey','mygroup')
+    except:
+        return dict(response="fail", host=request.vars["host"], message="No se pudo conectar con el servidor websocket.<br/>")
+            
+    if response != True:
+        return dict(response="fail", host=request.vars["host"], message="No se pudo conectar. ¿Está encendido el equipo? ¿Has establecido la relación de confianza?<br/>")
+    
+    channel = c.exec_command(request.vars["command"])
+    
+    import select
+    while True:
+        if channel.exit_status_ready():
+            break
+        rl, wl, xl = select.select([channel], [], [], 0.0)
+        if len(rl) > 0:
+            HTML_PARSER = ansi2html()
+            html = HTML_PARSER.parse(channel.recv(1024))
+            try:        
+                websocket_send('http://127.0.0.1:8888',html,'mykey','mygroup')
+            except:
+                pass
+
+    websocket_send('http://127.0.0.1:8888','<br>','mykey','mygroup')
+    channel.close()
+    c.close()
+    return dict(response="OK", host=request.vars["host"], message="")
 
 @service.json  
 @auth.requires_login()   
@@ -564,6 +634,7 @@ def getMonitorizados():
     return {"monitorizados": consulta}
 
 def classroom_computers():
+    
     return dict()
 
 def execCommand():

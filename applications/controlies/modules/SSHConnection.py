@@ -77,9 +77,11 @@ class SSHConnection(object):
             			        
         return True    
 
-    def exec_command(self,command):	
-        self.transport.exec_command(command)
-        
+    def exec_command(self,command):
+        self.channel = self.transport.get_transport().open_session()
+        self.channel.exec_command(command)
+        return self.channel
+    
     def close(self):
         self.transport.close()
         

@@ -8,21 +8,28 @@
  * http://www.opensource.org/licenses/mit-license.php
  * http://www.gnu.org/licenses/gpl.html
 **/
-$.jgrid = {
+$.jgrid = $.jgrid || {};
+$.extend($.jgrid,{
 	defaults: {
 		recordtext: "Rivit {0} - {1} / {2}",
 	    emptyrecords: "Ei n&auml;ytett&auml;vi&auml;",
 		loadtext: "Haetaan...",
-		pgtext: "Sivu {0} / {1}"
+		pgtext: "Sivu {0} / {1}",		
+		pgfirst : "First Page",
+		pglast : "Last Page",
+		pgnext : "Next Page",
+		pgprev : "Previous Page",
+		pgrecs : "Records per Page",
+		showhide: "Toggle Expand Collapse Grid"
 	},
 	search: {
 	    caption: "Etsi...",
 	    Find: "Etsi",
 	    Reset: "Tyhjenn&auml;",
-	    odata: ['on', 'ei ole', 'pienempi', 'pienempi tai yht&auml;suuri','suurempi','suurempi tai yht&auml;suuri', 'alkaa','ei ala','joukossa','ei joukossa','loppuu','ei lopu','sis&auml;lt&auml;&auml;','ei sis&auml;ll&auml;','on tyhj&auml;','ei ole tyhj&auml;'],
+	    odata: [{ oper:'eq', text:"on"},{ oper:'ne', text:"ei ole"},{ oper:'lt', text:"pienempi"},{ oper:'le', text:"pienempi tai yht&auml;suuri"},{ oper:'gt', text:"suurempi"},{ oper:'ge', text:"suurempi tai yht&auml;suuri"},{ oper:'bw', text:"alkaa"},{ oper:'bn', text:"ei ala"},{ oper:'in', text:"joukossa"},{ oper:'ni', text:"ei joukossa"},{ oper:'ew', text:"loppuu"},{ oper:'en', text:"ei lopu"},{ oper:'cn', text:"sis&auml;lt&auml;&auml;"},{ oper:'nc', text:"ei sis&auml;ll&auml;"},{ oper:'nu', text:"on tyhj&auml;"},{ oper:'nn', text:"ei ole tyhj&auml;"},{ oper:'nu', text:'is null'},{ oper:'nn', text:'is not null'}],
 	    groupOps: [	{ op: "AND", text: "kaikki" }, { op: "OR", text: "mik&auml; tahansa" }	],
-		matchText: "&nbsp;&nbsp;t&auml;yt&auml; ehdot:",
-		rulesText: ""
+		operandTitle : "Click to select search operation.",
+		resetTitle : "Reset Search Value"		
 	},
 	edit: {
 	    addCaption: "Uusi rivi",
@@ -103,6 +110,7 @@ $.jgrid = {
 			S: function (j) {return j < 11 || j > 13 ? ['st', 'nd', 'rd', 'th'][Math.min((j - 1) % 10, 3)] : 'th'},
 			srcformat: 'Y-m-d',
 			newformat: 'd.m.Y',
+			parseRe : /[#%\\\/:_;.,\t\s-]/,
 			masks: {
 	            ISO8601Long:"Y-m-d H:i:s",
 	            ISO8601Short:"Y-m-d",
@@ -116,7 +124,8 @@ $.jgrid = {
 	            UniversalSortableDateTime: "Y-m-d H:i:sO",
 	            YearMonth: "F, Y"
 	        },
-	        reformatAfterEdit : false
+	        reformatAfterEdit : false,
+			userLocalTime : false
 		},
 		baseLinkUrl: '',
 		showAction: '',
@@ -124,6 +133,6 @@ $.jgrid = {
 	    checkbox: {disabled:true},
 		idName: 'id'
 	}
-};
+});
 // FI
 })(jQuery);
