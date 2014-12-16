@@ -1,3 +1,10 @@
+controlies (0.6.6-5) unstable; urgency=low
+
+  * Websocket para recibir resultado de las instrucciones ejecutadas remotamente
+  * Actualizacion de jquery, jquery-ui y jdgrid
+
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Tue, 16 Dic 2014 13:13:00 +0200
+
 controlies (0.6.6-4) unstable; urgency=low
 
   * Nuevo sistema para detectar equipos y usuarios conectados
