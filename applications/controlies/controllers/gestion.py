@@ -97,15 +97,6 @@ def servidores_aula():
         response = t2.move(c)
     
     l.close()
-
-    
-    #try:
-        #dir_ssh = "/var/web2py/applications/controlies"
-    dir_ssh = "/home/manu/proyectos/controlies/applications/controlies"
-    if not os.path.isfile(dir_ssh+"/.ssh/id_rsa.pub"):
-        Utils.generateRSAkeys(dir_ssh)
-    #except:
-    #    pass
     
     return dict()
     
