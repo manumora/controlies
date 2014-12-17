@@ -1,19 +1,9 @@
 # -*- coding: utf-8 -*-
-# this file is released under public domain and you can use without limitations
 
-#########################################################################
-## This is a samples controller
-## - index is the default action of any application
-## - user is required for authentication and authorization
-## - download is for downloading files uploaded in the db (does streaming)
-## - call exposes all registered services (none by default)
-#########################################################################
+from applications.controlies.modules.Utils import Utils
+
 @auth.requires_login()
 def index():
-    """
-    example action using the internationalization operator T and flash
-    rendered by views/default/index.html or views/generic.html
-    """
 
     try:
         dir_ssh = "/var/web2py/applications/controlies"
