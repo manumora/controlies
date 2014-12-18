@@ -21,6 +21,7 @@ LDAP Computers management
 
 Mass command execution
 -------------------------
+![Alt text for your video](http://img.youtube.com/vi/4T50mxdujq4/0.jpg)](http://www.youtube.com/watch?v=4T50mxdujq4)
 ![alt text](https://raw.github.com/manumora/controlies/master/screenshots/massExecution1.png "Mass command execution")
 ![alt text](https://raw.github.com/manumora/controlies/master/screenshots/massExecution2.png "Mass command execution")
 
