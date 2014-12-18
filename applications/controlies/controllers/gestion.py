@@ -8,6 +8,7 @@ from applications.controlies.modules.LaptopsHistory import LaptopsHistory
 from applications.controlies.modules.Config import Config
 from applications.controlies.modules.Thinclients import Thinclients
 from applications.controlies.modules.Utils import Utils
+import applications.controlies.modules.websocket_messaging as WS
 
 import xmlrpclib
 import gluon.contrib.simplejson
@@ -414,14 +415,13 @@ def executeCommand():
         return dict(response="fail", host=request.vars["host"], message="Surgió un error")"""
         
     from applications.controlies.modules.SSHConnection import SSHConnection
-    from gluon.contrib.websocket_messaging import websocket_send
 
     c = SSHConnection(request.vars["host"],"root","")
     response = c.connectWithoutPass("/var/web2py/applications/controlies/.ssh/id_rsa")
     #response = c.connectWithoutPass("/home/manu/proyectos/controlies/applications/controlies/.ssh/id_rsa")
 
     try:
-        websocket_send('http://127.0.0.1:8888','<span style="font-size:14pt;">'+request.vars["host"]+'</span> > <span style="font-size:10pt;">'+request.vars["command"]+'</span><br>','mykey','mygroup')
+        WS.websocket_send('http://127.0.0.1:8888','<span style="font-size:14pt;">'+request.vars["host"]+'</span> > <span style="font-size:10pt;">'+request.vars["command"]+'</span><br>','mykey','mygroup')
     except:
         return dict(response="fail", host=request.vars["host"], message="No se pudo conectar con el servidor websocket.<br/>")
             
@@ -439,11 +439,11 @@ def executeCommand():
             HTML_PARSER = ansi2html()
             html = HTML_PARSER.parse(channel.recv(1024))
             try:        
-                websocket_send('http://127.0.0.1:8888',html,'mykey','mygroup')
+                WS.websocket_send('http://127.0.0.1:8888',html,'mykey','mygroup')
             except:
                 pass
 
-    websocket_send('http://127.0.0.1:8888','<br>','mykey','mygroup')
+    WS.websocket_send('http://127.0.0.1:8888','<br>','mykey','mygroup')
     channel.close()
     c.close()
     return dict(response="OK", host=request.vars["host"], message="")

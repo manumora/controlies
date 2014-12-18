@@ -10,7 +10,7 @@
             .click( function(){ $('#dialog-form').dialog('close'); });
 
 		try {            
-	    	 if(!web2py_websocket('ws://127.0.0.1:8888/realtime/mygroup',function(e){
+	    	 if(!web2py_websocket('ws://ldap:8888/realtime/mygroup',function(e){
 	    	 	
 	    	 	jQuery("#response").append(e.data);			
 				var objDiv = document.getElementById("response");
