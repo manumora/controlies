@@ -1,0 +1,112 @@
+<style>    
+	.ui-menu { position: absolute; width: 100px; }	
+	
+	#scroller { list-style: none; padding: 0.5em; margin: 0.5em 0; }
+
+	#scroller li { border: 1px solid #ddd; color:#000; width: 10em; margin: 0.25em; padding: 0.2em; background-color: #FFF; }
+</style> 
+
+{{extend 'layout.html'}}
+
+<script>
+    
+    $(function() {
+        $("#tabsHosts").tabs().css("font-size","13px");
+                
+		$("#dialogAlert").dialog({ autoOpen: false });
+		
+    	jQuery("#response").html("");
+    	
+        $("#text").focus();
+        $("#execButton").button({ icons: { primary: "ui-icon-disk"}});
+        $("#cancelButton")
+            .button({ icons: { primary: "ui-icon-close"}})
+            .click( function(){ $('#dialog-form').dialog('close'); });
+
+		try {            
+    	 	if(!web2py_websocket('ws://172.23.36.3:8888/realtime/chat/none/{{= session.domain }}',function(e){
+
+	    	 	if (e.data.substring(0, 14) == "listusernames@") {
+	    	 		var list = e.data.split("@");
+	    	 		var names = list[1].split("#");
+
+	    	 		$('#scroller').empty();
+	    	 		for(i=0;i<names.length;i++)
+	    	 			if (names[i]!="")
+	    	 				$('#scroller').prepend('<li>'+names[i]+'</li>');
+	    	 			
+				} else {
+		    	 	jQuery("#response").append(e.data);			
+					var objDiv = document.getElementById("response");
+					objDiv.scrollTop = objDiv.scrollHeight;
+				}
+					    	 	
+	    	 })) alert("html5 websocket not supported by your browser, try Google Chrome");
+		}
+		catch(err) {}
+	});
+
+    function send(command){
+    	ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session    			
+
+        jQuery.post('call/json/chat_send_message', "&text="+jQuery("#text").val(), function(result) {
+            switch(result.response){
+                case "OK":{
+					//jQuery("#response").append(result.message.replace(/\n/g, "<br/>")+"<br/>");		
+					jQuery("#text").val("");
+                    break;
+                }
+                case "fail":{
+					jQuery("#response").append("<span style='color:red;'>"+result.message+"</span><br>");
+                    break;
+                }
+            }
+
+			var objDiv = document.getElementById("response");
+			objDiv.scrollTop = objDiv.scrollHeight;					            
+        });
+
+        return false;
+    }
+
+</script>
+<table width="100%" cellspacing="12">
+<tr>
+	<td>    
+	    <div id="tabsHosts">
+	        <ul>
+	            <li><a href="#tabsHosts1"><span id="actions">Chat</span></a></li>
+	        </ul>
+	        <div id="tabsHosts1" style="padding:3px;">  
+	            <table>
+	                <tr>
+	                    <td style="width:90%;">
+							<div id="response" style="height:400px; overflow:auto; background-color: #000; color:#EEE; padding-left: 1em;"></div>
+							<form id="form_data" onsubmit="return send('executeCommand');">
+								<p><span id="loading" style"float:right;"></span></p>
+								<input type="text" id="text" name="text" size="65"/><button id="execButton" type="submit" style="width:100px;">Enviar</button>
+							</form>
+	                    </td>
+	                    <td style="width:450px; vertical-align:top;">
+							<div id="response" style="height:400px; overflow:auto; color:#EEE;">
+								<li id="scroller"></li>
+							</div>
+	                    </td>
+	                </tr>
+	            </table>
+	        </div>
+	    </div>       
+	</td>
+</tr>
+</table>
+
+<div id="dialog-form"></div>
+
+<div id="dialog-details"></div>
+
+<div id="dialogAlert" title="Atenci&oacute;n">
+        <p>
+                <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 7px 0;"></span>
+                <span id="dialogAlertMessage"></span>
+        </p>
+</div>
