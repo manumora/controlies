@@ -180,7 +180,7 @@ class Hosts(object):
             except:
 				mac = ""
 
-            if ((ip_search != "" and ip.find(ip_search)>=0) or (ip_search=="")):# and ((mac_search != "" and mac.find(mac_search)>=0) or (mac_search=="")) and ((host_search != "" and host.find(host_search)>=0) or (host_search=="")):
+            if ((ip_search != "" and ip.find(ip_search)>=0) or (ip_search=="")) and ((mac_search != "" and mac.find(mac_search)>=0) or (mac_search=="")) and ((host_search != "" and host.find(host_search)>=0) or (host_search=="")):
 				row = {
 					"id":host, 
 					"cell":[host, ip, mac],

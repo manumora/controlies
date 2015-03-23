@@ -41,7 +41,8 @@ response.menu+=[
 
 
 response.menu+=[('Gestión', False, None,[            
-            ('Equipos', False,URL( 'gestion', 'servidores_aula')),   
+            ('Equipos', False,URL( 'gestion', 'servidores_aula')),
+            ('Chat', False,URL( 'gestion', 'chat')),
             ('Importación de Rayuela', False, URL( 'gestion', 'rayuela')),
 #            ('Mantenimiento de LDAP', False, None,[
 #                ('Limpieza de grupos', False, URL('check_ldap','index')),

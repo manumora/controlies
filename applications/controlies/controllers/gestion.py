@@ -8,6 +8,7 @@ from applications.controlies.modules.LaptopsHistory import LaptopsHistory
 from applications.controlies.modules.Config import Config
 from applications.controlies.modules.Thinclients import Thinclients
 from applications.controlies.modules.Utils import Utils
+from applications.controlies.modules.Utils import LdapUtils
 import applications.controlies.modules.websocket_messaging as WS
 
 import xmlrpclib
@@ -100,7 +101,31 @@ def servidores_aula():
     l.close()
     
     return dict()
-    
+
+@service.json   
+@auth.requires_login()
+def chat():
+    if not auth.user: redirect(URL(c='default',f='index'))
+
+    l=conecta()
+    session.domain = LdapUtils.getDomain(l)
+    l.close()
+
+
+    #WS.websocket_send('http://127.0.0.1:8888',session.domain+" ha entrado en la sala"+'<br/>','mykey','chat')    
+    return dict()
+
+@service.json   
+@auth.requires_login()
+def chat_send_message():
+    try:
+        if request.vars["text"].strip()!="":
+            WS.websocket_send('http://172.23.36.3:8888','<b>'+session.domain+"</b>: "+request.vars["text"]+'<br/>','mykey','chat')
+    except:
+        return dict(response="fail", message="No se pudo conectar con el servidor websocket.<br/>")
+
+    return dict(response="OK")
+
 @service.json   
 @auth.requires_login()
 def servidores_centro():

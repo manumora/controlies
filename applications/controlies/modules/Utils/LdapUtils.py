@@ -146,7 +146,20 @@ def getBroadcast(ldap):
 		broadcast=""
 
 	return broadcast
-	
+
+
+def getDomain(ldap):
+	result = ldap.search("cn=DHCP Config","cn=INTERNAL",["dhcpOption"])
+
+	record = [i for i in result[0][0][1]['dhcpOption'] if i.startswith('domain-name ')]
+	try:
+		domain =record[0].split(" ")[1].replace("\"","")
+	except:
+		domain=""
+
+	return domain
+
+
 def whatHome(type):
 	
 	if type == "teacher":

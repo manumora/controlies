@@ -29,7 +29,6 @@ def user():
         @auth.requires_permission('read','table name',record_id)
     to decorate functions that need access control
     """
-
     if "host" in request.vars:
         session.server=request.vars["host"]
         session.username=request.vars["username"]        
