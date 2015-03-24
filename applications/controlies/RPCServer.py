@@ -82,15 +82,15 @@ def get_computers():
 def append_teacher(name, computer, ip):
 	n = name.split(" ")[0]
 
-	remove_teacher(n)
+	remove_teacher_from_computer(computer)
 
 	i = item(n, computer=computer, ip=ip)
 	teachers.append(i)
 
-def remove_teacher(name):
+def remove_teacher(name, computer):
 	n = name.split(" ")[0]
 	for c in teachers:
-		if c.getName() == n:
+		if c.getName() == n and c.getComputer() == computer:
 			teachers.remove(c)
 
 def get_teachers():
@@ -98,6 +98,12 @@ def get_teachers():
 	for c in teachers:
 		tmp.append(c.getName()+"@"+c.getComputer())
 	return tmp
+
+def remove_teacher_from_computer(computer):
+        for c in teachers:
+                if c.getComputer() == computer:
+                        teachers.remove(c)
+
 
 #************************************************************************************
 

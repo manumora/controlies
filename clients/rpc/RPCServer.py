@@ -35,6 +35,78 @@ class XMLRPCServer(SimpleXMLRPCServer):
 
        self.client_address = client_address[0]
        return SimpleXMLRPCServer.process_request(self, request, client_address)
+
+
+computers = []
+students = []
+
+class item():
+	def __init__(self, name, computer="", ip="", proxy=""):
+		self.name = name
+		self.computer = computer
+		self.ip = ip
+
+	def getName(self):
+		return self.name
+
+	def getComputer(self):
+		return self.computer
+
+	def getIP(self):
+		return self.ip
+
+
+#************************************************************************************
+
+def append_computer(name, ip):
+	n = name.split(" ")[0]
+
+	remove_computer(n)
+
+	i = item(n, ip=ip)
+	computers.append(i)
+
+def remove_computer(name):
+	n = name.split(" ")[0]
+	for c in computers:
+		if c.getName() == n:
+			computers.remove(c)
+
+def get_computers():
+	tmp = []
+	for c in computers:
+		tmp.append(c.getName())
+	return tmp
+
+#************************************************************************************
+
+def append_student(name, computer, ip):
+	n = name.split(" ")[0]
+
+	remove_student_from_computer(computer)
+
+	i = item(n, computer=computer, ip=ip)
+	students.append(i)
+
+def remove_student(name, computer):
+	n = name.split(" ")[0]
+	for c in students:
+		if c.getName() == n and c.getComputer() == computer:
+			students.remove(c)
+
+def get_students():
+	tmp = []
+	for c in students:
+		tmp.append(c.getName()+"@"+c.getComputer())
+	return tmp
+
+def remove_student_from_computer(computer):
+        for c in students:
+                if c.getComputer() == computer:
+                        students.remove(c)
+
+#************************************************************************************
+
        
 #Esto es una barbaridad, ya que accedemos a un atributo de un objeto global,
 #pero es la unica manera de hacerlo para averiguar el origen de la peticion.
@@ -191,6 +263,12 @@ if __name__ == "__main__":
 	server = XMLRPCServer (("", 6800))
 	ldap_ip=socket.gethostbyname("ldap")
 	host_name=socket.gethostname()
+	server.register_function (append_computer)
+	server.register_function (remove_computer)
+	server.register_function (get_computers)
+	server.register_function (append_student)
+	server.register_function (remove_student)
+	server.register_function (get_students)
 	server.register_function (exec_command)
 	server.register_function (shutdown)
 	server.register_function (wakeupThinclients)

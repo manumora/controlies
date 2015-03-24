@@ -129,7 +129,7 @@ class DistributeHandler(tornado.websocket.WebSocketHandler):
         del names[self]
         # notify clients that a member has left the groups
         for client in listeners.get(self.group, []):
-            client.write_message(datetime.datetime.now().strftime("%H:%M") + ' - ' + self.name + '<span style="color:red; font-weight:bold;"> ha dejado en la sala</span></br>')
+            client.write_message(datetime.datetime.now().strftime("%H:%M") + ' - ' + self.name + '<span style="color:red; font-weight:bold;"> ha dejado la sala</span></br>')
 
         # Send list of users
         usernames = ""

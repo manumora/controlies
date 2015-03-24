@@ -53,14 +53,14 @@ def newTeacher(interface, protocol, name, type, domain, flags):
 	try:
 		interface, protocol, name, type, domain, host, aprotocol, address, port, txt, flags = server.ResolveService(interface, protocol, name, type, domain, avahi.PROTO_UNSPEC, dbus.UInt32(0))
 		n = name.split(".")[0].split("@")
-
 		if protocol == avahi.PROTO_INET:
 			rpcServer.append_teacher(str(n[0]), str(n[1]), str(address))
 	except:
 		pass
 
 def removeTeacher(interface, protocol, name, type, domain, flags):
-        rpcServer.remove_teacher(str(name))
+	n = name.split(".")[0].split("@")
+        rpcServer.remove_teacher(str(n[0]),str(n[1]))
 
 #####################################################################################################
 def newLaptop(interface, protocol, name, type, domain, flags):
