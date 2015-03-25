@@ -8,7 +8,7 @@ clients/avahi/controlies-ltspserver usr/bin
 clients/avahi/controlies-ltspserver.desktop etc/xdg/autostart
 clients/avahi/sessionControl.py usr/share/controlies-ltspserver
 clients/avahi/avahiRoute.py usr/share/controlies-ltspserver
-clients/rpc/RPCServer.py usr/share/controlies-ltspserver
+clients/rpc/RPCLTSPServer.py usr/share/controlies-ltspserver
 clients/daemon/controlies-ltspserver etc/init.d
 clients/daemon/97controlies-ltspserver etc/NetworkManager/dispatcher.d
 clients/daemon/controlies-ltspserver.dhcp etc/dhcp/dhclient-exit-hooks.d

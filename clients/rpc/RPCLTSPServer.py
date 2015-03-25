@@ -75,7 +75,7 @@ def remove_computer(name):
 def get_computers():
 	tmp = []
 	for c in computers:
-		tmp.append(c.getName())
+		tmp.append(c.getName()+"@"+c.getIP())
 	return tmp
 
 #************************************************************************************

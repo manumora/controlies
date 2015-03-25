@@ -21,8 +21,8 @@ rundir=/var/run
 logfile=/var/log/controlies-ltspserver.log
 daemon="/usr/bin/python"
 
-pidfileRPC=$rundir/controlies-ltspserver/RPCServer.pid
-applicationRPC=/usr/share/controlies-ltspserver/RPCServer.py
+pidfileRPC=$rundir/controlies-ltspserver/RPCLTSPServer.pid
+applicationRPC=/usr/share/controlies-ltspserver/RPCLTSPServer.py
 
 pidfileAvahi=$rundir/controlies-ltspserver/avahiRoute.pid
 applicationAvahi=/usr/share/controlies-ltspserver/avahiRoute.py
