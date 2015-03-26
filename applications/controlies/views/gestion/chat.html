@@ -24,7 +24,7 @@
             .click( function(){ $('#dialog-form').dialog('close'); });
 
 		try {            
-    	 	if(!web2py_websocket('ws://172.23.36.3:8888/realtime/chat/none/{{= session.domain }}',function(e){
+    	 	if(!web2py_websocket('ws://172.23.36.5:8888/realtimechat/chat/none/{{= session.domain }}',function(e){
 
 	    	 	if (e.data.substring(0, 14) == "listusernames@") {
 	    	 		var list = e.data.split("@");

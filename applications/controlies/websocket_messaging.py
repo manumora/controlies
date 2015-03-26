@@ -4,67 +4,6 @@ This file is part of the web2py Web Framework
 Copyrighted by Massimo Di Pierro <mdipierro@cs.depaul.edu>
 License: LGPLv3 (http://www.gnu.org/licenses/lgpl.html)
 
-Attention: Requires Chrome or Safari. For IE of Firefox you need https://github.com/gimite/web-socket-js
-
-1) install tornado (requires Tornado 2.1)
-
-   easy_install tornado
-
-2) start this app:
-
-   python gluon/contrib/websocket_messaging.py -k mykey -p 8888
-
-3) from any web2py app you can post messages with
-
-   from gluon.contrib.websocket_messaging import websocket_send
-   websocket_send('http://127.0.0.1:8888','Hello World','mykey','mygroup')
-
-4) from any template you can receive them with
-
-   <script>
-   $(document).ready(function(){
-      if(!web2py_websocket('ws://127.0.0.1:8888/realtime/mygroup',function(e){alert(e.data)}))
-         alert("html5 websocket not supported by your browser, try Google Chrome");
-   });
-   </script>
-
-When the server posts a message, all clients connected to the page will popup an alert message
-Or if you want to send json messages and store evaluated json in a var called data:
-
-   <script>
-   $(document).ready(function(){
-      var data;
-      web2py_websocket('ws://127.0.0.1:8888/realtime/mygroup',function(e){data=eval('('+e.data+')')});
-   });
-   </script>
-
-- All communications between web2py and websocket_messaging will be digitally signed with hmac.
-- All validation is handled on the web2py side and there is no need to modify websocket_messaging.py
-- Multiple web2py instances can talk with one or more websocket_messaging servers.
-- "ws://127.0.0.1:8888/realtime/" must be contain the IP of the websocket_messaging server.
-- Via group='mygroup' name you can support multiple groups of clients (think of many chat-rooms)
-
-Here is a complete sample web2py action:
-
-    def index():
-        form=LOAD('default','ajax_form',ajax=True)
-        script=SCRIPT('''
-            jQuery(document).ready(function(){
-              var callback=function(e){alert(e.data)};
-              if(!web2py_websocket('ws://127.0.0.1:8888/realtime/mygroup',callback))
-                alert("html5 websocket not supported by your browser, try Google Chrome");
-            });
-        ''')
-        return dict(form=form, script=script)
-
-    def ajax_form():
-        form=SQLFORM.factory(Field('message'))
-        if form.accepts(request,session):
-            from gluon.contrib.websocket_messaging import websocket_send
-            websocket_send(
-                'http://127.0.0.1:8888',form.vars.message,'mykey','mygroup')
-        return form
-
 Acknowledgements:
 Tornado code inspired by http://thomas.pelletier.im/2010/08/websocket-tornado-redis/
 
@@ -79,6 +18,7 @@ import sys
 import optparse
 import urllib
 import time
+import datetime
 
 listeners = {}
 names = {}
@@ -115,6 +55,25 @@ class PostHandler(tornado.web.RequestHandler):
             return 'true'
         return 'false'
 
+class PostHandlerChat(tornado.web.RequestHandler):
+    """
+    only authorized parties can post messages
+    """
+    def post(self):
+        if hmac_key and not 'signature' in self.request.arguments:
+            return 'false'
+        if 'message' in self.request.arguments:
+            message = self.request.arguments['message'][0]
+            group = self.request.arguments.get('group', ['default'])[0]
+            print '%s:MESSAGE to %s:%s' % (time.time(), group, message)
+            if hmac_key:
+                signature = self.request.arguments['signature'][0]
+                if not hmac.new(hmac_key, message).hexdigest() == signature:
+                    return 'false'
+            for client in listeners.get(group, []):
+                client.write_message(datetime.datetime.now().strftime("%H:%M") +' - '+message)
+            return 'true'
+        return 'false'
 
 class TokenHandler(tornado.web.RequestHandler):
     """
@@ -169,6 +128,65 @@ class DistributeHandler(tornado.websocket.WebSocketHandler):
             client.write_message('-' + self.name)
         print '%s:DISCONNECT from %s' % (time.time(), self.group)
 
+class DistributeHandlerChat(tornado.websocket.WebSocketHandler):
+    name = ""
+    def open(self, params):
+        #group, token, name = params.split('/') + [None, None]
+	group, token, name = params.split('/')
+        self.group = group or 'default'
+        self.token = token or 'none'
+        self.name = name or 'anonymous'
+        # only authorized parties can join
+        if DistributeHandler.tokens:
+            if not self.token in tokens or not token[self.token] is None:
+                self.close()
+            else:
+                tokens[self.token] = self
+        if not self.group in listeners:
+            listeners[self.group] = []
+
+        # notify clients that a member has joined the groups
+        for client in listeners.get(self.group, []):
+            client.write_message(datetime.datetime.now().strftime("%H:%M") + ' - ' + self.name + '<span style="color:green; font-weight:bold;"> ha entrado en la sala</span></br>')
+
+        listeners[self.group].append(self)
+        names[self] = self.name
+
+	# Send list of users
+	usernames = ""
+        for client in listeners.get(self.group, []):
+	    usernames = client.get_name()+"#"+usernames
+
+        for client in listeners.get(self.group, []):
+            client.write_message('listusernames@'+usernames)
+
+        print '%s:CONNECT to %s' % (time.time(), self.group)
+
+    def on_message(self, message):
+        pass
+
+    def on_close(self):
+	print listeners
+        if self.group in listeners:
+            listeners[self.group].remove(self)
+        del names[self]
+        # notify clients that a member has left the groups
+        for client in listeners.get(self.group, []):
+            client.write_message(datetime.datetime.now().strftime("%H:%M") + ' - ' + self.name + '<span style="color:red; font-weight:bold;"> ha dejado la sala</span></br>')
+
+        # Send list of users
+        usernames = ""
+        for client in listeners.get(self.group, []):
+            usernames = client.get_name()+"#"+usernames
+
+        for client in listeners.get(self.group, []):
+            client.write_message('listusernames@'+usernames)
+
+        print '%s:DISCONNECT from %s' % (time.time(), self.group)
+
+    def get_name(self):
+	return self.name
+
 if __name__ == "__main__":
     usage = __doc__
     version = ""
@@ -200,7 +218,9 @@ if __name__ == "__main__":
     urls = [
         (r'/', PostHandler),
         (r'/token', TokenHandler),
-        (r'/realtime/(.*)', DistributeHandler)]
+        (r'/realtime/(.*)', DistributeHandler),
+        (r'/chat', PostHandlerChat),
+        (r'/realtimechat/(.*)', DistributeHandlerChat)]
     application = tornado.web.Application(urls, auto_reload=True)
     http_server = tornado.httpserver.HTTPServer(application)
     http_server.listen(int(options.port), address=options.address)

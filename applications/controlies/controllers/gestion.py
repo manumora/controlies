@@ -120,7 +120,7 @@ def chat():
 def chat_send_message():
     try:
         if request.vars["text"].strip()!="":
-            WS.websocket_send('http://172.23.36.3:8888','<b>'+session.domain+"</b>: "+request.vars["text"]+'<br/>','mykey','chat')
+            WS.websocket_send('http://172.23.36.5:8888/chat','<b>'+session.domain+"</b>: "+request.vars["text"]+'<br/>','mykey','chat')
     except:
         return dict(response="fail", message="No se pudo conectar con el servidor websocket.<br/>")
 

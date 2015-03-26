@@ -4,8 +4,6 @@ This file is part of the web2py Web Framework
 Copyrighted by Massimo Di Pierro <mdipierro@cs.depaul.edu>
 License: LGPLv3 (http://www.gnu.org/licenses/lgpl.html)
 
-Attention: Requires Chrome or Safari. For IE of Firefox you need https://github.com/gimite/web-socket-js
-
 Acknowledgements:
 Tornado code inspired by http://thomas.pelletier.im/2010/08/websocket-tornado-redis/
 
@@ -44,7 +42,6 @@ class PostHandler(tornado.web.RequestHandler):
     def post(self):
         if hmac_key and not 'signature' in self.request.arguments:
             return 'false'
-
         if 'message' in self.request.arguments:
             message = self.request.arguments['message'][0]
             group = self.request.arguments.get('group', ['default'])[0]
@@ -53,13 +50,9 @@ class PostHandler(tornado.web.RequestHandler):
                 signature = self.request.arguments['signature'][0]
                 if not hmac.new(hmac_key, message).hexdigest() == signature:
                     return 'false'
-
             for client in listeners.get(group, []):
                 client.write_message(datetime.datetime.now().strftime("%H:%M") +' - '+message)
-
-	    print "finaliza PostHandler en true"
             return 'true'
-        print "finaliza PostHandler en false"
         return 'false'
 
 
@@ -86,8 +79,6 @@ class TokenHandler(tornado.web.RequestHandler):
 class DistributeHandler(tornado.websocket.WebSocketHandler):
     name = ""
     def open(self, params):
-        print "Inicio DistributeHandler"
-	print params
         #group, token, name = params.split('/') + [None, None]
 	group, token, name = params.split('/')
         self.group = group or 'default'
