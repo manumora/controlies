@@ -28,7 +28,7 @@ case "$1" in
         sed -i.bak '/\/usr\/share\/controlies-ltspserver\/controlies-seguimiento/d' /etc/rc.local
 
 	######################################################
-	# Servicio RPC
+	# Servicio
 	update-rc.d controlies-ltspserver remove
     ;;
     upgrade|abort-upgrade|abort-remove|abort-deconfigure)

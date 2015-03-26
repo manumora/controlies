@@ -110,7 +110,7 @@ def remove_teacher_from_computer(computer):
 def append_laptop(name, computer, ip, proxy=""):
 	n = name.split(" ")[0]
 
-	remove_laptop(n)
+	#remove_laptop(n)
 
 	i = item(n, ip=ip, proxy=proxy)
 	laptops.append(i)
@@ -127,8 +127,10 @@ def get_laptops():
 		tmp.append(c.getName())
 	return tmp
 
-def set_laptops(classroom, laptops):
-	for laptop in laptops:
+def set_laptops(classroom, laptopsList):
+	remove_laptops_from_classroom(classroom)
+
+	for laptop in laptopsList:
 		l = laptop.split("@")
 		append_laptop(l[0],"",l[1],classroom)
 
@@ -138,6 +140,11 @@ def get_data_laptops(name=""):
 		if name=="" or name==c.getName():
 			tmp.append({"name":c.getName(), "ip": c.getIP(), "proxy": c.getProxy()})
 	return tmp
+
+def remove_laptops_from_classroom(classroom):
+	for l in laptops:
+		if l.getProxy() == classroom:
+			laptops.remove(c)
 #************************************************************************************
 
 def append_pupil(name, computer, ip, proxy=""):
@@ -168,7 +175,8 @@ def get_pupils():
 
 #************************************************************************************
 
-server = XMLRPCServer (("localhost", 6969), allow_none=True, logRequests = False)
+server = XMLRPCServer (("", 6969), allow_none=True, logRequests = False)
+#server = XMLRPCServer (("", 6969))
 server.register_function (append_computer)
 server.register_function (remove_computer)
 server.register_function (get_computers)
