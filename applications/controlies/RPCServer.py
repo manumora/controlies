@@ -10,16 +10,16 @@
 # Author:      Manuel Mora Gordillo
 # Copyright:   2013 - Manuel Mora Gordillo    <manuito @nospam@ gmail.com>
 #
-# Autorename is free software: you can redistribute it and/or modify
+# ControlIES is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# Autorename is distributed in the hope that it will be useful,
+# ControlIES is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 # You should have received a copy of the GNU General Public License
-# along with Autorename. If not, see <http://www.gnu.org/licenses/>.
+# along with ControlIES. If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
 
@@ -110,7 +110,7 @@ def remove_teacher_from_computer(computer):
 def append_laptop(name, computer, ip, proxy=""):
 	n = name.split(" ")[0]
 
-	#remove_laptop(n)
+	remove_laptop(n)
 
 	i = item(n, ip=ip, proxy=proxy)
 	laptops.append(i)
@@ -142,17 +142,17 @@ def get_data_laptops(name=""):
 	return tmp
 
 def remove_laptops_from_classroom(classroom):
-	for l in laptops:
-		if l.getProxy() == classroom:
+	for c in laptops:
+		if c.getProxy() == classroom:
 			laptops.remove(c)
 #************************************************************************************
 
 def append_pupil(name, computer, ip, proxy=""):
 	n = name.split(" ")[0]
-	print n
-	remove_pupil(n)
 
-	i = item(n, ip, proxy)
+	#remove_pupil(n)
+
+	i = item(n, ip=ip, proxy=proxy)
 	pupils.append(i)
 
 def remove_pupil(name):
@@ -162,6 +162,8 @@ def remove_pupil(name):
 			pupils.remove(c)
 
 def set_pupils(classroom, pupilsList):
+	remove_pupils_from_classroom(classroom)
+
 	for pupil in pupilsList:
 		l = pupil.split("@")
 		append_pupil(l[0],"",l[1],classroom)
@@ -172,6 +174,11 @@ def get_pupils():
 	for c in pupils:
 		tmp.append(c.getName()+"@"+c.getIP())
 	return tmp
+
+def remove_pupils_from_classroom(classroom):
+	for c in pupils:
+		if c.getProxy() == classroom:
+			pupils.remove(c)
 
 #************************************************************************************
 
