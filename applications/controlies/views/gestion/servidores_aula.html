@@ -256,19 +256,16 @@
 		jQuery("#dialog-form").html("").css("display","none");
 		jQuery("#dialog-form").load("execCommand.html", function(data) {				
 	                                       
-            x = (jQuery(window).width()-750)/2;
-            y = (jQuery(window).height()-500)/2;
-    
             jQuery("#messageLoading").hide();
     
             jQuery("#dialog-form").dialog({
+				position: { my: "center top+15%", at: "top", of: window},
                 resizable: false,
-                position: top,
                 modal: true,
                 width: 750,
                 title: "Ejecutar comando",
                 close: function(ev, ui) { web2py_websocket_stop(); },
-            }).dialog('option', 'position', [x, y]);            
+            });           
 		});		
 	}
 
@@ -287,22 +284,19 @@
         	getLaptopsPupils();    
         	
         	timer =""; 
-            x = (jQuery(window).width()-850)/2;
-            y = (jQuery(window).height()-520)/2;
-    
             jQuery("#messageLoading").hide();
     
             jQuery("#dialog-form").dialog({
+				position: { my: "center top+15%", at: "top", of: window},
                 resizable: false,
-                position: top,
                 modal: true,
                 width: 850,
-                title: "Equipos del aula",
+                title: "Equipos del aula",				
                 close: function() { clearTimeout(timer); },
-            }).dialog('option', 'position', [x, y]);            
+            });     
 		});			
 	}
-
+			
 </script>
 <table width="100%" cellspacing="12">
 <tr>

@@ -1,8 +1,15 @@
+controlies (0.6.6-8) unstable; urgency=low
+
+  * Nuevas funciones en RPC
+  * Mejora en threads
+
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Fri, 27 Mar 2015 09:42:00 +0200
+
 controlies (0.6.6-7) unstable; urgency=low
 
   * Mejora en la comunicacion con los servidores de aula
 
- -- Manuel Mora Gordillo <manuito@gmail.com>  Mon, 23 Mar 2015 17:54:00 +0200
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Thu, 26 Mar 2015 13:54:00 +0200
 
 controlies (0.6.6-6) unstable; urgency=low
 

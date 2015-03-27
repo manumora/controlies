@@ -149,7 +149,7 @@ def remove_laptops_from_classroom(classroom):
 
 def append_pupil(name, computer, ip, proxy=""):
 	n = name.split(" ")[0]
-
+	print n
 	remove_pupil(n)
 
 	i = item(n, ip, proxy)
@@ -161,8 +161,8 @@ def remove_pupil(name):
 		if c.getName() == n:
 			pupils.remove(c)
 
-def set_pupils(classroom, pupils):
-	for pupil in pupils:
+def set_pupils(classroom, pupilsList):
+	for pupil in pupilsList:
 		l = pupil.split("@")
 		append_pupil(l[0],"",l[1],classroom)
 
@@ -170,11 +170,16 @@ def set_pupils(classroom, pupils):
 def get_pupils():
 	tmp = []
 	for c in pupils:
-		tmp.append(c.getName())
+		tmp.append(c.getName()+"@"+c.getIP())
 	return tmp
 
 #************************************************************************************
 
+def set_data_classroom(classroom, laptopsList, pupilsList):
+	set_laptops(classroom, laptopsList)
+	set_pupils(classroom, pupilsList)
+
+#************************************************************************************
 server = XMLRPCServer (("", 6969), allow_none=True, logRequests = False)
 #server = XMLRPCServer (("", 6969))
 server.register_function (append_computer)
@@ -196,4 +201,5 @@ server.register_function (remove_pupil)
 server.register_function (set_pupils)
 server.register_function (get_pupils)
 
+server.register_function (set_data_classroom)
 server.serve_forever()

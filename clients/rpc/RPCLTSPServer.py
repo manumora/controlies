@@ -107,6 +107,13 @@ def remove_student_from_computer(computer):
 
 #************************************************************************************
 
+def get_data():
+	comp = get_computers()
+	stud = get_students()
+
+	return {"computers":comp, "students":stud}
+
+#************************************************************************************
        
 #Esto es una barbaridad, ya que accedemos a un atributo de un objeto global,
 #pero es la unica manera de hacerlo para averiguar el origen de la peticion.
@@ -269,6 +276,7 @@ if __name__ == "__main__":
 	server.register_function (append_student)
 	server.register_function (remove_student)
 	server.register_function (get_students)
+	server.register_function (get_data)
 	server.register_function (exec_command)
 	server.register_function (shutdown)
 	server.register_function (wakeupThinclients)
