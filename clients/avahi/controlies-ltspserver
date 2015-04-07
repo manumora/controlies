@@ -1,2 +1,2 @@
 #!/bin/sh
-exec python "/usr/share/controlies-ltspserver/sessionControl.py"
+exec python "/usr/share/controlies-ltspserver/sessionControlLTSP.py"

@@ -6,7 +6,7 @@ clients/tea4cups.conf etc/cups
 clients/tea4cups usr/lib/cups/backend
 clients/avahi/controlies-ltspserver usr/bin
 clients/avahi/controlies-ltspserver.desktop etc/xdg/autostart
-clients/avahi/sessionControl.py usr/share/controlies-ltspserver
+clients/avahi/sessionControlLTSP.py usr/share/controlies-ltspserver
 clients/avahi/avahiRoute.py usr/share/controlies-ltspserver
 clients/rpc/RPCLTSPServer.py usr/share/controlies-ltspserver
 clients/daemon/controlies-ltspserver etc/init.d

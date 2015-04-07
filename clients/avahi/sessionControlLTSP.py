@@ -2,7 +2,7 @@
 ##############################################################################
 # -*- coding: utf-8 -*-
 # Project:     ControlIES
-# Module:      sessionControl.py
+# Module:      sessionControlLTSP.py
 # Purpose:     Avahi Server to publish users logins
 # Language:    Python 2.5
 # Date:        13-Nov-2013.
@@ -36,7 +36,7 @@ loginname = ''
 def getLoginName():
     global loginname
     data = pwd.getpwuid(os.getuid())
-    if loginname == '':
+    if loginname == '' and "profesor" in data[5]:
         loginname = data[0]
 
     return loginname
