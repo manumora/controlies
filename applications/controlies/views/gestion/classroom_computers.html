@@ -209,12 +209,12 @@
             jQuery("#messageLoading").hide();
     
             jQuery("#dialog-form-pupils").dialog({
+		position: { my: "center top+15%", at: "top", of: window},
                 resizable: false,
-                position: top,
                 modal: true,
                 width: 750,
                 title: "Ejecutar comando"
-            }).dialog('option', 'position', [x, y]);            
+            });            
 		});		
 	}
 

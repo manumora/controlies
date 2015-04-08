@@ -102,6 +102,16 @@ def servidores_aula():
     
     return dict()
 
+
+@service.json   
+@auth.requires_login()
+def set_alias():
+    if(request.vars['name'].strip()==""):
+        return dict(response="name")
+    else:
+        session.alias = request.vars['name'].strip()
+        return dict(response="OK")
+
 @service.json   
 @auth.requires_login()
 def chat():
@@ -112,6 +122,11 @@ def chat():
     l.close()
 
 
+    import random
+    r = lambda: random.randint(0,255)
+    color = ('#%02X%02X%02X' % (r(),r(),r()))
+    session.color = color
+
     #WS.websocket_send('http://127.0.0.1:8888',session.domain+" ha entrado en la sala"+'<br/>','mykey','chat')    
     return dict()
 
@@ -119,8 +134,13 @@ def chat():
 @auth.requires_login()
 def chat_send_message():
     try:
+        alias = session.alias+"."+session.domain
+    except:
+        alias = session.domain
+        
+    try:
         if request.vars["text"].strip()!="":
-            WS.websocket_send('http://172.23.36.5:8888/chat','<b>'+session.domain+"</b>: "+request.vars["text"]+'<br/>','mykey','chat')
+            WS.websocket_send('http://172.23.36.5:8888/chat','<span style="color:'+session.color+'; font-weight:bold;">'+alias+"</span>: "+request.vars["text"]+'<br/>','mykey','chat')
     except:
         return dict(response="fail", message="No se pudo conectar con el servidor websocket.<br/>")
 
@@ -659,6 +679,9 @@ def execCommand():
 def execCommandClassroom():
     return dict()
 
+def form_chat():
+    return dict()
+
 def call():
     """
     exposes services. for example:
@@ -666,5 +689,5 @@ def call():
     decorate with @services.jsonrpc the functions to expose
     supports xml, json, xmlrpc, jsonrpc, amfrpc, rss, csv
     """
-    session.forget()
+    #session.forget()
     return service()

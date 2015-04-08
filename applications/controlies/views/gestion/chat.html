@@ -18,33 +18,20 @@
     	jQuery("#response").html("");
     	
         $("#text").focus();
-        $("#execButton").button({ icons: { primary: "ui-icon-disk"}});
+        $("#aliasButton").button({ icons: { primary: "ui-icon-person"}})
+		.click( function(){ modifyName(); });
+
+        $("#execButton").button({ icons: { primary: "ui-icon-comment"}});
         $("#cancelButton")
             .button({ icons: { primary: "ui-icon-close"}})
             .click( function(){ $('#dialog-form').dialog('close'); });
 
-		try {            
-    	 	if(!web2py_websocket('ws://172.23.36.5:8888/realtimechat/chat/none/{{= session.domain }}',function(e){
-
-	    	 	if (e.data.substring(0, 14) == "listusernames@") {
-	    	 		var list = e.data.split("@");
-	    	 		var names = list[1].split("#");
-
-	    	 		$('#scroller').empty();
-	    	 		for(i=0;i<names.length;i++)
-	    	 			if (names[i]!="")
-	    	 				$('#scroller').prepend('<li>'+names[i]+'</li>');
-	    	 			
-				} else {
-		    	 	jQuery("#response").append(e.data);			
-					var objDiv = document.getElementById("response");
-					objDiv.scrollTop = objDiv.scrollHeight;
-				}
-					    	 	
-	    	 })) alert("html5 websocket not supported by your browser, try Google Chrome");
-		}
-		catch(err) {}
-	});
+	{{ if not session.alias: }}
+		askName();
+	{{ else: }}
+		connectChat("{{= session.alias }}");
+	{{pass}}
+    });
 
     function send(command){
     	ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session    			
@@ -69,7 +56,70 @@
         return false;
     }
 
+	function askName(){   		
+ 	    ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+            jQuery("#messageLoading").show();
+        
+            jQuery("#dialog-form").html("").css("display","none");
+            jQuery("#dialog-form").load("form_chat.html", function() {                
+                jQuery("#form_data #messageForm").html("Todos los campos son obligatorios");                                     
+        
+                jQuery("#dialog-form").dialog({
+					position: { my: "center top+45%", at: "top", of: window},
+                    resizable: false,
+                    modal: true,
+                    width: 350,
+                    title: "Introducir Alias",
+                    close: function( event, ui ) { if($("#check_name").val()=="") $(location).attr('href',"{{= URL(c='default',f='index')}}");  }
+                });
+            });
+	}
+
+	function modifyName(){   		
+ 	    ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+            jQuery("#messageLoading").show();
+        
+            jQuery("#dialog-form").html("").css("display","none");
+            jQuery("#dialog-form").load("form_chat.html", function() {                
+                jQuery("#form_data #messageForm").html("Todos los campos son obligatorios");                                     
+        
+                jQuery("#dialog-form").dialog({
+		    position: { my: "center top+45%", at: "top", of: window},
+                    resizable: false,
+                    modal: true,
+                    width: 350,
+                    title: "Modificar Alias",
+                });
+            });
+	}
+
+	function connectChat(name){
+		try { web2py_websocket_stop(); } catch(err){};
+
+		try {            
+    	 	if(!web2py_websocket('ws://172.23.36.5:8888/realtimechat/chat/none/'+name+'.{{= session.domain }}',function(e){
+
+	    	 	if (e.data.substring(0, 14) == "listusernames@") {
+	    	 		var list = e.data.split("@");
+	    	 		var names = list[1].split("#");
+
+	    	 		$('#scroller').empty();
+	    	 		for(i=0;i<names.length;i++)
+	    	 			if (names[i]!="")
+	    	 				$('#scroller').prepend('<li>'+names[i]+'</li>');
+	    	 			
+				} else {
+		    	 	jQuery("#response").append(e.data);			
+					var objDiv = document.getElementById("response");
+					objDiv.scrollTop = objDiv.scrollHeight;
+				}
+					    	 	
+	    	 })) alert("html5 websocket not supported by your browser, try Google Chrome");
+		}
+		catch(err) {}		
+	}
 </script>
+<input type="hidden" id="check_name" name="check_name"/>
 <table width="100%" cellspacing="12">
 <tr>
 	<td>    
@@ -84,7 +134,7 @@
 							<div id="response" style="height:400px; overflow:auto; background-color: #000; color:#EEE; padding-left: 1em;"></div>
 							<form id="form_data" onsubmit="return send('executeCommand');">
 								<p><span id="loading" style"float:right;"></span></p>
-								<input type="text" id="text" name="text" size="65"/><button id="execButton" type="submit" style="width:100px;">Enviar</button>
+								<button id="aliasButton" type="button" style="width:30px;"></button><input type="text" id="text" name="text" size="60"/><button id="execButton" type="submit" style="width:100px;">Enviar</button>
 							</form>
 	                    </td>
 	                    <td style="width:450px; vertical-align:top;">

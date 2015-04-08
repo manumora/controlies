@@ -147,7 +147,7 @@ class DistributeHandlerChat(tornado.websocket.WebSocketHandler):
 
         # notify clients that a member has joined the groups
         for client in listeners.get(self.group, []):
-            client.write_message(datetime.datetime.now().strftime("%H:%M") + ' - ' + self.name + '<span style="color:green; font-weight:bold;"> ha entrado en la sala</span></br>')
+            client.write_message('<span style="color:green; font-weight:bold;">'+datetime.datetime.now().strftime("%H:%M") + ' - ' + self.name + ' ha entrado en la sala</span></br>')
 
         listeners[self.group].append(self)
         names[self] = self.name
@@ -172,7 +172,7 @@ class DistributeHandlerChat(tornado.websocket.WebSocketHandler):
         del names[self]
         # notify clients that a member has left the groups
         for client in listeners.get(self.group, []):
-            client.write_message(datetime.datetime.now().strftime("%H:%M") + ' - ' + self.name + '<span style="color:red; font-weight:bold;"> ha dejado la sala</span></br>')
+            client.write_message('<span style="color:red; font-weight:bold;">'+datetime.datetime.now().strftime("%H:%M") + ' - ' + self.name + ' ha dejado la sala</span></br>')
 
         # Send list of users
         usernames = ""
