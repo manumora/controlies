@@ -1,0 +1,54 @@
+<script language="javascript">
+
+    $(function() {
+        $("#name").focus();
+        $("#saveButton").button({ icons: { primary: "ui-icon-disk"}});
+        $("#cancelButton")
+            .button({ icons: { primary: "ui-icon-close"}})
+            .click( function(){ $('#dialog-form').dialog('close'); });
+    });
+
+    function restartStyle(){
+        $("#form_data_alias p span").css("color","black");
+        $('#message').html("");
+    }
+
+    function send_set_alias(){
+    	ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+        restartStyle();
+
+        jQuery.post('call/json/set_alias', jQuery("#form_data_alias").serialize(), function(result) {
+            switch(result.response){
+                case "OK":{
+                	jQuery("#check_name").val(jQuery("#form_data_alias #name").val());
+                	connectChat(jQuery("#form_data_alias #name").val())
+			$('#dialog-form').dialog('close');
+                    break;
+                }
+                case "fail":{
+                    jQuery('#message').html("Se produjo un error").effect("highlight", {"color":"yellow"}, 1000);
+                    break;
+                }
+                default:{
+                    jQuery('#'+result.response+"Tag").css("color","red");
+                    jQuery('#'+result.response).effect("highlight", {"color":"yellow"}, 1000).focus();
+                    jQuery('#message').html("Hay campos vacíos o incorrectos").effect("slide");
+                    break;
+                }
+            }
+        });
+
+        return false;
+    }
+
+</script>
+ 
+<form id="form_data_alias" onsubmit="return send_set_alias();">
+    <div>
+            <p><span id="nameTag">Alias</span><br><input type="text" id="name" name="name"/></p>
+        </div>
+    </div>
+    <div id="message" style="text-align:center; font-weight:bold; color:red; padding:3px; "></div>
+    <div style="text-align:center;"><button id="saveButton" type="submit" style="width:100px;">Guardar</button>&nbsp;&nbsp;<button type="button" id="cancelButton" style="width:100px;">Cancelar</button></div>
+    <p style="padding-top:10px; text-align:center; font-size:10px;" id="messageForm"></p>       
+</form>
