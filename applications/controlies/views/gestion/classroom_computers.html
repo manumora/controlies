@@ -213,7 +213,8 @@
                 resizable: false,
                 modal: true,
                 width: 750,
-                title: "Ejecutar comando"
+                title: "Ejecutar comando",
+                close: function(ev, ui) { web2py_websocket_stop(); },
             });            
 		});		
 	}

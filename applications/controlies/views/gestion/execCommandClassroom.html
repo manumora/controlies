@@ -6,6 +6,17 @@
         $("#cancelButton")
             .button({ icons: { primary: "ui-icon-close"}})
             .click( function(){ $('#dialog-form').dialog('close'); });
+
+	try {            
+    	 if(!web2py_websocket('ws://ldap:8888/realtime/mygroup',function(e){
+    	 	
+    	 	jQuery("#response").append(e.data);			
+			var objDiv = document.getElementById("response");
+			objDiv.scrollTop = objDiv.scrollHeight;
+    	 	
+    	 })) alert("html5 websocket not supported by your browser, try Google Chrome");
+	}
+	catch(err) {}
     });
 
     function restartStyle(){
@@ -20,7 +31,6 @@
 
 		var selected = computersSelectedClassroom();
 				
-		jQuery("#execButton").attr("disabled", "disabled");
 		jQuery('#command').attr('readonly', true);
 
     	jQuery(".progress-label").text( "0%" );
@@ -37,10 +47,9 @@
 		
 		for(i=0;i<selected.length;i++){						
 	        jQuery.post('call/json/'+command, "&host="+selected[i]+"&"+data, function(result) {
-	        	jQuery("#response").append("<br><h4><b>"+result.host+"</b></h4>");
 	            switch(result.response){
 	                case "OK":{
-						jQuery("#response").append(result.message.replace(/\n/g, "<br/>")+"<br/>");						
+						//jQuery("#response").append(result.message.replace(/\n/g, "<br/>")+"<br/>");						
 	                    break;
 	                }
 	                case "fail":{
@@ -55,8 +64,7 @@
 	            completed++;
 	            
 	            if(completed==selected.length){
-	            	jQuery("#execButton").removeAttr("disabled");
-	            	jQuery('#command').attr('readonly', false);
+	            	$('#command').attr('readonly', false).val("");
 	            	$("#progressbar").progressbar({value:100});
 	            	$(".progress-label").text( "100%" );
 	            }else{

@@ -20,7 +20,7 @@ Description: Caracteristicas adicionales de controlies para clientes
 
 Package: controlies-ltspserver
 Architecture: all
-Depends: curl, cups, pkpgcounter, python-avahi, python-netifaces, python-dbus
+Depends: curl, cups, pkpgcounter, python-avahi, python-netifaces, python-dbus, python-paramiko, python-tornado
 Conflicts: controlies, controlies-client
 Description: Caracteristicas adicionales de controlies para ltspservers
 

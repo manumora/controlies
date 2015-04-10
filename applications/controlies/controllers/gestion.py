@@ -19,7 +19,7 @@ import re
 import cgi
 from applications.controlies.modules import ansi
 from applications.controlies.modules.ansi2html import ansi2html
-
+from applications.controlies.modules.SSHConnection import SSHConnection
 
 @service.json   
 @auth.requires_login()
@@ -457,16 +457,14 @@ def executeCommand():
         s = server.exec_command(request.vars["command"])
         return dict(response="OK", host=request.vars["host"], message=s)
     except:
-        return dict(response="fail", host=request.vars["host"], message="Surgió un error")"""
-        
-    from applications.controlies.modules.SSHConnection import SSHConnection
+        return dict(response="fail", host=request.vars["host"], message="Surgió un error")"""        
 
     c = SSHConnection(request.vars["host"],"root","")
     response = c.connectWithoutPass("/var/web2py/applications/controlies/.ssh/id_rsa")
     #response = c.connectWithoutPass("/home/manu/proyectos/controlies/applications/controlies/.ssh/id_rsa")
 
     try:
-        WS.websocket_send('http://127.0.0.1:8888','<span style="font-size:14pt;">'+request.vars["host"]+'</span> > <span style="font-size:10pt;">'+request.vars["command"]+'</span><br>','mykey','mygroup')
+        WS.websocket_send('http://ldap:8888','<span style="font-size:14pt;">'+request.vars["host"]+'</span> > <span style="font-size:10pt;">'+request.vars["command"]+'</span><br>','mykey','mygroup')
     except:
         return dict(response="fail", host=request.vars["host"], message="No se pudo conectar con el servidor websocket.<br/>")
             
@@ -484,11 +482,11 @@ def executeCommand():
             HTML_PARSER = ansi2html()
             html = HTML_PARSER.parse(channel.recv(1024))
             try:        
-                WS.websocket_send('http://127.0.0.1:8888',html,'mykey','mygroup')
+                WS.websocket_send('http://ldap:8888',html,'mykey','mygroup')
             except:
                 pass
 
-    WS.websocket_send('http://127.0.0.1:8888','<br>','mykey','mygroup')
+    WS.websocket_send('http://ldap:8888','<br>','mykey','mygroup')
     channel.close()
     c.close()
     return dict(response="OK", host=request.vars["host"], message="")
@@ -496,8 +494,40 @@ def executeCommand():
 @service.json  
 @auth.requires_login()   
 def executeCommandLaptop():
+    try:
+        server = xmlrpclib.ServerProxy("http://ldap:6969")
+        data = server.get_data_laptops(request.vars["host"])
+    except:
+        pass
 
     try:
+	proxy = data[0]["proxy"]
+	ip = data[0]["ip"]
+    except:
+	return dict(response="fail", host=request.vars["host"], message="No se pudo conectar. ¿Está encendido el equipo?")
+
+    c = SSHConnection(proxy,"root","")
+    response = c.connectWithoutPass("/var/web2py/applications/controlies/.ssh/id_rsa")
+
+    if response != True:
+        return dict(response="fail", host=request.vars["host"], message="No se pudo conectar. ¿Has establecido la relación de confianza con el servidor de aula?<br/>")
+
+    channel = c.exec_command('/usr/bin/python /usr/share/controlies-ltspserver/remoteCommand.py '+ip+' "'+request.vars["command"]+'" '+request.vars["host"])
+
+    import select
+    import time
+
+    while True:
+	#time.sleep(0.3)
+
+        if channel.exit_status_ready():
+            break
+
+        rl, wl, xl = select.select([channel], [], [], 0.0)
+        if len(rl) > 0:
+            print channel.recv(1024)
+
+    """try:
         server = xmlrpclib.ServerProxy("http://localhost:6969")
         data = server.get_data_laptops(request.vars["host"])
     except:
@@ -508,8 +538,10 @@ def executeCommandLaptop():
         s = server.exec_command_laptop(data[0]["ip"],request.vars["command"])
         return dict(response="OK", host=request.vars["host"], message=s)
     except:
-        return dict(response="fail", host=request.vars["host"], message="Surgió un error")
-    
+        return dict(response="fail", host=request.vars["host"], message="Surgió un error")"""
+
+    return dict(response="OK", host=request.vars["host"], message="")
+ 
 @auth.requires_login()
 def config():
 

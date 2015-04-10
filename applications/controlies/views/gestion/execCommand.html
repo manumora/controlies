@@ -48,7 +48,6 @@
 		var completed=0;
 
 		for(i=0;i<selected.length;i++){						
-			//jQuery("#response").append("<br><h4><b>"+selected[i]+"</b></h4>");
 	        jQuery.post('call/json/'+command, "&host="+selected[i]+"&"+data, function(result) {
 	            switch(result.response){
 	                case "OK":{
