@@ -13,7 +13,7 @@ clients/daemon/controlies-ltspserver etc/init.d
 clients/daemon/97controlies-ltspserver etc/NetworkManager/dispatcher.d
 clients/daemon/controlies-ltspserver.dhcp etc/dhcp/dhclient-exit-hooks.d
 clients/controlies-seguimiento usr/share/controlies-ltspserver
-clients/ltspremote/ansy.py usr/share/controlies-ltspserver
+clients/ltspremote/ansi.py usr/share/controlies-ltspserver
 clients/ltspremote/ansi2html.py usr/share/controlies-ltspserver
 clients/ltspremote/remoteCommand.py usr/share/controlies-ltspserver
 clients/ltspremote/SSHConnection.py usr/share/controlies-ltspserver
