@@ -1,7 +1,6 @@
 # coding: utf8
 from applications.controlies.modules.Hosts import Hosts
 from applications.controlies.modules.Rayuela2Ldap import Rayuela  
-import applications.controlies.modules.Utils.LdapUtils as LdapUtils
 from applications.controlies.modules.SQLiteConnection import SQLiteConnection
 from applications.controlies.modules.Laptops import Laptops
 from applications.controlies.modules.LaptopsHistory import LaptopsHistory
@@ -414,9 +413,10 @@ def wakeup():
     data = gluon.contrib.simplejson.loads(request.body.read())
 
     l=conecta()
+    broadcast = LdapUtils.getBroadcast(l)
     for i in data["pclist"]:
         h = Hosts(l,i,"","","")
-        h.wakeup()
+        h.wakeup(broadcast)
 
     return response.json({'success':'true'})
 

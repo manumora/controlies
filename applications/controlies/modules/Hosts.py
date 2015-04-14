@@ -299,7 +299,7 @@ class Hosts(object):
             self.ldap.delete("dc="+ip[3]+",dc="+ip[2]+",dc="+ip[1]+",dc="+ip[0]+",dc=in-addr,dc=arpa,ou=Hosts")
 
         self.ldap.delete("dc="+self.name+",dc="+self.domainname+",ou=Hosts")
-            
+
         # Netgroup            
         triplets = self.getTriplets()
         triplets.remove('('+self.name+',-,-)')
@@ -309,6 +309,22 @@ class Hosts(object):
         self.ldap.modify("cn="+self.type_host+",ou=Netgroup", attr)
 
         return "OK"     
+
+    def addTriplet(self):
+        # Netgroup            
+        triplets = self.getTriplets()
+        triplets.append('('+self.name+',-,-)')
+        triplets.sort()
+        attr = [(ldap.MOD_REPLACE, 'nisNetgroupTriple', triplets )]
+        self.ldap.modify("cn="+self.type_host+",ou=Netgroup", attr)
+
+    def deleteTriplet(self):
+        # Netgroup            
+        triplets = self.getTriplets()
+        triplets.remove('('+self.name+',-,-)')
+        triplets.sort()   
+        attr = [(ldap.MOD_REPLACE, 'nisNetgroupTriple', triplets )]
+        self.ldap.modify("cn="+self.type_host+",ou=Netgroup", attr)
 
     def wakeup(self,broadcast):
         NetworkUtils.startup(self.getMAC(),broadcast)
@@ -375,16 +391,24 @@ class Hosts(object):
 
     def getTriplets(self):
         triplets = self.ldap.search("ou=Netgroup","cn="+self.type_host+"",["nisNetgroupTriple"])
-        triplets = triplets [0][0][1]["nisNetgroupTriple"]
+        try:
+            triplets = triplets [0][0][1]["nisNetgroupTriple"]
+        except:
+            triplets = []
+
         return triplets
 
     def getListTriplets(self):
         hostnames = []		
         triplets = self.ldap.search("ou=Netgroup","cn="+self.type_host+"",["nisNetgroupTriple"])
-        triplets = triplets [0][0][1]["nisNetgroupTriple"]
+        try:
+            triplets = triplets [0][0][1]["nisNetgroupTriple"]
         
-        for t in triplets:
-            hostnames.append(t.replace("(","").replace(",-,-)",""))
+            for t in triplets:
+                hostnames.append(t.replace("(","").replace(",-,-)",""))
+        except:
+            pass
+
         return hostnames
             
     def getHostData(self):
@@ -427,6 +451,14 @@ class Hosts(object):
         print names
         a.kill()"""
         return names
+
+
+    def createStructure(self):
+        attr = [
+        ('cn', [self.type_host]),
+        ('objectClass', ['top','nisNetgroup'])
+        ]
+        self.ldap.add("cn="+self.type_host+",ou=Netgroup", attr)
 
 #   def wakeup(self):
 #       from twisted.internet.task import LoopingCall

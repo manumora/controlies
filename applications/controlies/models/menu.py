@@ -32,6 +32,7 @@ response.menu+=[
             ('Grupos', False,URL( 'grupos', 'index' )),
             ('Servidores LTSP',False, URL( 'hosts', 'ltspservers' )),
             ('Workstations', False,URL( 'hosts', 'workstations' )),
+            ('Hardware', False,URL( 'hosts', 'hardware' )),
             ('Portátiles Profesores', False,URL( 'hosts', 'laptops' )),            
             ('Equipos Alumnos', False,URL( 'thinclients', 'index' )),         
             #('Parámetros DHCP', False,URL( 'dhcpd', 'index' )),

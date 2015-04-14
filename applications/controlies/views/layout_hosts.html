@@ -54,33 +54,44 @@
             sortname: 'cn', 
             autowidth: false,
             viewrecords: true, 
-            sortorder: "desc"
+            sortorder: "desc",
+            multiselect: true
         }); 
                       
         jQuery("#list").jqGrid('navGrid','#pager',{add:false,edit:false,del:false,search:false,refresh:false});
         
         jQuery("#list").jqGrid('navButtonAdd','#pager',{
-                caption: "Insertar",
+				caption: "",
+                title: "Insertar",
                 buttonicon :'ui-icon-plus',
                 onClickButton : function (){ 
                     addRecord();
                 } 
         }); 
         jQuery("#list").jqGrid('navButtonAdd','#pager',{
-                caption: "Modificar", 
+				caption: "",
+                title: "Modificar", 
                 buttonicon :'ui-icon-pencil',
                 onClickButton : function (){ 
                     modifyRecord();
             } 
         }); 
         jQuery("#list").jqGrid('navButtonAdd','#pager',{
-                caption: "Borrar", 
+				caption: "",
+                title: "Borrar", 
                 buttonicon :'ui-icon-trash',
                 onClickButton : function (){ 
                     deleteRecord();
             } 
-        });        
-          
+        }).navSeparatorAdd("#pager",{sepclass : "ui-separator"});        
+        jQuery("#list").jqGrid('navButtonAdd','#pager',{
+                caption: "",
+                title: "Mover Equipo",
+                buttonicon :'ui-icon-transferthick-e-w',
+                onClickButton : function (){ 
+                    moveRecord();
+            } 
+        }); 
         jQuery("#list").jqGrid('filterToolbar'); 
     }
 
@@ -101,19 +112,19 @@
     }        
                                      
 	function modifyRecord(){
-    ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+    	ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
 		jQuery("#messageLoading").show();
 		
-		var hid = rowSelected();
-		if(hid==false)
-			return false;
+        var rows = rowsSelected(1);
+        if(rows.length!=1)
+            return false;
 
 		jQuery("#dialog-form").html("").css("display","none");   
 		jQuery("#dialog-form").load("form_ltspserver.html", function() {
 			jQuery("#form_data #action").val("modify");
 			jQuery("#form_data #name").attr("readonly","true");
 			jQuery("#form_data #name").css("background-color","#DDD");                   
-			jQuery.post('call/json/getHostData',{ cn:hid,type_host:type_host }, function(result) {
+			jQuery.post('call/json/getHostData',{ cn:rows[0],type_host:type_host }, function(result) {
 				
 				jQuery("#form_data #name").val(result.response['cn']);               
 				jQuery("#form_data #mac").val(result.response['mac']);                           
@@ -165,10 +176,10 @@
     
 function deleteRecord(){
     ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
-        var cn = rowSelected();
-        if(cn==false)
-            return false;    
-    
+        var rows = rowsSelected();
+        if(rows.length==0)
+            return false; 
+
         jQuery( "#dialog-confirm" ).dialog({
             resizable: false,
             height:160,
@@ -176,7 +187,7 @@ function deleteRecord(){
             modal: true,
             buttons: {
                 "Borrar": function() {
-                    jQuery.post("call/json/delete",{cn:cn,action:'delete',type_host:type_host}, function(data){
+                    jQuery.post("call/json/delete",{cn:rows,action:'delete',type_host:type_host}, function(data){
                         jQuery("#dialog-confirm").dialog( "close" );
                         jQuery("#list").trigger("reloadGrid");
                     });
@@ -187,6 +198,35 @@ function deleteRecord(){
             }
         }).dialog('open');
 }    
+
+    function moveRecord(){
+    	ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+        jQuery("#messageLoading").show();
+        
+        var rows = rowsSelected();
+        if(rows.length==0)
+            return false; 
+
+        jQuery("#dialog-form").html("").css("display","none");
+        jQuery("#dialog-form").load("form_move.html", function() {                        
+            
+            jQuery("#form_data #messageForm").html("Con esta opción moveremos de grupo un dispositivo");
+            jQuery("#form_data #source").val(type_host);
+            jQuery("#form_data #hosts").val(rows);
+            
+            jQuery.post('call/json/getNetgroups',{ type_host: type_host }, function(result) {
+				for(r=0;r<result.response.length;r++){
+					$("#netgroup").append('<option value="'+result.response[r]+'">'+result.response[r]+'</option>');
+				}
+                jQuery("#dialog-form").dialog({
+                    resizable: false,
+                    modal: true,
+                    width: 350,
+                    title: "Mover Dispositivo"
+                }).dialog('option', 'position', [x, y]);                        
+            });               
+        });
+    }
 
 </script>
 

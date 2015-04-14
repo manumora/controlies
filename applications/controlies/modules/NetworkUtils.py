@@ -241,7 +241,6 @@ def getUsableTCPPort(address,port):
 
 
 def startup(address,broadcast):
-
     addr_byte = address.split(':')
     hw_addr = struct.pack('BBBBBB', int(addr_byte[0], 16),
       int(addr_byte[1], 16),
