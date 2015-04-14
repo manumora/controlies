@@ -2,6 +2,7 @@ controlies (0.6.6-12) unstable; urgency=low
 
   * Nuevo netgroup hardware
   * Mover dispositivos entre netgroups
+  * Detecta usuarios logueados en thinclients
 
  -- Manuel Mora Gordillo <manuito@gmail.com>  Tue, 14 Abr 2015 09:04:00 +0200
 

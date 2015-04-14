@@ -36,21 +36,29 @@ loginname = ''
 def getLoginName():
     global loginname
     data = pwd.getpwuid(os.getuid())
-    if loginname == '' and "profesor" in data[5]:
+    hostname=""
+    thinclient="False"
+    if loginname == '':
         loginname = data[0]
+        if "profesor" in data[5]:
+            hostname = getHostName()
+        else:
+            h = subprocess.Popen(["who | grep '"+loginname+"' | awk '{ print $5}'"],shell=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT).communicate()[0]
+            hostname = h.replace("(","").replace(")","").replace(".local","").rstrip()
+            thinclient="True"
 
-    return loginname
+    return {'loginname':loginname, 'hostname':hostname, "thinclient":thinclient}
 
 import socket
 def getHostName():
     return socket.gethostname()
 
 def isActive():
-    logged = subprocess.Popen(["users"],
-                              stdout=subprocess.PIPE).communicate()[0]
+    logged = subprocess.Popen(["users"], stdout=subprocess.PIPE).communicate()[0]
     loggedusers = logged.split()
-    user = getLoginName()
-    active = user in loggedusers
+    #user = getLoginName()
+    #active = user["loginname"] in loggedusers
+    active = loginname in loggedusers
 
     return active
 
@@ -100,10 +108,11 @@ class ZeroconfService:
 
 
 if __name__ == "__main__":
-    USERNAME = getLoginName()
-    HOSTNAME = getHostName()
-
-    service = ZeroconfService(stype = "_controlies._udp", port = "3000", name = USERNAME + '@' + HOSTNAME, text = ["hostname=" + HOSTNAME])       
+    data = getLoginName()
+    USERNAME = data["loginname"]
+    HOSTNAME = data["hostname"]
+    THINCLIENT = data["thinclient"]
+    service = ZeroconfService(stype = "_controlies._udp", port = "3000", name = USERNAME + '@' + HOSTNAME, text = ["hostname=" + HOSTNAME, "thinclient=" + THINCLIENT ])
     service.publish()
     reactor.callWhenRunning(checkActivity)
     reactor.run()
