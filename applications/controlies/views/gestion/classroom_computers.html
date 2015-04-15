@@ -60,6 +60,11 @@
             .button({ icons: { primary: "ui-icon-play"}})
             .click(function(){ execCommandClassroom() });     
 
+        $( "#infoComputer" )
+            .css("font-size","11px")        
+            .button({ icons: { primary: "ui-icon-play"}})
+            .click(function(){ infoComputer() });    
+
         $( "#classroomDetails" )
             .css("font-size","11px")        
             .button({ icons: { primary: "ui-icon-circle-close"}})
@@ -219,6 +224,31 @@
 		});		
 	}
 
+	function infoComputer(){
+		var selected = computersSelected();
+		if(selected.length==0){
+			modalAlert("Para realizar la acci&oacute;n debe seleccionar al menos un equipo");
+			return;
+		}
+	
+		jQuery("#dialog-form-pupils").html("").css("display","none");
+		jQuery("#dialog-form-pupils").load("infoComputers.html", function(data) {				
+	                                       
+            x = (jQuery(window).width()-750)/2;
+            y = (jQuery(window).height()-500)/2;
+    
+            jQuery("#messageLoading").hide();
+    
+            jQuery("#dialog-form-pupils").dialog({
+		position: { my: "center top+15%", at: "top", of: window},
+                resizable: false,
+                modal: true,
+                width: 750,
+                title: "Información",
+                close: function(ev, ui) { web2py_websocket_stop(); },
+            });            
+		});		
+	}
 
 </script>
 <input type="hidden" name="classroom" id="classroom"/>
@@ -252,7 +282,10 @@
 		        </tr>-->
 		        <tr>
 		            <td style="text-align:center;"><button id="execCommandClassroom" style="width:123px;">Ej. comando</button></td>
-		        </tr>       
+		        </tr>      
+		        <tr>
+		            <td style="text-align:center;"><button id="infoComputer" style="width:123px;">Información</button></td>
+		        </tr>   
 		    </table>
 		</div>
 	    </div>

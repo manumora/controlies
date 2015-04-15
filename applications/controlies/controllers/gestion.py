@@ -541,7 +541,24 @@ def executeCommandLaptop():
         return dict(response="fail", host=request.vars["host"], message="Surgió un error")"""
 
     return dict(response="OK", host=request.vars["host"], message="")
- 
+
+@service.json  
+@auth.requires_login()   
+def getInfoComputers():
+    try:
+        server = xmlrpclib.ServerProxy("http://ldap:6969")
+        data = server.get_data_laptops(request.vars["host"])
+    except:
+        data = []
+        pass
+
+    if not data:
+        WS.websocket_send('http://ldap:8888','<br><span style="font-size:14pt;">'+request.vars["host"]+'</span><br> No hay información ¿El equipo está conectado?<br>','mykey','mygroup')
+    else:
+        WS.websocket_send('http://ldap:8888','<br><span style="font-size:14pt;">'+request.vars["host"]+'</span><br> -Conectado a: '+data[0]["proxy"]+'<br> -IP: '+data[0]["ip"]+'<br>','mykey','mygroup')
+
+    return dict(response="OK", host=request.vars["host"], message="")
+
 @auth.requires_login()
 def config():
 
@@ -709,6 +726,9 @@ def execCommand():
     return dict()
 
 def execCommandClassroom():
+    return dict()
+
+def infoComputers():
     return dict()
 
 def form_chat():
