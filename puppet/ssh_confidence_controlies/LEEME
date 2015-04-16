@@ -1,5 +1,6 @@
 Descripción:
-	Establecer relaciones de confianza entre el servidor LDAP y el resto de equipos para que controlIES pueda ejecutar instrucciones en equipos remotos de forma segura.
+	Establecer relaciones de confianza entre el servidor LDAP y el resto de equipos para que controlIES pueda 
+	ejecutar instrucciones en equipos remotos de forma segura.
 
 Instrucciones:
 
