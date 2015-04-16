@@ -1,3 +1,6 @@
+Descripción:
+	Establecer relaciones de confianza entre el servidor LDAP y el resto de equipos para que controlIES pueda ejecutar instrucciones en equipos remotos de forma segura.
+
 Instrucciones:
 
 1) Al entrar en ControlIES se generarán las claves pública y privada:
