@@ -501,16 +501,18 @@ def executeCommandLaptop():
         pass
 
     try:
-	proxy = data[0]["proxy"]
-	ip = data[0]["ip"]
+        proxy = data[0]["proxy"]
+        ip = data[0]["ip"]
     except:
-	return dict(response="fail", host=request.vars["host"], message="No se pudo conectar. ¿Está encendido el equipo?")
+        WS.websocket_send('http://ldap:8888','<span style="font-size:14pt;">'+request.vars["host"]+'</span><br>No se pudieron obtener los datos de conexión del equipo, ¿está encendido?','mykey','mygroup')
+        return dict()
 
     c = SSHConnection(proxy,"root","")
     response = c.connectWithoutPass("/var/web2py/applications/controlies/.ssh/id_rsa")
 
     if response != True:
-        return dict(response="fail", host=request.vars["host"], message="No se pudo conectar. ¿Has establecido la relación de confianza con el servidor de aula?<br/>")
+        WS.websocket_send('http://ldap:8888','<span style="font-size:14pt;">'+request.vars["host"]+'</span><br>No se pudo conectar con el servidor de aula. ¿Has establecido la relación de confianza?','mykey','mygroup')
+        return dict()
 
     channel = c.exec_command('/usr/bin/python /usr/share/controlies-ltspserver/remoteCommand.py '+ip+' "'+request.vars["command"]+'" '+request.vars["host"])
 
@@ -525,22 +527,15 @@ def executeCommandLaptop():
 
         rl, wl, xl = select.select([channel], [], [], 0.0)
         if len(rl) > 0:
-            print channel.recv(1024)
+            if channel.recv(1024).rstrip().strip()=="no_ssh":
+                WS.websocket_send('http://ldap:8888','El servidor de aula no pudo conectar con el equipo. ¿Has establecido la relación de confianza?','mykey','mygroup')
+                break                
 
-    """try:
-        server = xmlrpclib.ServerProxy("http://localhost:6969")
-        data = server.get_data_laptops(request.vars["host"])
-    except:
-        pass
-
-    try:
-        server = xmlrpclib.ServerProxy("http://"+data[0]["proxy"]+":6800")
-        s = server.exec_command_laptop(data[0]["ip"],request.vars["command"])
-        return dict(response="OK", host=request.vars["host"], message=s)
-    except:
-        return dict(response="fail", host=request.vars["host"], message="Surgió un error")"""
-
-    return dict(response="OK", host=request.vars["host"], message="")
+            if channel.recv(1024).rstrip().strip()=="no_websocket":
+                WS.websocket_send('http://ldap:8888','<span style="font-size:14pt;">'+request.vars["host"]+'</span><br>El equipo no pudo conectar por websocket','mykey','mygroup')
+                break   
+                
+    return dict()
 
 @service.json  
 @auth.requires_login()   
