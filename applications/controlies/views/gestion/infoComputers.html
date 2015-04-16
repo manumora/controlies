@@ -3,7 +3,7 @@
     $(function() {
         $("#cancelButton")
             .button({ icons: { primary: "ui-icon-close"}})
-            .click( function(){ $('#dialog-form').dialog('close'); });
+            .click( function(){ $('#dialog-form-pupils').dialog('close'); });
 
 	try {            
     	 if(!web2py_websocket('ws://ldap:8888/realtime/mygroup',function(e){
