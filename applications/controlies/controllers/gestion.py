@@ -351,8 +351,6 @@ def getLaptopsPupils():
 @service.json   
 @auth.requires_login()    
 def getLTSPStatus():
-
-
     try:
         rpcServer = xmlrpclib.ServerProxy("http://localhost:6969", allow_none=True)
     except:

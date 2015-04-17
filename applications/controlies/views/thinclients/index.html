@@ -46,10 +46,11 @@
                     }
                 },
                 
-                colNames:['Nombre','Mac','Usuario','Num Serie'],
+                colNames:['Nombre','Mac','IP','Usuario','Num Serie'],
                 colModel:[ 
                     {name:'cn',index:'cn', width:60, align:"center"},
-                    {name:'mac',index:'mac', width:120, align:"center"},
+                    {name:'mac',index:'mac', width:80, align:"center"},
+                    {name:'ip',index:'ip', width:80, align:"center"},
                     {name:'username',index:'username', width:100, align:"center"},
                     {name:'serial',index:'serial', width:150, align:"center"}
                 ], 
@@ -90,6 +91,14 @@
                     buttonicon :'ui-icon-trash',
                     onClickButton : function (){ 
                         deleteRecord();
+                } 
+            }); 
+            jQuery("#list").jqGrid('navButtonAdd','#pager',{
+                    caption: "", 
+                    title: "Asignar IP",
+                    buttonicon :'ui-icon-tag',
+                    onClickButton : function (){ 
+                        assignIP();
                 } 
             }); 
             jQuery("#list").jqGrid('navButtonAdd','#pager',{
@@ -148,19 +157,16 @@
         	jQuery("#form_data #name").attr("readonly","true");
         	jQuery("#form_data #name").css("background-color","#DDD");
             jQuery("#form_data #messageForm").html("Todos los campos son obligatorios");                                     
-    
-            x = (jQuery(window).width()-300)/2;
-            y = (jQuery(window).height()-500)/2;
-    
+        
             jQuery("#messageLoading").hide();
     
             jQuery("#dialog-form").dialog({
+		position: { my: "center top+15%", at: "top", of: window},
                 resizable: false,
-                position: top,
                 modal: true,
                 width: 300,                     
                 title: "Añadir Equipo Alumno"
-            }).dialog('option', 'position', [x, y]);
+            });
         });
     }
     
@@ -187,23 +193,22 @@
 
                 jQuery("#form_data #name").val(result.response['cn']);
                 jQuery("#form_data #mac").val(result.response['mac']);       
+                jQuery("#form_data #ip").val(result.response['ip']);       
                 jQuery("#form_data #serial").val(result.response['serial']);                
                 jQuery("#form_data #username").val(result.response['username']);
                 jQuery("#form_data #type").val(kindComputer(result.response['cn']));                                                      				
 
 				mostrarCampos();
-
-                x = (jQuery(window).width()-300)/2;
-                y = (jQuery(window).height()-500)/2;
                 
                 jQuery("#messageLoading").hide();
                 
                 jQuery("#dialog-form").dialog({
+	 	    position: { my: "center top+15%", at: "top", of: window},
                     resizable: false,
                     modal: true,
                     width: 300,
                     title: "Modificar Equipo Alumno"
-                }).dialog('option', 'position', [x, y]);                        
+                });
             });               
         });
     }
@@ -238,7 +243,28 @@
 		a = name.split("-");
 		return a[1].substring(0, 1);		
 	}
-	
+
+
+    function assignIP(){
+    	ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+        jQuery("#messageLoading").show();
+    
+        jQuery("#dialog-form").html("").css("display","none");
+        jQuery("#dialog-form").load("assignIP.html", function() {    		
+
+            jQuery("#form_data #messageForm").html("Con esta opción asignaremos direcciones IP consecutivas a partir<br> de una dada a los equipos de las aulas seleccionadas.");
+            jQuery("#messageLoading").hide();
+    
+            jQuery("#dialog-form").dialog({
+		position: { my: "center top+15%", at: "top", of: window},
+                resizable: false,
+                modal: true,
+                width: 600,                     
+                title: "Asignar IPs a equipos"
+            });
+        });	
+	}	
+
     function moveRecord(){
     	ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
         jQuery("#messageLoading").show();

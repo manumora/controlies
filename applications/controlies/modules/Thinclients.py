@@ -35,12 +35,13 @@ class Thinclients(object):
     def __init__(self):
         pass
     
-    def __init__(self,ldap,name,mac,serial,username):
+    def __init__(self,ldap,name,mac,serial,username,ip=""):
         self.ldap = ldap
         self.name = name
         self.mac = mac
         self.serial = serial
         self.username = username
+        self.ip = ip
 
     def validation(self,action):
         
@@ -120,7 +121,7 @@ class Thinclients(object):
         if args['sord'] == "asc":
             reverseSort = True
         
-        search = self.ldap.search("cn=THINCLIENTS,cn=DHCP Config","cn=*",["cn","dhcpHWAddress","uniqueIdentifier","dhcpComments"])
+        search = self.ldap.search("cn=THINCLIENTS,cn=DHCP Config","cn=*",["cn","dhcpHWAddress","uniqueIdentifier","dhcpComments","dhcpStatements"])
         filter="(|(dhcpOption=*subnet*)(dhcpOption=*log*))"
         rows = []
 
@@ -144,12 +145,16 @@ class Thinclients(object):
         except:
             serial_search = ""
 
+        try:
+            ip_search = args["ip"] or ""
+        except:
+            ip_search = ""
+
         # esto hay que cambiarlo: tenemos 4 groups en thinclientes
         for i in search[6:len(search)]:
             if len(i[0][0].split(","))>6:
             
                 host = i[0][1]["cn"][0]
-                
                 try:
                     mac = i[0][1]["dhcpHWAddress"][0].replace("ethernet","").strip()
                 except:
@@ -165,15 +170,24 @@ class Thinclients(object):
                 except:
                     serial = ""
 
-                if ((host_search != "" and host.find(host_search)>=0) or (host_search=="")) and ((mac_search != "" and mac.find(mac_search)>=0) or (mac_search=="")) and ((serial_search != "" and serial.find(serial_search)>=0) or (serial_search=="")) and ((user_search != "" and username.find(user_search)>=0) or (user_search=="")):
+                try:
+                    matching = [s for s in i[0][1]["dhcpStatements"] if "fixed-address" in s]
+                    ip=""
+                    if matching:
+                    	ip=matching[0].replace("fixed-address ","")
+                except:
+                    ip = ""
+
+                if ((host_search != "" and host.find(host_search)>=0) or (host_search=="")) and ((mac_search != "" and mac.find(mac_search)>=0) or (mac_search=="")) and ((ip_search != "" and ip.find(ip_search)>=0) or (ip_search=="")) and ((serial_search != "" and serial.find(serial_search)>=0) or (serial_search=="")) and ((user_search != "" and username.find(user_search)>=0) or (user_search=="")):# and ((ip_search != "" and ip.find(ip_search)>=0) or (ip_search=="")):
     				nodeinfo=i[0][0].replace ("cn=","").split(",")
     				row = {
     					"id":host, 
-    					"cell":[host, mac, username, serial],
+    					"cell":[host, mac,ip , username, serial],
     					"cn":host,
     					"dhcpHWAddress":mac,
-                        "uniqueIdentifier":username,
-                        "serial":serial
+    					"ip":ip,
+    					"uniqueIdentifier":username,
+    					"serial":serial,
     				}             
     				rows.append(row)
 
@@ -201,16 +215,17 @@ class Thinclients(object):
             self.newGroup(classroom)
 
         if self.getTypeComputer()=="o":
-    		attr = [
-    		('objectclass', ['top','dhcpHost']),
-    		('cn', [self.name] ),
-    		('dhcpStatements', ['filename "/var/lib/tftpboot/ltsp/i386/pxelinux.0"'] ), 
-    		('dhcpHWAddress', ['ethernet ' + self.mac] )
-    		]		
+            attr = [
+            ('objectclass', ['top','dhcpHost']),
+            ('cn', [self.name] ),
+            ('dhcpStatements', ['filename "/var/lib/tftpboot/ltsp/i386/pxelinux.0"','fixed-address ' + self.ip] ), 
+            ('dhcpHWAddress', ['ethernet ' + self.mac] )
+            ]		
         else:
             attr = [
             ('objectclass', ['top','dhcpHost','lisPerson']),
             ('cn', [self.name] ),
+            ('dhcpStatements', ['fixed-address ' + self.ip] ), 
             ('dhcpComments', ['serial-number ' + self.serial] ), 
             ('dhcpHWAddress', ['ethernet ' + self.mac] ),
             ('uniqueIdentifier', ['user-name ' + self.username]),
@@ -222,12 +237,15 @@ class Thinclients(object):
         
     def modify(self):
         if self.getTypeComputer()=="o":
-            attr = [(ldap.MOD_REPLACE, 'dhcpHWAddress', ['ethernet ' + self.mac])]
+            attr = [(ldap.MOD_REPLACE, 'dhcpHWAddress', ['ethernet ' + self.mac]),
+            (ldap.MOD_REPLACE, 'dhcpStatements', ['filename "/var/lib/tftpboot/ltsp/i386/pxelinux.0"', 'fixed-address ' + self.ip])
+            ]
         else:
             attr = [
             (ldap.MOD_REPLACE, 'dhcpHWAddress', ['ethernet ' + self.mac] ),
             (ldap.MOD_REPLACE, 'dhcpComments', ['serial-number ' + self.serial] ),      
-            (ldap.MOD_REPLACE, 'uniqueIdentifier', ['user-name ' + self.username] )       
+            (ldap.MOD_REPLACE, 'uniqueIdentifier', ['user-name ' + self.username] ),
+            (ldap.MOD_REPLACE, 'dhcpStatements', ['fixed-address ' + self.ip])
             ]
             
         self.ldap.modify("cn="+self.name+",cn="+self.getGroup()+",cn=THINCLIENTS,cn=DHCP Config", attr)            
@@ -235,6 +253,15 @@ class Thinclients(object):
 
     def modifyUser(self):
         attr = [(ldap.MOD_REPLACE, 'uniqueIdentifier', ['user-name ' + self.username])]
+        self.ldap.modify("cn="+self.name+",cn="+self.getGroup()+",cn=THINCLIENTS,cn=DHCP Config", attr)
+        return "OK"
+
+    def modifyIP(self):
+        if self.getTypeComputer()=="o":
+            attr = [(ldap.MOD_REPLACE, 'dhcpStatements', ['filename "/var/lib/tftpboot/ltsp/i386/pxelinux.0"', 'fixed-address ' + self.ip])]
+        else:
+            attr = [(ldap.MOD_REPLACE, 'dhcpStatements', ['fixed-address ' + self.ip])]
+
         self.ldap.modify("cn="+self.name+",cn="+self.getGroup()+",cn=THINCLIENTS,cn=DHCP Config", attr)
         return "OK"
 
@@ -289,7 +316,7 @@ class Thinclients(object):
 
     def getHostData(self):
         g = self.getGroup()
-        result = self.ldap.search("cn="+g+",cn=THINCLIENTS,cn=DHCP Config","cn="+self.name,["cn","dhcpHWAddress","dhcpComments","uniqueIdentifier"])
+        result = self.ldap.search("cn="+g+",cn=THINCLIENTS,cn=DHCP Config","cn="+self.name,["cn","dhcpHWAddress","dhcpComments","uniqueIdentifier","dhcpStatements"])
 
         serial=""
         username=""
@@ -304,9 +331,18 @@ class Thinclients(object):
             except:
                 username = ""
 
+        try:
+            matching = [s for s in result[0][0][1]["dhcpStatements"] if "fixed-address" in s]
+            ip=""
+            if matching:
+                ip=matching[0].replace("fixed-address ","")
+        except:
+            ip = ""
+
         dataHost = {
             "cn":self.name,
             "mac":result[0][0][1]["dhcpHWAddress"][0].replace("ethernet","").strip(),
+            "ip":ip,
             "serial":serial,
             "username":username
         }
@@ -317,7 +353,7 @@ class Thinclients(object):
         for g in groups['groups']:
             search = self.ldap.search("cn="+g+",cn=THINCLIENTS,cn=DHCP Config","cn="+self.name,["cn"])
             if len(search) == 1:
-			    return g
+                return g
             
         return "noGroup"
 
@@ -326,7 +362,8 @@ class Thinclients(object):
         groups = []
         search = self.ldap.searchOneLevel("cn=THINCLIENTS,cn=DHCP Config","cn=*",["cn"])
         for g in search:
-            groups.append (g[0][1]["cn"][0])
+            if g[0][1]["cn"][0]!="192.168.0.0":
+                groups.append (g[0][1]["cn"][0])
 
         return { "groups":groups }
 
@@ -344,7 +381,7 @@ class Thinclients(object):
         groups = self.getThinclientGroups()        
         for g in groups['groups']:
             if not self.groupOverflow(g,300):
-				return { "freeGroup":g }
+                return { "freeGroup":g }
 
         return { "freeGroup" : 'noFreeGroup' }
     

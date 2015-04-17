@@ -31,7 +31,7 @@ def list():
 @auth.requires_login()
 def modify():
     l=conecta()
-    h = Thinclients(l,request.vars['name'],request.vars['mac'],request.vars['serial'],request.vars['username'])
+    h = Thinclients(l,request.vars['name'],request.vars['mac'],request.vars['serial'],request.vars['username'],request.vars['ip'])
     response=h.process(request.vars['action'])
     l.close()
     return dict(response=response)
@@ -132,6 +132,35 @@ def saveAssignation():
             t = Thinclients(l,i,"","","")
             t.modifyUser();        
         j=j+1
+    return dict(response="OK")
+
+@service.json
+@auth.requires_login()
+def setIP():
+    try:
+        if (isinstance(request.vars["nodes[]"],str)):
+            nodes = [request.vars["nodes[]"]]
+        else:
+            nodes = request.vars["nodes[]"]          
+    except:
+        nodes = "None"
+
+    if not nodes:
+        return dict(response="no_groups_selected")
+
+    l=conecta()
+    for n in nodes:
+        c = Thinclients(l,"","","","").getAllComputersNode(n)
+        computers = sorted(c["computers"])
+        ip = request.vars["ip"]
+        for i in computers:
+            new_ip = "192.168.0."+str(ip)
+            if new_ip!="192.168.0.254":
+            	t = Thinclients(l,i,"","","",new_ip)
+            	t.modifyIP()
+
+            ip = int(ip)+1
+
     return dict(response="OK")
 
 @auth.requires_login()
@@ -273,7 +302,10 @@ def form_move():
 
 def assignComputers():
     return dict()
-    
+
+def assignIP():
+    return dict()
+  
 def call():
     """
     exposes services. for example:
