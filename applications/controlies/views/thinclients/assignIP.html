@@ -1,0 +1,88 @@
+<style>
+  #sortable { list-style-type: none; margin: 0; padding: 0; width: 100%; }
+  #sortable li { margin: 0 3px 3px 3px; padding: 0.1em; padding-left: 1.5em; font-size: 1em; height: 14px; }
+  #sortable li span { position: absolute; margin-left: -1.3em; }
+
+  #sortableStudents { list-style-type: none; margin: 0; padding: 0; width: 100%; }
+  #sortableStudents li { margin: 0 3px 3px 3px; padding: 0.1em; padding-left: 1.5em; font-size: 1em; height: 14px; }
+  #sortableStudents li span { position: absolute; margin-left: -1.3em; }  
+</style>
+
+<script language="javascript">
+
+    $(function() {
+		loadClassrooms();
+
+
+        $("#saveButton").button({ icons: { primary: "ui-icon-disk"}});
+        $("#cancelButton")
+            .button({ icons: { primary: "ui-icon-close"}})
+            .click( function(){ $('#dialog-form').dialog('close'); });
+    });
+    
+    function loadClassrooms(){
+		 jQuery.get("{{=URL(c='thinclients',f='call/json/getNodes')}}",		
+			function(data){		
+				jQuery.each(data.response, function(i,item){
+					jQuery("#nodes").append("<option value='"+item+"'>"+item+"</option>");
+				});
+			}
+		);  
+    }
+    
+    
+    function restartStyle(){
+        $("#form_data p span").css("color","black");
+        $('#message').html("");
+    }
+
+    function send(){
+    	ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+
+        restartStyle();
+        jQuery.post('call/json/setIP', jQuery("#form_data").serialize(), function(result) {
+            switch(result.response){
+                case "OK":{
+                    jQuery('#message').html("Operación realizada correctamente").css("color","green").effect("highlight", {"color":"yellow"}, 1000);
+					jQuery("#list").trigger("reloadGrid");					
+					setTimeout("$('#dialog-form').dialog('close')",1000);
+                    break;
+                }                
+                case "no_groups_selected":{
+                    jQuery('#message').html("No hay aulas seleccionadas").effect("slide");
+                    break;
+                }
+                case "fail":{
+                    jQuery('#message').html("Se produjo un error").effect("highlight", {"color":"yellow"}, 1000);
+                    break;
+                }
+                default:{
+                    jQuery('#'+result.response+"Tag").css("color","red");
+                    jQuery('#'+result.response).effect("highlight", {"color":"yellow"}, 1000).focus();
+                    jQuery('#message').html("Hay campos vacíos o incorrectos").effect("slide");
+                    break;
+                }
+            }
+        });
+
+        return false;
+    }
+</script>
+
+<form id="form_data" onsubmit="return send();">
+	<table style="width: 100%;">
+		<tr>
+			<td style="width:20%;">
+				Aulas<br>
+				<select id="nodes" name="nodes[]" multiple="multiple" size=20 style="height:100%"></select>
+			</td>
+			<td>
+				A partir de la IP<br>192.168.0.
+				<select id="ip" name="ip">{{ for i in range(1, 254):}} <option> {{= i }}</option>{{pass}}</select>
+			</td>
+		</tr>
+	</table>
+    <div id="message" style="text-align:center; font-weight:bold; color:red; padding:3px; "></div>
+    <div style="text-align:center;"><button id="saveButton" type="submit" style="width:100px;">Asignar</button>&nbsp;&nbsp;<button type="button" id="cancelButton" style="width:100px;">Cancelar</button></div>
+    <p style="padding-top:10px; text-align:center; font-size:10px;" id="messageForm"></p>       
+</form>
