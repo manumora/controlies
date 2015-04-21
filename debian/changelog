@@ -1,3 +1,9 @@
+controlies (0.6.6-15) unstable; urgency=low
+
+  * Mover multiples equipos de aula
+
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Tue, 21 Abr 2015 13:47:00 +0200
+
 controlies (0.6.6-14) unstable; urgency=low
 
   * Asignar IP fija a thinclients

@@ -435,3 +435,18 @@ class Thinclients(object):
                 pass
 
         return { "computers":computers }
+
+    def findFreeGaps(self,node,type,startIN):
+        computers = []
+        freeGaps = []
+        search = self.ldap.searchOneLevel("cn="+node+",cn=THINCLIENTS,cn=DHCP Config","cn=*",["cn"])
+        if search:
+            for s in search:
+                computers.append (s[0][1]["cn"][0])
+        
+        for r in range(int(startIN),51):
+            computer = node+"-"+type+str(r).zfill(2)
+            if computer not in computers:
+                freeGaps.append (computer)
+
+        return { "computers":computers, "freeGaps":freeGaps }

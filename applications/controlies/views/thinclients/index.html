@@ -256,7 +256,7 @@
             jQuery("#messageLoading").hide();
     
             jQuery("#dialog-form").dialog({
-		position: { my: "center top+15%", at: "top", of: window},
+				position: { my: "center top+15%", at: "top", of: window},
                 resizable: false,
                 modal: true,
                 width: 600,                     
@@ -269,34 +269,27 @@
     	ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
         jQuery("#messageLoading").show();
         
-        var rows = rowsSelected(1);
-        if(rows.length!=1)
+        var rows = rowsSelected();
+        if(rows.length==0)
             return false;
 
         jQuery("#dialog-form").html("").css("display","none");
         jQuery("#dialog-form").load("form_move.html", function() {                        
-            
-            jQuery("#form_data #action").val("modify");
+
             jQuery("#form_data #name").attr("readonly","true");
             jQuery("#form_data #name").css("background-color","#DDD");
-            jQuery("#form_data #messageForm").html("Con esta opción moveremos de aula un equipo<br>Si en el destino hay otro equipo con el mismo nombre se sobreescribirá<br>Todos los campos son obligatorios");
+            jQuery("#form_data #messageForm").html("Con esta opción moveremos los equipos seleccionados al aula de destino deseada.<br>Los equipos movidos se pueden colocar automáticamente en los huecos disponibles del aula destino<br>o pueden sobreescribir los equipos del aula destino de forma secuencial.<br>Ambos casos se realizarán a partir de un n&uacute;mero de puesto dado.<br>Si desea conservar un equipo que va a ser sobreescrito, se puede realizar un backup al aula a9999.");
             
-            jQuery.post('call/json/getHostData',{ name: rows[0] }, function(result) {
-
-                jQuery("#form_data #name").val(result.response['cn']);   
-
-                x = (jQuery(window).width()-350)/2;
-                y = (jQuery(window).height()-500)/2;
-                
-                jQuery("#messageLoading").hide();
-                
-                jQuery("#dialog-form").dialog({
-                    resizable: false,
-                    modal: true,
-                    width: 350,
-                    title: "Mover Equipo Alumno"
-                }).dialog('option', 'position', [x, y]);                        
-            });               
+            jQuery("#form_data #rows").val(rows);
+			jQuery("#messageLoading").hide();
+			
+			jQuery("#dialog-form").dialog({
+				position: { my: "center top+15%", at: "top", of: window},
+				resizable: false,
+				modal: true,
+				width: 600,
+				title: "Mover Equipos Alumnos"
+			});                                      
         });
     }
 

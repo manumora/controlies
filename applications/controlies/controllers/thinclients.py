@@ -55,28 +55,39 @@ def delete():
 @service.json
 @auth.requires_login()
 def move():
-	
-    if request.vars['classroom']=="aula":
-        return dict(response="classroom")
-    
-    if request.vars['computer']=="equipo":
-        return dict(response="computer")
-
-
-    cadena = request.vars['name'].split("-")
-    type = cadena[1][:1]
-
-    newName = "a"+request.vars['classroom'].zfill(2)+"-"+type+request.vars['computer'].zfill(2)
-  
+    rows = request.vars["rows"].split(",")
     l=conecta()
-    t1 = Thinclients(l,newName,"","","")
-    t1.delete()
+    if request.vars["action"]=="free_gap":
+        for r in rows:
+            cadena = r.split("-")
+            type = cadena[1][:1]
+            classroom = "a"+request.vars['classroom'].zfill(2)
+            newName = Thinclients(l,"","","","").findFreeGaps(classroom,type,request.vars['startIN'])["freeGaps"][0]
 
-    t2 = Thinclients(l,request.vars['name'],"","","")
-    response = t2.move(newName)
-    
+            Thinclients(l,r,"","","").move(newName)
+            
+    elif request.vars["action"]=="overwrite":
+        num_computer = int(request.vars['startIN'])
+        for r in rows:
+            cadena = r.split("-")
+            type = cadena[1][:1]
+            classroom = "a"+request.vars['classroom'].zfill(2)
+            computer = type+str(num_computer).zfill(2)
+            newName = classroom+"-"+computer
+
+            if r!=newName:				
+				if request.vars['backup']=="no":
+					Thinclients(l,newName,"","","").delete() # Borrar el destino para abrir hueco
+				else:
+					backup = Thinclients(l,"","","","").findFreeGaps("a9999",type,1)["freeGaps"][0]
+					Thinclients(l,newName,"","","").move(backup)
+
+				Thinclients(l,r,"","","").move(newName) # Mover el equipo a su nuevo destino
+
+				num_computer = num_computer+1
+            
     l.close()
-    return dict(response=response)
+    return dict(response="OK")
 
 @service.json
 @auth.requires_login()

@@ -44,13 +44,13 @@
 </script>
  
 <form id="form_data" onsubmit="return send();">
-    <input type="hidden" id="action" name="action"/>
+    <input type="hidden" id="rows" name="rows"/>
     <div>
 		<table width="100%">
-		<tr>
-			<td><span id="nameTag">Origen</span><br><input type="text" id="name" name="name" size="10" maxlength="10"/></td>
-			<td><span id="purposeTag">Destino</span><br><select id="classroom" name="classroom"><option value="aula">Aula</option>{{ for i in range(1,51):}}{{= OPTION(str(i),_value=i) }}{{pass}}</select><select id="computer" name="computer"><option value="equipo">Equipo</option>{{ for i in range(1,36):}}{{= OPTION(str(i),_value=i) }}{{pass}}</select></td>
-		</tr>
+			<tr><td><span id="purposeTag">Aula destino</span></td><td><select id="classroom" name="classroom">{{ for i in range(1,51):}}{{= OPTION(str(i),_value=i) }}{{pass}}</select></td></tr>
+			<tr><td>Acci&oacute;n</td><td><select id="action" name="action"><option value="free_gap" default="default">Colocar en huecos libres</option><option value="overwrite">Sobreescribir</option></select></td></tr>
+			<tr><td>A partir del puesto (inclusive)</td><td><select id="startIN" name="startIN">{{ for i in range(1,36):}}{{= OPTION(str(i),_value=i) }}{{pass}}</select></td></tr>
+			<tr><td>¿Backup de los equipos sobreescritos en aula a9999?</td><td><select id="backup" name="backup"><option value="si">S&iacute;</option><option value="no">No</option></select></td></tr>
 		</table>
     </div>
     <div id="message" style="text-align:center; font-weight:bold; color:red; padding:3px; "></div>
