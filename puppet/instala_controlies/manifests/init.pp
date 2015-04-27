@@ -1,7 +1,6 @@
-
 class instala_controlies {
 
-   $version="0.6.6-15"
+   $version="0.6.6-16"
    $paquete_client="controlies-client_${version}_all.deb"
    $paquete_ltspserver="controlies-ltspserver_${version}_all.deb"
    $paquete_thinclient="controlies-thinclient_${version}_all.deb"
@@ -11,7 +10,7 @@ class instala_controlies {
    #################################
    case $use {
         #Servidores ltsp
-        "ltsp-server", "ltsp-wheezy" : {
+        "ltsp-server", "ltsp-wheezy", "aulatic-profesor-wheezy" : {
                 file {"/opt/ltsp/i386/var/cache/$paquete_thinclient":
                         owner => root, group => root, mode => 755,
                         source => "puppet:///instala_controlies/$paquete_thinclient",
@@ -27,11 +26,29 @@ class instala_controlies {
                         notify => Exec["actualiza-imagen-controlies"]
                 }
 
-		exec { "actualiza-imagen-controlies":
-			command => "/usr/sbin/ltsp-update-image --arch i386",
-			refreshonly => true,
-		}
 
+
+                #El comando para actualizar la imagen de los thinclient difiere entre squeeze y wheezy
+        
+                case $use {
+                     "ltsp-wheezy", "aulatic-profesor-wheezy": {
+                         $comandoupdateimagen="/usr/sbin/ltsp-update-image"
+                     }
+
+                     "ltsp-server": {
+                         $comandoupdateimagen="/usr/sbin/ltsp-update-image --arch i386"
+                     }
+
+                     default: {
+                         $comandoupdateimagen="/usr/sbin/ltsp-update-image"
+                     }
+                }
+
+                exec { "actualiza-imagen-controlies":
+                         command => "$comandoupdateimagen",
+                         refreshonly => true,
+                }
+ 
 		#################################
 		# Paquete ltspservers
 		#################################

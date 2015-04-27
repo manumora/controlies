@@ -15,16 +15,23 @@ then
 	if [ -e /usr/bin/facter ]
 	then
 	      use=$(facter | grep ^use | cut -d" " -f3)
-	      case $use in
-		   ltsp*) tipo="LTSP"
-		                  ;;
-		   work*) tipo="WORKSTATION"
-		                  ;;
-		   port*) tipo="PORTATIL"
-		                  ;;
-		   *) tipo="WORKSTATION"
-		                  ;;
-	      esac
+              case $use in
+                   # ltsp-wheezy, ltsp-squeeze
+                   ltsp*) tipo="LTSP"
+                   ;;
+                   # aulatic-profesor-wheezy -> otro tipo de ltsp.
+                   aula*) tipo="LTSP"
+                   ;;
+                   # workstation, workstation-wheezy
+                   work*) tipo="WORKSTATION"
+                   ;;
+                   # todos los tipos de portatil port*
+                   port*) tipo="PORTATIL"
+                   ;;
+                   # ante la duda, lo consideramos workstation
+                   *) tipo="WORKSTATION"
+                   ;;
+              esac
 	fi
 
 	#Si es un LTSP, debemos saber si es profesor, ya que los alumnos tambien hacen login (indirectamente) en el equipo del profesor

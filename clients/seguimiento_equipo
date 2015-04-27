@@ -13,14 +13,20 @@ then
 	then
 	      use=$(facter | grep ^use | cut -d" " -f3)
 	      use=${use:0:4}
-	      case $use in
-		   "ltsp") tipo="LTSP"
-		                  ;;
-		   "work") tipo="WORKSTATION"
-		                  ;;
-		   "port") tipo="PORTATIL"
-		                  ;;
-	      esac
+              case $use in
+                   # ltsp-wheezy, ltsp-squeeze
+                   "ltsp") tipo="LTSP"
+                   ;;
+                   # aulatic-profesor-wheezy -> otro tipo de ltsp
+                   "aula") tipo="LTSP"
+                   ;;
+                   # workstation, workstation-wheezy
+                   "work") tipo="WORKSTATION"
+                   ;;
+                   # todos los tipos de portatil port*
+                   "port") tipo="PORTATIL"
+                   ;;
+              esac
 	fi
 
 	#Hora ultimo arranque
@@ -42,7 +48,7 @@ then
 	update_result=$?
 
 	#Echo si está bloqueado el sistema de paquetes....
-	grep "/var/lib/dpkg/lock" /tmp/apt-get.log > /dev/null
+        grep -e "/var/lib/dpkg/lock" -e "/var/lib/apt/lists/lock" /tmp/apt-get.log > /dev/null
 	no_bloqueado=$?
 
 	if [ $no_bloqueado -ne 0 ]
