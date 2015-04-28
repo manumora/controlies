@@ -45,7 +45,7 @@ def newComputer(interface, protocol, name, type, domain, flags):
 		interface, protocol, name, type, domain, host, aprotocol, address, port, txt, flags = server.ResolveService(interface, protocol, name, type, domain, avahi.PROTO_UNSPEC, dbus.UInt32(0))
 		iface = siocgifname(interface)
 
-		if protocol == avahi.PROTO_INET and address!="192.168.0.254" and (iface=="eth0" or iface=="wlan0"):
+		if protocol == avahi.PROTO_INET and address!="192.168.0.254" and (iface=="eth0" or iface=="wlan0" or iface=="br0"):
 			rpcServer.append_computer(str(name), str(address))
 	except:
 		pass
@@ -60,9 +60,9 @@ def newStudent(interface, protocol, name, type, domain, flags):
 		iface = siocgifname(interface)
 		n = name.split(".")[0].split("@")
 
-		if protocol == avahi.PROTO_INET and address!="192.168.0.254" and (iface=="eth0" or iface=="wlan0"):
+		if protocol == avahi.PROTO_INET and address!="192.168.0.254" and (iface=="eth0" or iface=="wlan0" or iface=="br0"):
 			rpcServer.append_student(str(n[0]), str(n[1]), str(address))
-		elif protocol == avahi.PROTO_INET and address=="192.168.0.254" and iface=="eth0":
+		elif protocol == avahi.PROTO_INET and address=="192.168.0.254" and (iface=="eth0" or iface=="br0"):
 			thin = ''.join([chr(byte) for byte in txt[0]]).replace("thinclient=","")
 			if thin=="True":
 				rpcServer.append_student(str(n[0]), str(n[1]), str(address))
