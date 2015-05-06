@@ -16,6 +16,7 @@
     function send(){
     	ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
         restartStyle();
+
         jQuery.post('call/json/modify_user', jQuery("#form_data").serialize(), function(result) {
             //var result = $.parseJSON(data);
             switch(result.response){

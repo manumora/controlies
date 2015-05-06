@@ -65,8 +65,8 @@ def modify_user():
     l=conecta() 
     departments=[]
     classrooms=[]                
-    if 'multiselect_departments' in request.vars: departments = request.vars['multiselect_departments']
-    if 'multiselect_classrooms' in request.vars:classrooms = request.vars['multiselect_classrooms']
+    if 'departments[]' in request.vars: departments = request.vars['departments[]']
+    if 'classrooms[]' in request.vars:classrooms = request.vars['classrooms[]']
 
     u = Users(l,request.vars['type'],request.vars['name'],request.vars['surname'],request.vars['nif'],request.vars['user'],request.vars['password'],request.vars['password2'],departments,classrooms)
     response = u.process(request.vars['action'])

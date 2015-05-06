@@ -1,3 +1,9 @@
+controlies (0.6.6-18) unstable; urgency=low
+
+  * Bug multiselect en gestion de usuarios
+
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Wed, 6 May 2015 14:00:00 +0200
+
 controlies (0.6.6-17) unstable; urgency=low
 
   * Añado el interfaz br0 a avahiRoute

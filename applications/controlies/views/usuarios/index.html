@@ -122,7 +122,9 @@
                 }).dialog('option', 'position', [x, y]);
             });
     }
-    
+
+
+   
     function modifyRecord(){
 		ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
                     var uid;
@@ -161,13 +163,16 @@
                 if (result.response['photo']!='')
                     jQuery("#form_data #photo").attr("src","data:image/png;base64,"+result.response['photo']);                       
 
-                $.each(result.response['groups']['departments'], function(i, l){
-                    jQuery('#form_data input:checkbox[value='+l+']').attr('checked', true);                          
-                });
 
-                $.each(result.response['groups']['classrooms'], function(i, l){
-                    jQuery('#form_data input:checkbox[value='+l+']').attr('checked', true);                          
-                });                     
+				$("#form_data #departments").multiselect("widget").find(":checkbox").each(function(){
+					if(jQuery.inArray(this.value,result.response['groups']['departments'])>=0)
+						this.click();
+				});
+
+				$("#form_data #classrooms").multiselect("widget").find(":checkbox").each(function(){
+					if(jQuery.inArray(this.value,result.response['groups']['classrooms'])>=0)
+						this.click();
+				});
 
                 x = (jQuery(window).width()-350)/2;
                 y = (jQuery(window).height()-500)/2;
@@ -178,7 +183,11 @@
                     resizable: false,
                     modal: true,
                     width: 350,
-                    title: "Modificar Usuario"
+                    title: "Modificar Usuario",
+					close: function(event, ui) {
+						$("#form_data #departments").multiselect("close");
+						$("#form_data #classrooms").multiselect("close");
+					}
                 }).dialog('option', 'position', [x, y]);                        
             });               
         });
@@ -220,8 +229,8 @@
             $.each( groups.classrooms, function(i, l){
                 jQuery("#form_data #classrooms").append("<option value='"+l+"'>"+l+"</option>");
              });                         
-            jQuery("#form_data #departments").multiselect(); 
-            jQuery("#form_data #classrooms").multiselect();                       
+            jQuery("#form_data #departments").multiselect({selectedList: 4}); 
+            jQuery("#form_data #classrooms").multiselect({selectedList: 4});                       
         });             
     }
 
