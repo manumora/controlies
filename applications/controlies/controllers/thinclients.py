@@ -12,7 +12,7 @@ def index():
 @service.json
 def getHostData():
     l=conecta()
-    h = Thinclients(l,request.vars['name'],"","","")
+    h = Thinclients(l,request.vars['name'])
     response = h.getHostData()    
     l.close()
     return dict(response=response)
@@ -21,7 +21,7 @@ def getHostData():
 @auth.requires_login()
 def list():
     l=conecta()
-    h = Thinclients (l,"","","","")
+    h = Thinclients (l)
     a=request.vars
     response = h.list(a)    
     l.close()
@@ -31,7 +31,7 @@ def list():
 @auth.requires_login()
 def modify():
     l=conecta()
-    h = Thinclients(l,request.vars['name'],request.vars['mac'],request.vars['serial'],request.vars['username'],request.vars['ip'])
+    h = Thinclients(l,request.vars['name'],request.vars['mac'],request.vars['macWlan'],request.vars['serial'],request.vars['username'],request.vars['ip'])
     response=h.process(request.vars['action'])
     l.close()
     return dict(response=response)
@@ -42,11 +42,11 @@ def delete():
     l=conecta()
     
     if(isinstance(request.vars['host[]'], str)):
-        t = Thinclients(l,request.vars['host[]'],"","","")
+        t = Thinclients(l,request.vars['host[]'])
         t.process("delete")
     else:
         for h in request.vars['host[]']:
-            t = Thinclients(l,h,"","","")
+            t = Thinclients(l,h)
             t.process("delete")
             
     l.close()
@@ -62,9 +62,9 @@ def move():
             cadena = r.split("-")
             type = cadena[1][:1]
             classroom = "a"+request.vars['classroom'].zfill(2)
-            newName = Thinclients(l,"","","","").findFreeGaps(classroom,type,request.vars['startIN'])["freeGaps"][0]
+            newName = Thinclients(l).findFreeGaps(classroom,type,request.vars['startIN'])["freeGaps"][0]
 
-            Thinclients(l,r,"","","").move(newName)
+            Thinclients(l,r).move(newName)
             
     elif request.vars["action"]=="overwrite":
         num_computer = int(request.vars['startIN'])
@@ -77,12 +77,12 @@ def move():
 
             if r!=newName:				
 				if request.vars['backup']=="no":
-					Thinclients(l,newName,"","","").delete() # Borrar el destino para abrir hueco
+					Thinclients(l,newName).delete() # Borrar el destino para abrir hueco
 				else:
-					backup = Thinclients(l,"","","","").findFreeGaps("a9999",type,1)["freeGaps"][0]
-					Thinclients(l,newName,"","","").move(backup)
+					backup = Thinclients(l).findFreeGaps("a9999",type,1)["freeGaps"][0]
+					Thinclients(l,newName).move(backup)
 
-				Thinclients(l,r,"","","").move(newName) # Mover el equipo a su nuevo destino
+				Thinclients(l,r).move(newName) # Mover el equipo a su nuevo destino
 
 				num_computer = num_computer+1
             
@@ -95,11 +95,11 @@ def removeAssigns():
     l=conecta()
     
     if(isinstance(request.vars['host[]'], str)):
-        t = Thinclients(l,request.vars['host[]'],"","","")
+        t = Thinclients(l,request.vars['host[]'])
         t.modifyUser()
     else:
         for h in request.vars['host[]']:
-            t = Thinclients(l,h,"","","")
+            t = Thinclients(l,h)
             t.modifyUser()
             
     l.close()
@@ -109,15 +109,21 @@ def removeAssigns():
 @auth.requires_login()
 def getNodes():
     l=conecta()
-    t = Thinclients(l,"","","","")
+    t = Thinclients(l)
     groups = t.getThinclientGroups()
-    return dict(response=sorted(groups["groups"]))
+
+    response=[]
+    for g in groups["groups"]:
+        print g
+        if (not "-wifi" in g) and (not "group" in g):
+            response.append(g)
+    return dict(response=sorted(response))
 
 @service.json
 @auth.requires_login()
 def getComputersNode():
     l=conecta()
-    t = Thinclients(l,"","","","")
+    t = Thinclients(l)
     computers = t.getAllComputersNode(request.vars['node'])
     return dict(response=sorted(computers["computers"]))
 
@@ -137,10 +143,10 @@ def saveAssignation():
     j=0
     for i in request.vars['computers[]']:
         try:
-            t = Thinclients(l,i,"","",request.vars['students[]'][j])            
+            t = Thinclients(l,i,username=request.vars['students[]'][j])            
             t.modifyUser();
         except:
-            t = Thinclients(l,i,"","","")
+            t = Thinclients(l,i)
             t.modifyUser();        
         j=j+1
     return dict(response="OK")
@@ -161,13 +167,13 @@ def setIP():
 
     l=conecta()
     for n in nodes:
-        c = Thinclients(l,"","","","").getAllComputersNode(n)
+        c = Thinclients(l).getAllComputersNode(n)
         computers = sorted(c["computers"])
         ip = request.vars["ip"]
         for i in computers:
             new_ip = "192.168.0."+str(ip)
             if new_ip!="192.168.0.254":
-            	t = Thinclients(l,i,"","","",new_ip)
+            	t = Thinclients(l,i,ip=new_ip)
             	t.modifyIP()
 
             ip = int(ip)+1
@@ -227,7 +233,7 @@ def databaseDumpExec():
 
     
     l=conecta()
-    t = Thinclients(l,"","","","")
+    t = Thinclients(l)
     result = t.getAllComputers()
     
     for c in result["computers"]:
@@ -262,7 +268,7 @@ def databaseDumpExec():
 @auth.requires_login()
 def findDuplicates():
     l=conecta()
-    t = Thinclients(l,"","","","")
+    t = Thinclients(l)
     result = t.getAllComputers()
     
     serials = []
@@ -318,11 +324,5 @@ def assignIP():
     return dict()
   
 def call():
-    """
-    exposes services. for example:
-    http://..../[app]/default/call/jsonrpc
-    decorate with @services.jsonrpc the functions to expose
-    supports xml, json, xmlrpc, jsonrpc, amfrpc, rss, csv
-    """
     session.forget()
     return service()

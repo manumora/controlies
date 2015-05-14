@@ -46,7 +46,7 @@
                     }
                 },
                 
-                colNames:['Nombre','Mac','IP','Usuario','Num Serie'],
+                colNames:['Nombre','Mac eth0','IP','Usuario','Num Serie'],
                 colModel:[ 
                     {name:'cn',index:'cn', width:60, align:"center"},
                     {name:'mac',index:'mac', width:80, align:"center"},
@@ -193,6 +193,7 @@
 
                 jQuery("#form_data #name").val(result.response['cn']);
                 jQuery("#form_data #mac").val(result.response['mac']);       
+                jQuery("#form_data #macWlan").val(result.response['macWlan']);       
                 jQuery("#form_data #ip").val(result.response['ip']);       
                 jQuery("#form_data #serial").val(result.response['serial']);                
                 jQuery("#form_data #username").val(result.response['username']);

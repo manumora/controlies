@@ -35,10 +35,11 @@ class Thinclients(object):
     def __init__(self):
         pass
     
-    def __init__(self,ldap,name,mac,serial,username,ip=""):
+    def __init__(self,ldap,name="",mac="",macWlan="",serial="",username="",ip=""):
         self.ldap = ldap
         self.name = name
         self.mac = mac
+        self.macWlan = macWlan
         self.serial = serial
         self.username = username
         self.ip = ip
@@ -57,15 +58,31 @@ class Thinclients(object):
 
         if not ValidationUtils.validMAC(self.mac):
             return "mac"                        
+
+        if self.macWlan!="":
+            if not ValidationUtils.validMAC(self.macWlan):
+                return "macWlan"
+
+            if self.mac == self.macWlan:
+                return "macWlanAlreadyExists"
         
-        if action == "add":                            
-            if self.existsMAC():
+        if action == "add":
+            if self.existsMAC(self.mac):
                 return "macAlreadyExists"
+
+            if self.macWlan!="":
+                if self.existsMAC(self.macWlan):
+                    return "macWlanAlreadyExists"
 
         elif action == "modify":
             if not self.equalMAC():
-				if self.existsMAC():
-					return "macAlreadyExists"
+                if self.existsMAC(self.mac):
+                    return "macAlreadyExists"
+
+            if self.macWlan!="":
+                if not self.equalMACWlan():
+                    if self.existsMAC(self.macWlan):
+                    	return "macWlanAlreadyExists"
 
         if self.username != "":
             u = Users(self.ldap,"","","","",self.username,"","","","")
@@ -122,7 +139,6 @@ class Thinclients(object):
             reverseSort = True
         
         search = self.ldap.search("cn=THINCLIENTS,cn=DHCP Config","cn=*",["cn","dhcpHWAddress","uniqueIdentifier","dhcpComments","dhcpStatements"])
-        filter="(|(dhcpOption=*subnet*)(dhcpOption=*log*))"
         rows = []
 
         try:
@@ -152,7 +168,7 @@ class Thinclients(object):
 
         # esto hay que cambiarlo: tenemos 4 groups en thinclientes
         for i in search[6:len(search)]:
-            if len(i[0][0].split(","))>6:
+            if len(i[0][0].split(","))>6 and not "wifi" in i[0][0].split(",")[1]:
             
                 host = i[0][1]["cn"][0]
                 try:
@@ -222,6 +238,18 @@ class Thinclients(object):
             ('dhcpHWAddress', ['ethernet ' + self.mac] )
             ]		
         else:
+            if not classroom+"-wifi" in groups['groups']:
+            	self.newGroup(classroom+"-wifi")
+
+            attr = [
+            ('objectclass', ['top','dhcpHost']),
+            ('cn', [self.name] ),
+            ('dhcpStatements', ['fixed-address ' + self.ip] ), 
+            ('dhcpHWAddress', ['ethernet ' + self.macWlan] ),
+            ]
+
+            self.ldap.add("cn="+self.name +",cn="+classroom+"-wifi"+",cn=THINCLIENTS,cn=DHCP Config", attr)
+
             attr = [
             ('objectclass', ['top','dhcpHost','lisPerson']),
             ('cn', [self.name] ),
@@ -230,17 +258,33 @@ class Thinclients(object):
             ('dhcpHWAddress', ['ethernet ' + self.mac] ),
             ('uniqueIdentifier', ['user-name ' + self.username]),
             ]
-                        
+
         self.ldap.add("cn="+self.name +",cn="+classroom+",cn=THINCLIENTS,cn=DHCP Config", attr)
             
         return "OK"
         
     def modify(self):
+        classroom = self.getClassroom()
+        groups = self.getThinclientGroups()
+
+        if not classroom in groups['groups']:
+            self.newGroup(classroom)
+
         if self.getTypeComputer()=="o":
             attr = [(ldap.MOD_REPLACE, 'dhcpHWAddress', ['ethernet ' + self.mac]),
             (ldap.MOD_REPLACE, 'dhcpStatements', ['filename "/var/lib/tftpboot/ltsp/i386/pxelinux.0"', 'fixed-address ' + self.ip])
             ]
         else:
+            if not classroom+"-wifi" in groups['groups']:
+            	self.newGroup(classroom+"-wifi")
+
+            attr = [
+            (ldap.MOD_REPLACE, 'dhcpHWAddress', ['ethernet ' + self.macWlan] ),
+            (ldap.MOD_REPLACE, 'dhcpStatements', ['fixed-address ' + self.ip])
+            ]
+
+            self.ldap.modify("cn="+self.name+",cn="+self.getGroup()+"-wifi,cn=THINCLIENTS,cn=DHCP Config", attr)      
+
             attr = [
             (ldap.MOD_REPLACE, 'dhcpHWAddress', ['ethernet ' + self.mac] ),
             (ldap.MOD_REPLACE, 'dhcpComments', ['serial-number ' + self.serial] ),      
@@ -260,6 +304,11 @@ class Thinclients(object):
         if self.getTypeComputer()=="o":
             attr = [(ldap.MOD_REPLACE, 'dhcpStatements', ['filename "/var/lib/tftpboot/ltsp/i386/pxelinux.0"', 'fixed-address ' + self.ip])]
         else:
+            attr = [
+            (ldap.MOD_REPLACE, 'dhcpStatements', ['fixed-address ' + self.ip])
+            ]
+            self.ldap.modify("cn="+self.name+",cn="+self.getGroup()+"-wifi,cn=THINCLIENTS,cn=DHCP Config", attr)      
+
             attr = [(ldap.MOD_REPLACE, 'dhcpStatements', ['fixed-address ' + self.ip])]
 
         self.ldap.modify("cn="+self.name+",cn="+self.getGroup()+",cn=THINCLIENTS,cn=DHCP Config", attr)
@@ -269,6 +318,7 @@ class Thinclients(object):
         group = self.getGroup()
         if group != "noGroup":
             self.ldap.delete('cn='+ self.name +',cn='+group+',cn=THINCLIENTS,cn=DHCP Config')
+            self.ldap.delete('cn='+ self.name +',cn='+group+'-wifi,cn=THINCLIENTS,cn=DHCP Config')
 
         return "OK"     
 
@@ -279,6 +329,7 @@ class Thinclients(object):
 
         self.name= purpose
         self.mac= data['mac']
+        self.macWlan= data['macWlan']
         self.serial= data['serial']
         self.username= data['username']	
         self.add()
@@ -294,22 +345,28 @@ class Thinclients(object):
         
         return False
         
-    def existsMAC(self):     
+    def existsMAC(self, mac):     
         result = self.ldap.search("cn=THINCLIENTS,cn=DHCP Config","dhcpHWAddress=*",["dhcpHWAddress"])
         #for i in range (0, len(result) - 1):
         for i in range (0, len(result)):
-            if result [i][0][1]['dhcpHWAddress'][0].replace ("ethernet", "").strip() == self.mac:
+            if result [i][0][1]['dhcpHWAddress'][0].replace ("ethernet", "").strip() == mac:
 				return True
         
         return False
 
     def equalMAC(self):
-        result = self.ldap.search("cn=THINCLIENTS,cn=DHCP Config","cn="+self.name,["dhcpHWAddress"])
+        result = self.ldap.search("cn="+self.getGroup()+",cn=THINCLIENTS,cn=DHCP Config","cn="+self.name,["dhcpHWAddress"])
         if result[0][0][1]['dhcpHWAddress'][0].replace("ethernet", "").strip() == self.mac:
             return True
         
         return False
 
+    def equalMACWlan(self):
+        result = self.ldap.search("cn="+self.getGroup()+"-wifi,cn=THINCLIENTS,cn=DHCP Config","cn="+self.name,["dhcpHWAddress"])
+        if result[0][0][1]['dhcpHWAddress'][0].replace("ethernet", "").strip() == self.macWlan:
+            return True
+        
+        return False
        
     def getName (self):
         return self.mac   
@@ -320,6 +377,8 @@ class Thinclients(object):
 
         serial=""
         username=""
+        macWlan = ""
+
         if self.getTypeComputer()=="p":
             try:              
                 serial = result[0][0][1]["dhcpComments"][0].replace("serial-number","").strip()
@@ -330,6 +389,16 @@ class Thinclients(object):
                 username = result[0][0][1]["uniqueIdentifier"][0].replace("user-name","").strip()
             except:
                 username = ""
+
+            try:
+                result2 = self.ldap.search("cn="+g+"-wifi,cn=THINCLIENTS,cn=DHCP Config","cn="+self.name,["cn","dhcpHWAddress"])
+            except:
+                pass
+
+            try:
+                macWlan = result2[0][0][1]["dhcpHWAddress"][0].replace("ethernet","").strip()
+            except:
+                macWlan = ""
 
         try:
             matching = [s for s in result[0][0][1]["dhcpStatements"] if "fixed-address" in s]
@@ -342,6 +411,7 @@ class Thinclients(object):
         dataHost = {
             "cn":self.name,
             "mac":result[0][0][1]["dhcpHWAddress"][0].replace("ethernet","").strip(),
+            "macWlan":macWlan,
             "ip":ip,
             "serial":serial,
             "username":username
