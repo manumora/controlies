@@ -346,26 +346,35 @@ class Thinclients(object):
         return False
         
     def existsMAC(self, mac):     
-        result = self.ldap.search("cn=THINCLIENTS,cn=DHCP Config","dhcpHWAddress=*",["dhcpHWAddress"])
+        result = self.ldap.search("cn=THINCLIENTS,cn=DHCP Config","dhcpHWAddress=*",["cn","dhcpHWAddress"])
         #for i in range (0, len(result) - 1):
         for i in range (0, len(result)):
-            if result [i][0][1]['dhcpHWAddress'][0].replace ("ethernet", "").strip() == mac:
-				return True
+            if result[i][0][1]['dhcpHWAddress'][0].replace ("ethernet", "").strip()==mac and result[i][0][1]['cn'][0]!=self.name:
+                print result[i][0][1]['cn'][0]+" - "+self.name+" "+result[i][0][1]['dhcpHWAddress'][0].replace ("ethernet", "").strip()+"=="+mac
+                return True
         
         return False
 
     def equalMAC(self):
         result = self.ldap.search("cn="+self.getGroup()+",cn=THINCLIENTS,cn=DHCP Config","cn="+self.name,["dhcpHWAddress"])
-        if result[0][0][1]['dhcpHWAddress'][0].replace("ethernet", "").strip() == self.mac:
+        eth0 = result[0][0][1]['dhcpHWAddress'][0].replace("ethernet", "").strip()
+
+        if eth0 == self.mac:
             return True
         
         return False
 
     def equalMACWlan(self):
         result = self.ldap.search("cn="+self.getGroup()+"-wifi,cn=THINCLIENTS,cn=DHCP Config","cn="+self.name,["dhcpHWAddress"])
-        if result[0][0][1]['dhcpHWAddress'][0].replace("ethernet", "").strip() == self.macWlan:
+
+        try:
+            wlan0 = result[0][0][1]['dhcpHWAddress'][0].replace("ethernet", "").strip()
+        except:
+            wlan0 = ""
+
+        if wlan0 == self.macWlan:
             return True
-        
+
         return False
        
     def getName (self):
