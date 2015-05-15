@@ -152,6 +152,11 @@ class Thinclients(object):
             mac_search = ""
 
         try:
+            macWlan_search = args["macWlan"] or ""
+        except:
+            macWlan_search = ""
+
+        try:
             user_search = args["username"] or ""
         except:
             user_search = ""
@@ -166,15 +171,37 @@ class Thinclients(object):
         except:
             ip_search = ""
 
-        # esto hay que cambiarlo: tenemos 4 groups en thinclientes
+
+        macsWlan={}
+        for i in search[6:len(search)]:
+            if len(i[0][0].split(","))>6 and "wifi" in i[0][0].split(",")[1]:
+                try:
+                    macsWlan[i[0][1]["cn"][0]] = i[0][1]["dhcpHWAddress"][0].replace("ethernet","").strip()
+                except:
+                    pass
+
+
         for i in search[6:len(search)]:
             if len(i[0][0].split(","))>6 and not "wifi" in i[0][0].split(",")[1]:
-            
+           
                 host = i[0][1]["cn"][0]
+                """wlan0 = ""
+                for w in search[6:len(search)]:
+                    if w[0][0].split(",")[0]=="cn="+host and "wifi" in w[0][0].split(",")[1]:
+                        try:
+                            wlan0 = w[0][1]["dhcpHWAddress"][0].replace("ethernet","").strip()
+                        except:
+                            pass"""
+
                 try:
                     mac = i[0][1]["dhcpHWAddress"][0].replace("ethernet","").strip()
                 except:
                     mac = ""
+
+                try:
+                    macWlan = macsWlan[host]
+                except:
+                    macWlan = ""
 
                 try:
                     username = i[0][1]["uniqueIdentifier"][0].replace("user-name","").strip()
@@ -194,15 +221,16 @@ class Thinclients(object):
                 except:
                     ip = ""
 
-                if ((host_search != "" and host.find(host_search)>=0) or (host_search=="")) and ((mac_search != "" and mac.find(mac_search)>=0) or (mac_search=="")) and ((ip_search != "" and ip.find(ip_search)>=0) or (ip_search=="")) and ((serial_search != "" and serial.find(serial_search)>=0) or (serial_search=="")) and ((user_search != "" and username.find(user_search)>=0) or (user_search=="")):# and ((ip_search != "" and ip.find(ip_search)>=0) or (ip_search=="")):
+                if ((host_search != "" and host.find(host_search)>=0) or (host_search=="")) and ((mac_search != "" and mac.find(mac_search)>=0) or (mac_search=="")) and ((macWlan_search != "" and macWlan.find(macWlan_search)>=0) or (macWlan_search=="")) and ((ip_search != "" and ip.find(ip_search)>=0) or (ip_search=="")) and ((serial_search != "" and serial.find(serial_search)>=0) or (serial_search=="")) and ((user_search != "" and username.find(user_search)>=0) or (user_search=="")):# and ((ip_search != "" and ip.find(ip_search)>=0) or (ip_search=="")):
     				nodeinfo=i[0][0].replace ("cn=","").split(",")
     				row = {
     					"id":host, 
-    					"cell":[host, mac,ip , username, serial],
+    					"cell":[host, mac, macWlan, ip, username, serial],
     					"cn":host,
-    					"dhcpHWAddress":mac,
+    					"mac":mac,
+    					"macWlan":macWlan,
     					"ip":ip,
-    					"uniqueIdentifier":username,
+    					"username":username,
     					"serial":serial,
     				}             
     				rows.append(row)
