@@ -238,17 +238,7 @@ class Thinclients(object):
             ('dhcpHWAddress', ['ethernet ' + self.mac] )
             ]		
         else:
-            if not classroom+"-wifi" in groups['groups']:
-            	self.newGroup(classroom+"-wifi")
-
-            attr = [
-            ('objectclass', ['top','dhcpHost']),
-            ('cn', [self.name] ),
-            ('dhcpStatements', ['fixed-address ' + self.ip] ), 
-            ('dhcpHWAddress', ['ethernet ' + self.macWlan] ),
-            ]
-
-            self.ldap.add("cn="+self.name +",cn="+classroom+"-wifi"+",cn=THINCLIENTS,cn=DHCP Config", attr)
+            self.addWifiNode()
 
             attr = [
             ('objectclass', ['top','dhcpHost','lisPerson']),
@@ -262,7 +252,22 @@ class Thinclients(object):
         self.ldap.add("cn="+self.name +",cn="+classroom+",cn=THINCLIENTS,cn=DHCP Config", attr)
             
         return "OK"
-        
+
+    def addWifiNode(self):
+        classroom = self.getClassroom()
+        groups = self.getThinclientGroups()
+
+        if not classroom+"-wifi" in groups['groups']:
+            	self.newGroup(classroom+"-wifi")
+
+        attr = [
+        ('objectclass', ['top','dhcpHost']),
+        ('cn', [self.name] ),
+        ('dhcpStatements', ['fixed-address ' + self.ip] ), 
+        ('dhcpHWAddress', ['ethernet ' + self.macWlan] ),
+        ]
+        self.ldap.add("cn="+self.name +",cn="+classroom+"-wifi"+",cn=THINCLIENTS,cn=DHCP Config", attr)
+
     def modify(self):
         classroom = self.getClassroom()
         groups = self.getThinclientGroups()
@@ -278,12 +283,10 @@ class Thinclients(object):
             if not classroom+"-wifi" in groups['groups']:
             	self.newGroup(classroom+"-wifi")
 
-            attr = [
-            (ldap.MOD_REPLACE, 'dhcpHWAddress', ['ethernet ' + self.macWlan] ),
-            (ldap.MOD_REPLACE, 'dhcpStatements', ['fixed-address ' + self.ip])
-            ]
-
-            self.ldap.modify("cn="+self.name+",cn="+self.getGroup()+"-wifi,cn=THINCLIENTS,cn=DHCP Config", attr)      
+            if self.existsWifiNode():
+            	self.modifyWifiNode()
+            else:
+               self.addWifiNode()
 
             attr = [
             (ldap.MOD_REPLACE, 'dhcpHWAddress', ['ethernet ' + self.mac] ),
@@ -294,6 +297,20 @@ class Thinclients(object):
             
         self.ldap.modify("cn="+self.name+",cn="+self.getGroup()+",cn=THINCLIENTS,cn=DHCP Config", attr)            
         return "OK"
+
+    def modifyWifiNode(self):
+        classroom = self.getClassroom()
+        groups = self.getThinclientGroups()
+
+        if not classroom+"-wifi" in groups['groups']:
+            self.newGroup(classroom+"-wifi")
+
+        attr = [
+        (ldap.MOD_REPLACE, 'dhcpHWAddress', ['ethernet ' + self.macWlan] ),
+        (ldap.MOD_REPLACE, 'dhcpStatements', ['fixed-address ' + self.ip])
+        ]
+
+        self.ldap.modify("cn="+self.name+",cn="+self.getGroup()+"-wifi,cn=THINCLIENTS,cn=DHCP Config", attr)   
 
     def modifyUser(self):
         attr = [(ldap.MOD_REPLACE, 'uniqueIdentifier', ['user-name ' + self.username])]
@@ -344,13 +361,19 @@ class Thinclients(object):
             return True
         
         return False
+
+    def existsWifiNode(self):
+        result = self.ldap.search("cn="+self.getGroup()+"-wifi,cn=THINCLIENTS,cn=DHCP Config","cn="+self.name,["cn"])
+        if len(result) > 0:
+            return True
         
+        return False
+
     def existsMAC(self, mac):     
         result = self.ldap.search("cn=THINCLIENTS,cn=DHCP Config","dhcpHWAddress=*",["cn","dhcpHWAddress"])
         #for i in range (0, len(result) - 1):
         for i in range (0, len(result)):
             if result[i][0][1]['dhcpHWAddress'][0].replace ("ethernet", "").strip()==mac and result[i][0][1]['cn'][0]!=self.name:
-                print result[i][0][1]['cn'][0]+" - "+self.name+" "+result[i][0][1]['dhcpHWAddress'][0].replace ("ethernet", "").strip()+"=="+mac
                 return True
         
         return False
