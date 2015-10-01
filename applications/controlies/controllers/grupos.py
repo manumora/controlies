@@ -9,6 +9,20 @@ def index():
 @auth.requires_login()
 def list():
     l=conecta()
+    
+    # Corrige grupos con miembros vacios
+    """import applications.controlies.modules.Utils.LdapUtils as LdapUtils
+    response = LdapUtils.getClassroomGroupsWithUsers(l)
+    for i in response["classrooms"]:
+        list2 = [x for x in i[i.keys()[0]] if x]
+        if len(list2)>0:
+            users = ",".join(list2)
+            g = Groups(l,"school_class", i.keys()[0], users)
+            g.process("modify")    
+    """    
+    #return response
+    
+    
     g = Groups(l,"","","")
     a=request.vars
     response = g.list(a)
