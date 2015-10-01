@@ -118,10 +118,11 @@ class Groups(object):
 
 			if searchType == typeRow or searchType=="None":
 				try:
-					usersNumber = len(i[0][1]["memberUid"])
+					list2 = [x for x in i[0][1]["memberUid"] if x]
+					usersNumber = len(list2)
 				except:
 					usersNumber = 0
-					
+
 				row = {
 					"id":i[0][1]["cn"][0], 
 					"cell":[typeRow, i[0][1]["cn"][0], i[0][1]["gidNumber"][0], usersNumber],
@@ -170,6 +171,7 @@ class Groups(object):
 
 		rows = []
 		for i in groupData["memberuid"]:
+			if i=="": continue
 
 			u = Users(self.ldap,"","","","",i,"","","","")
 			userData = u.getUserData()
@@ -277,7 +279,8 @@ class Groups(object):
 
 		result = self.ldap.search("ou=Group","cn="+self.name,["cn","grouptype","memberuid"])
 
-		members = result[0][0][1]["memberUid"]
+		m = result[0][0][1]["memberUid"]
+		members = [x for x in m if x]
 		members.sort()
 
 		dataGroup = {
