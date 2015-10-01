@@ -1,3 +1,10 @@
+controlies (0.6.6-21) unstable; urgency=low
+
+  * Arreglo bug modulo grupos
+  * Oculta celdas vacias en grupos
+
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Thu, 1 Oct 2015 11:15:00 +0200
+
 controlies (0.6.6-20) unstable; urgency=low
 
   * Integro una nueva columna para mostrar las macs wlan de los portatiles
