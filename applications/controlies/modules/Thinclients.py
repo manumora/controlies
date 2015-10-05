@@ -552,17 +552,35 @@ class Thinclients(object):
     def getAllComputers(self):
         computers = []
         search = self.ldap.search("cn=THINCLIENTS,cn=DHCP Config","cn=*",["cn","uniqueIdentifier","dhcpComments","dhcpHWAddress"])
-        for g in search:
-            try:
-                computer = {
-                    "cn" : g[0][1]["cn"][0],
-                    "username": g[0][1]["uniqueIdentifier"][0],
-                    "serial": g[0][1]["dhcpComments"][0],
-                    "mac": g[0][1]["dhcpHWAddress"][0]
-                }
-                computers.append (computer)
-            except:
-                pass
+
+        macsWlan={}
+        for i in search[6:len(search)]:
+            if len(i[0][0].split(","))>6 and "wifi" in i[0][0].split(",")[1]:
+                try:
+                    macsWlan[i[0][1]["cn"][0]] = i[0][1]["dhcpHWAddress"][0].replace("ethernet","").strip()
+                except:
+                    pass
+
+        for i in search[6:len(search)]:
+            if len(i[0][0].split(","))>6 and not "wifi" in i[0][0].split(",")[1]:
+                group = i[0][0].split(",")[1].replace("cn=","")
+                try:
+                    result2 = self.ldap.search("cn="+group+"-wifi,cn=THINCLIENTS,cn=DHCP Config","cn="+i[0][1]["cn"][0],["cn","dhcpHWAddress"])
+                    macWlan = result2[0][0][1]["dhcpHWAddress"][0]
+                except:
+                    macWlan = ""
+
+                try:
+                    computer = {
+                        "cn" : i[0][1]["cn"][0],
+                        "username": i[0][1]["uniqueIdentifier"][0],
+                        "serial": i[0][1]["dhcpComments"][0],
+                        "mac": i[0][1]["dhcpHWAddress"][0],
+                        "macWlan": macWlan
+                    }
+                    computers.append (computer)
+                except:
+                    pass
 
         return { "computers":computers }
 

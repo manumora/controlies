@@ -259,6 +259,12 @@ class Laptops(object):
         
         return False
 
+    def updateMAC(self,mac,macWlan):
+        self.DB(self.DB.laptops.id_laptop==self.id_laptop).update(mac_eth0=mac,
+                                                                  mac_wlan0=macWlan)
+        self.DB.commit()
+        return "OK"
+
     def getLaptopData(self):
 		
         sql="SELECT l.id_laptop, l.serial_number, l.id_trademark, lt.trademark, lt.model, l.name, l.battery_sn, l.charger_sn, mac_eth0, mac_wlan0 "

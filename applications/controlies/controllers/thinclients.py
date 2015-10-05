@@ -114,7 +114,6 @@ def getNodes():
 
     response=[]
     for g in groups["groups"]:
-        print g
         if (not "-wifi" in g) and (not "group" in g):
             response.append(g)
     return dict(response=sorted(response))
@@ -216,44 +215,47 @@ def addHistory(l,username,id_laptop,computer_name):
 def databaseDumpExec():
     
     try:
-        if request.vars['massive_desasignation']=="ok":    
-            # Get all students asigned laptops    
-            sql="SELECT id_laptop FROM laptops_historical lh" 
+        if request.vars['massive_desasignation']=="ok":
+            # Get all students asigned laptops
+            sql="SELECT id_laptop FROM laptops_historical lh"
             sql=sql+" WHERE lh.id_state=2 AND lh.id_user_type=2"
             sql=sql+" AND lh.id_historical IN (SELECT MAX(lh2.id_historical) FROM laptops_historical lh2 WHERE lh2.id_laptop=lh.id_laptop)"
             sql=sql+" GROUP BY id_laptop"
             sql=sql+" ORDER BY id_laptop"
             result = cdb.executesql(sql)
-            
+
             for r in result:
-                lh = LaptopsHistory(cdb,"",r[0],1,"","","","","Desasignación masiva ControlIES")
+                lh = LaptopsHistory(cdb,"",r[0],1,"","","","","Desasignación masiva ControlIES","")
                 lh.add()
     except:
         pass
 
-    
     l=conecta()
     t = Thinclients(l)
     result = t.getAllComputers()
-    
+
     for c in result["computers"]:
         
         computer_name = c["cn"].strip()
         serial = c["serial"].replace("serial-number","").strip()
         username = c["username"].replace("user-name","").strip()
         mac = c["mac"].replace("ethernet","").strip()
-        
+        macWlan = c["macWlan"].replace("ethernet","").strip()
+
         if serial!="":        
-            lap = Laptops(cdb,"","","","","","","","")
-            id_laptop = lap.existsSerialNumber(serial)
+            id_laptop = Laptops(cdb,"","","","","","","","").existsSerialNumber(serial)
             if id_laptop:
                 addHistory(l,username,id_laptop,computer_name)
-                
+
+                lap = Laptops(cdb,id_laptop,"","","","","","","")
+                laptop = lap.getLaptopData()
+                if laptop["mac_eth0"]!=mac or laptop["mac_wlan0"]!=macWlan:
+                    lap.updateMAC(mac,macWlan)
+
             else: # Si no existe el portatil
                 try:
                     if request.vars['add_laptop']=="ok":  
-                        lap = Laptops(cdb,"", serial, "", "", "", "", mac, str(0))
-
+                        lap = Laptops(cdb,"", serial, "", "", "", "", mac, macWlan)
                         lap.add()
                         
                         addHistory(l,username,lap.getIdLaptop(),computer_name)

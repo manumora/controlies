@@ -21,3 +21,5 @@ div.section { clear: both; padding-top: 50px; }
 
 form p{ margin-bottom:10px; font-weight:bold;}
 form input{ border:1px solid #DDD; }
+
+.prueba{font-size:5px; size:5px; background-color:#000}

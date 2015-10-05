@@ -1,3 +1,10 @@
+controlies (0.6.6-22) unstable; urgency=low
+
+  * Cambios en informe dispositivos profesores
+  * Bugs en volcado masivo portatiles alumnos
+
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Mon, 5 Oct 2015 13:21:00 +0200
+
 controlies (0.6.6-21) unstable; urgency=low
 
   * Arreglo bug modulo grupos

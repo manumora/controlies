@@ -87,20 +87,35 @@ def report():
             count+=1            
     
     elif request.vars["report_type"]=="listado":
-        title = "Listado de portátiles"
-        
-        head = THEAD(TR(TH("Nombre y apellidos",_width="35%"), 
-                        TH("Marca/Modelo",_width="25%"),
-                        TH("Nº Serie",_width="40%"), 
+
+        title = "Listado de dispositivos"
+
+        html = """<table with='100%'>
+                    <thead>
+                    <tr><th>sdffsd</th><th></th><th></th></tr>
+                    </thead>
+                    <tbody>
+                    <tr><td>sdffsd</td><td></td><td></td></tr>
+                    <tr><td>sdffsd</td><td></td><td></td></tr>
+                    </tbody>
+                    </table>"""
+
+        head = THEAD(TR(TH("Nº",_width="5%"),
+                        TH("Nombre y apellidos",_width="30%"),
+                        TH("Marca/Modelo",_width="22%"),
+                        TH("Nº Serie",_width="30%"),
+                        TH("Estado",_width="13%"),
                         _bgcolor="#A0A0A0"))
-        
+
         rowsTable = []
         i=0;
         for r in rows:
             col = i % 2 and "#F0F0F0" or "#FFFFFF"
-            rowsTable.append(TR(TD(r["cn"]),
+            rowsTable.append(TR(TD(i+1),
+                           TD(r["cn"]),
                            TD(r["trademark"], _align="center"),
                            TD(r["serial_number"], _align="center"),
+                           TD(r["state"], _align="center"),
                            _bgcolor=col))
             i+=1 
 
@@ -129,7 +144,7 @@ def report():
                     
         pdf=MyFPDF()
         pdf.add_page()
-        pdf.write_html(str(XML(table, sanitize=False)))        
+        pdf.write_html('<font size="9">' +table.xml() + '</font>')
 
     response.headers['Content-Type']='application/pdf'
     doc=pdf.output(dest='S')
@@ -146,24 +161,27 @@ def getDataStudents(classroom):
     l.close()
 
     # Obtenemos los numeros de serie de los portatiles
-    sql = "SELECT lh.username, l.serial_number, lt.trademark, lt.model FROM laptops l" 
-    sql = sql+" LEFT JOIN laptops_historical lh ON l.id_laptop=lh.id_laptop"
-    sql = sql+" LEFT JOIN laptops_trademarks lt ON l.id_trademark=lt.id_trademark" 
-    sql = sql+" GROUP BY l.id_laptop ORDER BY lh.datetime desc"
+    sql = "SELECT lh.username, l.serial_number, lt.trademark, lt.model, st.state FROM laptops l, laptops_historical lh"
+    sql = sql+" LEFT JOIN laptops_trademarks lt ON l.id_trademark=lt.id_trademark"
+    sql = sql+" LEFT JOIN states st ON st.id_state=lh.id_state "
+    sql = sql+" WHERE lh.id_user_type=2 AND l.id_laptop=lh.id_laptop "
+    sql = sql+" AND lh.id_historical IN (SELECT MAX(lh2.id_historical) FROM laptops_historical lh2 WHERE lh2.id_laptop=l.id_laptop) "
+    sql = sql+" GROUP BY l.id_laptop ORDER BY lh.name asc"
     result = cdb.executesql(sql)
-
     serials={}
     for r in result:
         if str(r[0])!="":
-            serials[str(r[0])]={'serial':str(r[1]), 'trademark':str(r[2])+' - '+str(r[3])}
+            serials[str(r[0])]={'serial':str(r[1]), 'trademark':str(r[2])+' - '+str(r[3]), 'state':str(r[4].encode('utf-8'))}
 
     rows=[]
     for r in listUsers["rows"]:
         num=""
         trademark=""
+        state=" "
         if r["cell"][1] in serials:
             num = serials[r["cell"][1]]['serial']
             trademark = serials[r["cell"][1]]['trademark']
+            state = serials[r["cell"][1]]['state']
 
         if num=="":
             num = "                                              "
@@ -175,15 +193,17 @@ def getDataStudents(classroom):
         r["serial_number"]=num
         r["cell"].append(trademark)
         r["trademark"]=trademark
+        r["state"]=state
         rows.append(r)
         
     return rows
 
 def getDataTeachers(search):
-    sql = "SELECT lh.username, l.serial_number, lh.name, lt.trademark, lt.model "
+    sql = "SELECT lh.username, l.serial_number, lh.name, lt.trademark, lt.model, st.state "
     sql = sql+" FROM laptops l, laptops_historical lh"
     sql = sql+" LEFT JOIN laptops_trademarks lt ON l.id_trademark=lt.id_trademark "        
-    sql = sql+" LEFT JOIN users_types ut ON ut.id_user_type=lh.id_user_type "     
+    sql = sql+" LEFT JOIN users_types ut ON ut.id_user_type=lh.id_user_type "
+    sql = sql+" LEFT JOIN states st ON st.id_state=lh.id_state "
     sql = sql+" WHERE lh.id_user_type=1"
     sql = sql+" AND l.id_laptop=lh.id_laptop "
     sql = sql+" AND lh.id_historical IN (SELECT MAX(lh2.id_historical) FROM laptops_historical lh2 WHERE lh2.id_laptop=l.id_laptop) "
@@ -195,19 +215,21 @@ def getDataTeachers(search):
         sql = sql+" OR lt.trademark like '%"+search+"%' "
         sql = sql+" OR lt.model like '%"+search+"%')"
     
-    sql = sql+" GROUP BY l.id_laptop ORDER BY lh.datetime desc"
+    sql = sql+" GROUP BY l.id_laptop ORDER BY lh.name asc"
     result = cdb.executesql(sql)
 
     serials={}
+    teachers = []
     for r in result:
         if str(r[0])!="" and str(r[0])!="None":
-            serials[str(r[0])] = { 'serial_number':str(r[1].encode('latin1')), 'cn':str(r[2].encode('latin1')) , 'trademark':str(r[3].encode('latin1'))+' - '+str(r[4].encode('latin1')) }
-
-    teachers = []
-    for s in serials:
-        teachers.append(serials[s])
+            #serials[str(r[0])] = { 'serial_number':str(r[1].encode('latin1')), 'cn':str(r[2].encode('latin1')) , 'trademark':str(r[3].encode('latin1'))+' - '+str(r[4].encode('latin1')) }
+            #serials.append({ 'serial_number':str(r[1].encode('latin1')), 'cn':str(r[2].encode('latin1')) , 'trademark':str(r[3].encode('latin1'))+' - '+str(r[4].encode('latin1')) })
+            teachers.append({ 'serial_number':str(r[1].encode('latin1')), 'cn':str(r[2].encode('latin1')) , 'trademark':str(r[3].encode('latin1'))+' - '+str(r[4].encode('latin1')) , 'state':str(r[5].encode('latin1'))})
 
     return teachers
+    """for s in serials:
+        teachers.append(serials[s])
+    return teachers"""
 
 
 @auth.requires_login()      
