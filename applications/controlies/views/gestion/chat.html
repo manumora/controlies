@@ -116,8 +116,23 @@
 					    	 	
 	    	 })) alert("html5 websocket not supported by your browser, try Google Chrome");
 		}
-		catch(err) {}		
+		catch(err) {}
+		setChatSession();
 	}
+
+    function setChatSession(){
+    	jQuery.post('call/json/setChatSession', function(result) {
+            switch(result.response){
+                case "OK":{
+            		setTimeout("setChatSession()",15000);
+                    break;
+                }
+                default:{
+                    break;
+                }
+            }
+        });
+    }
 </script>
 <input type="hidden" id="check_name" name="check_name"/>
 <table width="100%" cellspacing="12">

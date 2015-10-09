@@ -145,6 +145,14 @@ def chat_send_message():
 
     return dict(response="OK")
 
+    return dict(response="OK")
+
+@service.json
+@auth.requires_login()
+def setChatSession():
+    if not auth.user: redirect(URL(c='default',f='index'))
+    return dict(response="OK")
+
 @service.json   
 @auth.requires_login()
 def servidores_centro():
