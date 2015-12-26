@@ -8,5 +8,6 @@
         <Location "/controlies">
             Order deny,allow
             Allow from all
+	    Require all granted
             WSGIProcessGroup web2py
         </Location>
