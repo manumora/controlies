@@ -2,7 +2,7 @@ Source: controlies
 Section: python
 Priority: extra
 Maintainer: José L. Redrejo Rodríguez <jredrejo@debian.org>,Manuel Mora Gordillo <manuito@gmail.com>
-Build-Depends: debhelper (>= 7.0.50~)
+Build-Depends: debhelper (>= 9.20~)
 Standards-Version: 3.8.4
 
 Package: controlies

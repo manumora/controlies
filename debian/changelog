@@ -1,3 +1,9 @@
+controlies (0.7.0-0) unstable; urgency=low
+
+  * Adaptado a Debian Jessie
+
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Sat, 26 Dic 2015 21:00:00 +0200
+
 controlies (0.6.6-23) unstable; urgency=low
 
   * Ya no caduca la sesion en el chat
