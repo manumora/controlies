@@ -26,14 +26,20 @@ import os
 
 path = os.path.dirname(os.path.abspath(__file__))
 os.chdir(path)
-sys.path = [path]+[p for p in sys.path if not p==path]
+
+if not os.path.isdir('applications'):
+    raise RuntimeError('Running from the wrong folder')
+
+sys.path = [path] + [p for p in sys.path if not p == path]
+
+sys.stdout = sys.stderr
 
 import gluon.main
 
 if LOGGING:
     application = gluon.main.appfactory(wsgiapp=gluon.main.wsgibase,
                                         logfilename='httpserver.log',
-                                        profilerfilename=None)
+                                        profiler_dir=None)
 else:
     application = gluon.main.wsgibase
 

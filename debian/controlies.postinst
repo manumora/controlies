@@ -8,13 +8,19 @@ set -e
 case "$1" in
     configure)
 
-	chown -R  www-data:www-data /var/web2py
+     chown -R  www-data:www-data /var/web2py
      chmod +x /etc/init.d/controlies
      a2enmod ssl
      a2enmod wsgi
+     a2dismod python
      a2ensite default-ssl
      service apache2 --full-restart
      /etc/init.d/controlies restart
+
+     if ! grep "Include /etc/apache2/conf.d" /etc/apache2/apache2.conf
+     then
+       echo "Include /etc/apache2/conf.d/*" >> /etc/apache2/apache2.conf
+     fi
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
