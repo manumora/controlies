@@ -29,11 +29,16 @@ def user():
         @auth.requires_permission('read','table name',record_id)
     to decorate functions that need access control
     """
+
     if "host" in request.vars:
         session.server=request.vars["host"]
         session.username=request.vars["username"]        
         session.password=request.vars["password"]
         con_parameters=auth.settings.login_methods[0].func_defaults
+
+        session.secureAuth = "off"
+        if request.vars["secureAuth"]=="on":
+            session.secureAuth= request.vars["secureAuth"]
 
         if con_parameters[0] != request.vars["host"] or request.vars["username"] != 'admin':
             #tengo que cambiar los parámetros con los que se llama a la función de logueo:

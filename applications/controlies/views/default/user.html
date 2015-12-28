@@ -21,7 +21,8 @@
 	            {{=form.custom.begin}}
 	                <p><span>LDAP</span><br><input type="text" id="host" name="host" value="localhost"></p> 
 	                <p><span>{{=form.custom.label.username}}</span><br>{{=form.custom.widget.username}}</p> 
-	                <p><span>{{=form.custom.label.password}}</span><br>{{=form.custom.widget.password}}</p><br> 
+	                <p><span>{{=form.custom.label.password}}</span><br>{{=form.custom.widget.password}}</p>
+			<p><input type="checkbox" name="secureAuth" id="secureAuth" checked="checked" />&nbsp;<span>Autenticación Segura</span></p><br> 
 	                <p style="text-align:center;">
 	                            {{form.custom.submit
 	                            submit = form.element("input",_type="submit")
