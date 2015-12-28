@@ -89,6 +89,14 @@ crud.settings.auth = None                      # =auth to enforce authorization 
 ## >>> for row in rows: print row.id, row.myfield
 #########################################################################
 
+import applications.controlies.modules.LdapConnection as LdapConnection
+if session.secureAuth=="on":
+    #Secure LDAP Auth
+    auth.settings.login_methods=[ldap_auth( server='localhost', base_dn='ou=People,dc=instituto,dc=extremadura,dc=es',secure=LdapConnection.ldap_secure,cert_path=LdapConnection.ldap_cert,mode='cn')]
+else:
+    #LDAP Auth
+    auth.settings.login_methods=[ldap_auth( server='localhost', base_dn='ou=People,dc=instituto,dc=extremadura,dc=es',secure=False,mode='cn')]
+
 
 #########################################################
 #

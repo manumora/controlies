@@ -35,19 +35,10 @@ def user():
         session.username=request.vars["username"]        
         session.password=request.vars["password"]
         con_parameters=auth.settings.login_methods[0].func_defaults
-        print con_parameters
+
         session.secureAuth = "off"
         if request.vars["secureAuth"]=="on":
             session.secureAuth= request.vars["secureAuth"]
-
-        import applications.controlies.modules.LdapConnection as LdapConnection
-
-        if session.secureAuth=="on":
-            #Secure LDAP Auth
-            auth.settings.login_methods=[ldap_auth( server='localhost', base_dn='ou=People,dc=instituto,dc=extremadura,dc=es',secure=LdapConnection.ldap_secure,cert_path=LdapConnection.ldap_cert,mode='cn')]
-        else:
-            #LDAP Auth
-            auth.settings.login_methods=[ldap_auth( server='localhost', base_dn='ou=People,dc=instituto,dc=extremadura,dc=es',secure=False,mode='cn')]
 
         if con_parameters[0] != request.vars["host"] or request.vars["username"] != 'admin':
             #tengo que cambiar los parámetros con los que se llama a la función de logueo:
