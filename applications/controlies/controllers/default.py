@@ -36,9 +36,9 @@ def user():
         session.password=request.vars["password"]
         con_parameters=auth.settings.login_methods[0].func_defaults
 
-        session.secureAuth = "off"
+        """session.secureAuth = "off"
         if request.vars["secureAuth"]=="on":
-            session.secureAuth= request.vars["secureAuth"]
+            session.secureAuth= request.vars["secureAuth"]"""
 
         if con_parameters[0] != request.vars["host"] or request.vars["username"] != 'admin':
             #tengo que cambiar los parámetros con los que se llama a la función de logueo:
