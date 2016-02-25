@@ -18,3 +18,4 @@ clients/ltspremote/ansi2html.py usr/share/controlies-ltspserver
 clients/ltspremote/remoteCommand.py usr/share/controlies-ltspserver
 clients/ltspremote/SSHConnection.py usr/share/controlies-ltspserver
 clients/ltspremote/websocket_messaging.py usr/share/controlies-ltspserver
+clients/14-logout.conf usr/share/controlies-ltspserver

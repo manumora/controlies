@@ -1,7 +1,7 @@
 #!/bin/bash
 
 equipo=$(hostname -s)
-dominio=$(host -d -t CNAME servidor | grep domain | cut -f1 -d".")
+dominio=$(host -d -t CNAME servidor | grep -e .domain -e .ns | cut -f1 -d".")
 
 #Primero comprobamos si estamos dentro del centro educativo y tenemos red, con un timeout de 3 segundos.
 ping -c 1 ldap -W 3 > /dev/null 2>&1
@@ -25,6 +25,16 @@ then
                    ;;
                    # todos los tipos de portatil port*
                    "port") tipo="PORTATIL"
+                   ;;
+                   #equipos nuevos.
+                   "ubun")
+                       tipo_ubuntu=$(facter | grep ^tipo | cut -d" " -f3)
+                       case $tipo_ubuntu in
+                            "siatic") tipo="LTSP"
+                            ;;
+                            "infolab") tipo="WORKSTATION"
+                            ;;
+                       esac
                    ;;
               esac
 	fi

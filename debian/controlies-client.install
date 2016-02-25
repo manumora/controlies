@@ -12,4 +12,5 @@ clients/daemon/controlies-client etc/init.d
 clients/daemon/97controlies-client etc/NetworkManager/dispatcher.d
 clients/daemon/controlies-client.dhcp etc/dhcp/dhclient-exit-hooks.d
 clients/controlies-seguimiento usr/share/controlies-client
+clients/14-logout.conf usr/share/controlies-client
 
