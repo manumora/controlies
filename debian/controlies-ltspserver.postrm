@@ -13,10 +13,15 @@ case "$1" in
     remove|purge)
 	#####################################################
 	# Registro Post Session
-	if [ -f "/etc/$DIR/PostSession/Default" ]; then
-		sed -i.bak '/\/usr\/share\/controlies-ltspserver\/PostSession \$LOGNAME/d' /etc/$DIR/PostSession/Default
-	fi
-
+        # Registro Post Session
+        if [  -e /etc/lightdm ]
+        then #lightdm
+               rm -f /etc/lightdm/lightdm.conf.d/14-logout.conf
+        else #gdm o gdm3
+   	   if [ -f "/etc/$DIR/PostSession/Default" ]; then
+		sed -i.bak '/\/usr\/share\/controlies-ltspserver\/PostSession/d' /etc/$DIR/PostSession/Default
+  	   fi
+        fi
 	######################################################
 	# Seguimiento equipos
 	sed -i.bak '/@reboot root \/usr\/share\/controlies-ltspserver\/seguimiento_equipo/d' /etc/crontab
@@ -29,7 +34,7 @@ case "$1" in
 
 	######################################################
 	# Servicio
-	update-rc.d controlies-ltspserver remove
+	update-rc.d -f controlies-ltspserver remove
     ;;
     upgrade|abort-upgrade|abort-remove|abort-deconfigure)
     ;;

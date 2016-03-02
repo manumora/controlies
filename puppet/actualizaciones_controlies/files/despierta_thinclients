@@ -4,7 +4,8 @@
 #el nombre del aula
 equipo=$(hostname -s)
 aula=${equipo%-[Pp][Rr][Oo]}
-dominio=$(host -d -t CNAME servidor | grep domain | cut -f1 -d".")
+dominio=$(host -d -t CNAME servidor | grep -e .domain -e .ns | cut -f1 -d".")
+
 
 #Extrae de ldap la lista de thinclients de ese aula.
 thinclients=$(ldapsearch -xLLL -h ldap -b cn=THINCLIENTS,cn=DHCP\ Config,dc=instituto,dc=extremadura,dc=es "cn" | grep -i "cn: $aula-O"  | cut -f2 -d" ")
@@ -37,3 +38,4 @@ do
   sleep 1
 
 done
+

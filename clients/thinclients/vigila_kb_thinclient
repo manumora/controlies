@@ -6,8 +6,7 @@
 #ya que los dispositivos PS/2 no suelen generar eventos en su conexión/desconexión.
 
 equipo=$(hostname -s)
-dominio=$(host -d -t CNAME servidor | grep domain | cut -f1 -d".")
-
+dominio=$(host -d -t CNAME servidor | grep -e .domain -e .ns | cut -f1 -d".")
 
 #En teclados Sweex USB, aparece mouse en devices, aun cuando no haya ratón 
 #conectado. Con el filtro grep -v kbd eliminamos esas lineas, para que solo

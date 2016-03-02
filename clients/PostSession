@@ -1,8 +1,11 @@
 #!/bin/bash
 
 equipo=$(hostname -s)
-usuario=$1
-dominio=$(host -d -t CNAME servidor | grep domain | cut -f1 -d".")
+usuario=$LOGNAME
+dominio=$(host -d -t CNAME servidor | grep -e .domain -e .ns | cut -f1 -d".")
+
+#Si no hay usuario se sale sin hacer nada
+test -z $usuario && exit 0
 
 #Primero comprobamos si estamos dentro del centro educativo y tenemos red, con un timeout de 3 segundos.
 ping -c 1 ldap -W 3 > /dev/null 2>&1

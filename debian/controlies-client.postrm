@@ -13,9 +13,15 @@ case "$1" in
     remove|purge)
 	#####################################################
 	# Registro Post Session
-	if [ -f "/etc/$DIR/PostSession/Default" ]; then
-		sed -i.bak '/\/usr\/share\/controlies-client\/PostSession \$LOGNAME/d' /etc/$DIR/PostSession/Default
-	fi
+        if [  -e /etc/lightdm ]
+        then #lightdm
+               rm -f /etc/lightdm/lightdm.conf.d/14-logout.conf
+        else #gdm o gdm3
+ 
+ 	   if [ -f "/etc/$DIR/PostSession/Default" ]; then
+		sed -i.bak '/\/usr\/share\/controlies-client\/PostSession/d' /etc/$DIR/PostSession/Default
+	   fi
+        fi
 
 	######################################################
 	# Seguimiento equipos
@@ -29,7 +35,7 @@ case "$1" in
 
 	######################################################
 	# Servicio RPC
-	update-rc.d controlies-client remove
+	update-rc.d -f controlies-client remove
     ;;
     upgrade|abort-upgrade|abort-remove|abort-deconfigure)
     ;;

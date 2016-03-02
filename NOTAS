@@ -1,6 +1,24 @@
 CAMBIOS
 =======
 
+13 febrero 2016
+
+  -Adaptacion de clientes a Ubuntu 14.04. Ver changelog.
+
+Enero 2016:  
+
+  -Adaptacion a servidor Debian Jessie.
+
+
+9 Abril 2015
+
+  -Incluida compatibilidad con los servidores de aula nuevos con facter use=aulatic-profesor-wheezy. Avisado
+   por Manuel Cienfuegos.
+  -Adaptada la generación de la imagen de thinclients en la tarea puppet instala_controlies para que sea
+   compatible con los servidores de aula wheezy. Avisado por Fran (IES Univ. Laboral)
+  -Añadido a seguimiento_equipo la comprobacion de bloqueo de /var/lib/apt/lists/lock, para evitar 
+   en ese caso el apt-get check.
+
 3 Noviembre 2014
   -Integracion de controlies-seguimiento con los portatiles wheezy
   -Tareas puppet adaptadas a equipos Wheezy

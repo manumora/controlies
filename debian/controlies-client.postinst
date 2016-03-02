@@ -9,24 +9,30 @@ case "$1" in
     configure)
     #####################################################
     # Registro Post Session
-    DIR="gdm"
-    if [ -f "/etc/init.d/gdm3" ]; then
-        DIR="gdm3"
+    if [  -e /etc/lightdm ]
+    then #lightdm
+        cp -f /usr/share/controlies-client/14-logout.conf /etc/lightdm/lightdm.conf.d/14-logout.conf
+        chmod 644 /etc/lightdm/lightdm.conf.d/14-logout.conf
+    else #gdm o gdm3
+       DIR="gdm"
+       if [ -f "/etc/init.d/gdm3" ]; then
+           DIR="gdm3"
+       fi
+
+       if [ ! -f /etc/$DIR/PostSession/Default ]; then
+           echo "#!/bin/sh" >> /etc/$DIR/PostSession/Default
+       fi
+
+       sed -i.bak '/exit 0/d' /etc/$DIR/PostSession/Default
+
+       if ! grep "/usr/share/controlies-client/PostSession" /etc/$DIR/PostSession/Default
+       then
+          echo "/usr/share/controlies-client/PostSession" >> /etc/$DIR/PostSession/Default
+       fi
+
+       echo "exit 0" >> /etc/$DIR/PostSession/Default
+       chmod +x /etc/$DIR/PostSession/Default
     fi
-
-    if [ ! -f /etc/$DIR/PostSession/Default ]; then
-        echo "#!/bin/sh" >> /etc/$DIR/PostSession/Default
-    fi
-
-    sed -i.bak '/exit 0/d' /etc/$DIR/PostSession/Default
-
-    if ! grep "/usr/share/controlies-client/PostSession \$LOGNAME" /etc/$DIR/PostSession/Default
-    then
-      echo "/usr/share/controlies-client/PostSession \$LOGNAME" >> /etc/$DIR/PostSession/Default
-    fi
-
-    echo "exit 0" >> /etc/$DIR/PostSession/Default
-    chmod +x /etc/$DIR/PostSession/Default
     chmod 755 /usr/share/controlies-client/PostSession
     chmod 755 /usr/share/controlies-client/controlies-seguimiento
 
