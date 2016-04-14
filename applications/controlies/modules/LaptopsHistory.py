@@ -133,12 +133,12 @@ class LaptopsHistory(object):
 
     def add(self): 
         now = datetime.datetime.now()
-        sql = "INSERT INTO laptops_historical (id_historical,id_laptop,computer_name,datetime,username,name,id_user_type,nif,comment,id_state) "
-        sql = sql+" VALUES (null,"+ str(self.id_laptop) +",'"+self.computer_name+"','"+ now.strftime('%Y-%m-%d %H:%M:%S')+"','"+self.username+"','"+self.name+"',"+ str(self.id_user_type)+",'"+ self.nif+"','"+self.comment+"','"+ str(self.id_state)+"')"
-        result = self.DB.executesql(sql)
+        #sql = "INSERT INTO laptops_historical (id_historical,id_laptop,computer_name,datetime,username,name,id_user_type,nif,comment,id_state) "
+        #sql = sql+" VALUES (null,"+ str(self.id_laptop) +",'"+self.computer_name+"','"+ now.strftime('%Y-%m-%d %H:%M:%S')+"','"+self.username+"','"+self.name+"',"+ str(self.id_user_type)+",'"+ self.nif+"','"+self.comment+"','"+ str(self.id_state)+"')"
+        #result = self.DB.executesql(sql)
 
-        #self.DB.laptops_historical.insert (id_laptop=self.id_laptop, datetime=now.strftime('%Y-%m-%d %H:%M:%S'), username=self.username, name = self.name, id_user_type=self.id_user_type,nif=self.nif,comment=self.comment, id_state=self.id_state)
-        #self.DB.commit()
+        self.DB.laptops_historical.insert(id_laptop=self.id_laptop, computer_name=self.computer_name, datetime=now.strftime('%Y-%m-%d %H:%M:%S'), username=self.username, name = self.name, id_user_type=self.id_user_type, nif=self.nif, comment=self.comment, id_state=self.id_state)
+        self.DB.commit()
         
         return "OK"
             
@@ -182,21 +182,21 @@ class LaptopsHistory(object):
         return data
 
     def getDataHistory(self):
-        sql="SELECT * FROM laptops_historical WHERE id_historical='"+str(self.id_historical)+"'"
-        result = self.DB.executesql(sql)
-
+        result=self.DB(self.DB.laptops_historical.id_historical==self.id_historical).select(self.DB.laptops_historical.ALL)
+        #sql="SELECT * FROM laptops_historical WHERE id_historical='"+str(self.id_historical)+"'"
+        #result = self.DB.executesql(sql)
         data = {"id_historical":"","id_laptop":"","username":"","name":"","id_user_type":"","nif":"","comment":"","id_state":"","computer_name":""}
         if len(result)>0:
             data = {
-                "id_historical":str(result[0][0]),
-                "id_laptop":str(result[0][1]),
-                "username":str(result[0][3]),
-                "name":str(result[0][4]),
-                "id_user_type":str(result[0][5]),
-                "nif":str(result[0][6]),
-                "comment":str(result[0][7]),
-                "id_state":str(result[0][8]),
-                "computer_name":str(result[0][9]),
+                "id_historical":str(result[0]["id_historical"]),
+                "id_laptop":str(result[0]["id_laptop"]),
+                "username":str(result[0]["username"]),
+                "name":str(result[0]["name"]),
+                "id_user_type":str(result[0]["id_user_type"]),
+                "nif":str(result[0]["nif"]),
+                "comment":str(result[0]["comment"]),
+                "id_state":str(result[0]["id_state"]),
+                "computer_name":str(result[0]["computer_name"]),
             }
 
         return data

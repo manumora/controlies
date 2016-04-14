@@ -103,18 +103,15 @@
             jQuery("#form_data_history #id_laptop").val(jQuery("#form_history #id_laptop").val());
             jQuery("#form_data_history #messageFormHistory").html("Los campos marcados con asterisco son obligatorios");                                     
     
-            x = (jQuery(window).width()-400)/2;
-            y = (jQuery(window).height()-500)/2;
-    
             jQuery("#messageLoading").hide();
     
             jQuery("#dialog-form-history").dialog({
+                position: { my: "center top+5%", at: "top", of: window},
                 resizable: false,
-                position: top,
                 modal: true,
                 width: 400,
                 title: "Añadir histórico"
-            }).dialog('option', 'position', [x, y]);
+            });
         });
     }
 	
@@ -149,17 +146,15 @@
 
 				showFields();
 				
-				x = (jQuery(window).width()-400)/2;
-				y = (jQuery(window).height()-500)/2;
-				
 				jQuery("#messageLoading").hide();
 				
 				jQuery("#dialog-form-history").dialog({
+				    position: { my: "center top+5%", at: "top", of: window},
 					resizable: false,
 					modal: true,
 					width: 400,
 					title: "Modificar histórico"
-				}).dialog('option', 'position', [x, y]);                        
+				});
 			});               
 		});
     }

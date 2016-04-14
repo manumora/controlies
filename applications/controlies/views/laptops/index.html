@@ -52,7 +52,7 @@
                     {name:'trademark',index:'trademark', width:60, align:"center"},
                     {name:'model',index:'model', width:70, align:"center"},
                     {name:'serial_number',index:'serial_number', width:115, align:"center"},
-                    {name:'user_type',index:'user_type', width:50, align:"center", stype:'select', editoptions:{value:":Todos;Profesor:Profesores;Alumno:Alumnos;Ninguno:Ninguno"}},
+                    {name:'user_type',index:'user_type', width:50, align:"center", stype:'select', editoptions:{value:":Todos;Profesor:Profesores;Alumno:Alumnos;Personal:Personal;Ninguno:Ninguno"}},
                     {name:'username',index:'username', width:100, align:"center"},
                     {name:'datetime',index:'datetime', width:80, align:"center"},
                     {name:'state',index:'state', width:65, align:"center", stype:'select', editoptions:{value:":Todos;Asignado:Asignado;En reparación:En reparación;Desaparecido:Desaparecido;Sin asignar:Sin asignar"}},   
@@ -138,18 +138,15 @@
                 jQuery("#form_data #action").val("add");
                 jQuery("#form_data #messageForm").html("Los campos marcados con asterisco son obligatorios");                                     
         
-                x = (jQuery(window).width()-350)/2;
-                y = (jQuery(window).height()-500)/2;
-        
                 jQuery("#messageLoading").hide();
         
                 jQuery("#dialog-form").dialog({
+                    position: { my: "center top+5%", at: "top", of: window},
                     resizable: false,
-                    position: top,
                     modal: true,
                     width: 350,
                     title: "Añadir Dispositivo"
-                }).dialog('option', 'position', [x, y]);
+                });
             });
     }
     
@@ -181,17 +178,15 @@
 						}catch(err){ }
 					});			
 
-					x = (jQuery(window).width()-350)/2;
-					y = (jQuery(window).height()-500)/2;
-					
 					jQuery("#messageLoading").hide();
 					
 					jQuery("#dialog-form").dialog({
+					    position: { my: "center top+5%", at: "top", of: window},
 						resizable: false,
 						modal: true,
 						width: 350,
 						title: "Modificar Dispositivo"
-					}).dialog('option', 'position', [x, y]);                        
+					});
 				});               
 			});
     }
@@ -244,17 +239,15 @@
 					jQuery("#form_history #serial_number").html(result.response['serial_number']);
 					jQuery("#form_history #id_trademark").html(result.response['trademark']);					
 
-					x = (jQuery(window).width()-900)/2;
-					y = (jQuery(window).height()-500)/2;
-					
 					jQuery("#messageLoading").hide();
 					
 					jQuery("#dialog-form").dialog({
+					    position: { my: "center top+5%", at: "top", of: window},
 						resizable: false,
 						modal: true,
 						width: 900,
 						title: "Historial Dispositivo"
-					}).dialog('option', 'position', [x, y]);                        
+					});
 				});               
 			});
     }

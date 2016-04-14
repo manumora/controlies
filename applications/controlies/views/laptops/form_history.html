@@ -50,6 +50,7 @@
 			switch(result.response['type']){
 				case 'teacher': jQuery("#form_data_history #id_user_type").val(1); break;
 				case 'student': jQuery("#form_data_history #id_user_type").val(2); break;
+				case 'staff': jQuery("#form_data_history #id_user_type").val(3); break;
 			}	
 		});
 	}
@@ -77,6 +78,7 @@
 		switch(jQuery("#form_data_history #id_state").val()){
 			case '2':
 			case '3':
+			case '5':
 				jQuery("#form_data_history #usernameP").show();
 				jQuery("#form_data_history #id_user_typeP").show();
 				jQuery("#form_data_history #nifP").show();

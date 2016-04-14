@@ -31,6 +31,7 @@ response.menu+=[
             ('Usuarios', False, URL( 'usuarios', 'index' )),
             ('Grupos', False,URL( 'grupos', 'index' )),
             ('Servidores LTSP',False, URL( 'hosts', 'ltspservers' )),
+            ('SIATIC',False, URL( 'hosts', 'siatic' )),
             ('Workstations', False,URL( 'hosts', 'workstations' )),
             ('Hardware', False,URL( 'hosts', 'hardware' )),
             ('Portátiles Profesores', False,URL( 'hosts', 'laptops' )),            

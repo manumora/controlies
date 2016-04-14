@@ -134,18 +134,16 @@
 				jQuery("#form_data #subrange").val(ip[1]);
 				jQuery("#form_data #range").val(ip[2]);				
 				jQuery("#form_data #ip").val(ip[3]);								
-				
-				x = (jQuery(window).width()-300)/2;
-				y = (jQuery(window).height()-500)/2;
-				
+							
 				jQuery("#messageLoading").hide();
 				
 				jQuery("#dialog-form").dialog({
+					position: { my: "center top+35%", at: "top", of: window},
 					resizable: false,
 					modal: true,
 					width: 300,                            
 					title: "Modificar "+name_host
-				}).dialog('option', 'position', [x, y]);                        
+				});                        
 			});            
 		});
 	}
@@ -161,15 +159,12 @@
             jQuery("#form_data #messageForm").html("Todos los campos son obligatorios");                 
         });
     
-        x = (jQuery(window).width()-250)/2;
-        y = (jQuery(window).height()-400)/2;
-    
         jQuery("#dialog-form").dialog({
+	    position: { my: "center top+35%", at: "top", of: window},
             resizable: false,
-            position: top,
             modal: true,                       
             title: "Añadir "+name_host
-        }).dialog('option', 'position', [x, y]);
+        });
     } 
 
 
@@ -219,11 +214,12 @@ function deleteRecord(){
 					$("#netgroup").append('<option value="'+result.response[r]+'">'+result.response[r]+'</option>');
 				}
                 jQuery("#dialog-form").dialog({
+		    position: { my: "center top+35%", at: "top", of: window},
                     resizable: false,
                     modal: true,
                     width: 350,
                     title: "Mover Dispositivo"
-                }).dialog('option', 'position', [x, y]);                        
+                });
             });               
         });
     }

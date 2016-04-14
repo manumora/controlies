@@ -14,6 +14,11 @@
     #selectable2 { list-style-type: none; margin: 0; padding: 0; }
     #selectable2 li { margin: 3px 3px 3px 0; padding: 1px; float: left; width: 80px; height: 95px; font-size: 1px; text-align: center; cursor:pointer; }
 
+    #selectable3 .ui-selecting { background: #FECA40; }
+    #selectable3 .ui-selected { background: #F39814; color: white; }
+    #selectable3 { list-style-type: none; margin: 0; padding: 0; }
+    #selectable3 li { margin: 3px 3px 3px 0; padding: 1px; float: left; width: 80px; height: 95px; font-size: 1px; text-align: center; cursor:pointer; }
+
 	.ui-menu { position: absolute; width: 100px; }
 	
 	.computersON { display:none; width:12px; height:12px; border: 1px solid; border-color:black; border-radius: 75px; margin-left:50px; margin-top:45px; padding:2px; color:white; background-color:red; font-size:11px; position: absolute; }
@@ -89,10 +94,12 @@
         $( "#selectable0" ).selectable();
         $( "#selectable1" ).selectable();
         $( "#selectable2" ).selectable();
+        $( "#selectable3" ).selectable();
         
 		$("#dialogAlert").dialog({ autoOpen: false });
 		
         getLTSPServers();
+        getSIATIC();
         getWorkstations();
         getLaptops();
     });
@@ -105,10 +112,18 @@
         });
     }
 
+    function getSIATIC(){
+        jQuery.post('call/json/getSIATIC', function(result) {
+            jQuery.each(result.response, function(i, l){
+                jQuery('#selectable1').append('<li class="ui-state-default" id="selectable-'+l+'"><div id="pcName" style="font-size:11px;">'+l+'</div><div id="computersON" class="computersON"></div>{{=IMG(_src=URL(r=request,c="static",f="images/turnOff.png"),_class="thumb-image")}}<div id="userName" style="font-size:11px;"></div></li>');
+            });
+        });
+    }
+
     function getWorkstations(){
         jQuery.post('call/json/getWorkstations', function(result) {                                                            
             jQuery.each(result.response, function(i, l){
-                jQuery('#selectable1').append('<li class="ui-state-default" id="selectableWorkstations-'+l+'"><div id="pcName" style="font-size:11px;">'+l+'</div>{{=IMG(_src=URL(r=request,c="static",f="images/turnOff.png"),_class="thumb-image")}}<div id="userNameWorkstation" style="font-size:11px;"></div></li>');               
+                jQuery('#selectable2').append('<li class="ui-state-default" id="selectableWorkstations-'+l+'"><div id="pcName" style="font-size:11px;">'+l+'</div>{{=IMG(_src=URL(r=request,c="static",f="images/turnOff.png"),_class="thumb-image")}}<div id="userNameWorkstation" style="font-size:11px;"></div></li>');
             });            
         });
     }
@@ -116,7 +131,7 @@
     function getLaptops(){
         jQuery.post('call/json/getLaptops', function(result) {                                                            
             jQuery.each(result.response, function(i, l){
-                jQuery('#selectable2').append('<li class="ui-state-default" id="selectableLaptops-'+l+'"><div id="pcName" style="font-size:11px;">'+l+'</div>{{=IMG(_src=URL(r=request,c="static",f="images/turnOff.png"),_class="thumb-image")}}<div id="userNameLaptop" style="font-size:11px;"></div></li>');               
+                jQuery('#selectable3').append('<li class="ui-state-default" id="selectableLaptops-'+l+'"><div id="pcName" style="font-size:11px;">'+l+'</div>{{=IMG(_src=URL(r=request,c="static",f="images/turnOff.png"),_class="thumb-image")}}<div id="userNameLaptop" style="font-size:11px;"></div></li>');
             });
             
             getLTSPStatus();
@@ -141,9 +156,10 @@
 	    }catch(err){}
 
             jQuery.each(result.computers, function(i, l){                
-                jQuery('#selectable0 #selectable-'+l+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/turnOn.png")}}');           
-                jQuery('#selectable1 #selectableWorkstations-'+l+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/turnOn.png")}}');
-                jQuery('#selectable2 #selectableLaptops-'+l+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/turnOn.png")}}');
+                jQuery('#selectable0 #selectable-'+l+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/turnOn.png")}}');
+                jQuery('#selectable1 #selectableSIATIC-'+l+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/turnOn.png")}}');
+                jQuery('#selectable2 #selectableWorkstations-'+l+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/turnOn.png")}}');
+                jQuery('#selectable3 #selectableLaptops-'+l+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/turnOn.png")}}');
 
 		try{
 			if(jQuery("#classroom").val()==l){
@@ -159,11 +175,14 @@
                 jQuery('#selectable0 #selectable-'+computer[1]+' #userName').html(computer[0]);
                 jQuery('#selectable0 #selectable-'+computer[1]+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/nobody.png")}}');
 
-                jQuery('#selectable1 #selectableWorkstations-'+computer[1]+' #userNameWorkstation').html(computer[0]);
-                jQuery('#selectable1 #selectableWorkstations-'+computer[1]+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/nobody.png")}}');
+                jQuery('#selectable1 #selectableSIATIC-'+computer[1]+' #userName').html(computer[0]);
+                jQuery('#selectable1 #selectableSIATIC-'+computer[1]+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/nobody.png")}}');
 
-                jQuery('#selectable2 #selectableLaptops-'+computer[1]+' #userNameLaptop').html(computer[0]);
-                jQuery('#selectable2 #selectableLaptops-'+computer[1]+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/nobody.png")}}');
+                jQuery('#selectable2 #selectableWorkstations-'+computer[1]+' #userNameWorkstation').html(computer[0]);
+                jQuery('#selectable2 #selectableWorkstations-'+computer[1]+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/nobody.png")}}');
+
+                jQuery('#selectable3 #selectableLaptops-'+computer[1]+' #userNameLaptop').html(computer[0]);
+                jQuery('#selectable3 #selectableLaptops-'+computer[1]+' .thumb-image').attr('src','{{=URL(r=request,c="static",f="images/nobody.png")}}');
 
 		try{
 			if(jQuery("#classroom").val()==computer[1]){
@@ -200,20 +219,17 @@
 	
 		jQuery("#dialog-form").html("").css("display","none");
 		jQuery("#dialog-form").load("execCommand.html", function(data) {				
-	                                       
-            x = (jQuery(window).width()-750)/2;
-            y = (jQuery(window).height()-500)/2;
-    
+
             jQuery("#messageLoading").hide();
     		jQuery("#form_data").hide();
     		
             jQuery("#dialog-form").dialog({
+                position: { my: "center top+5%", at: "top", of: window},
                 resizable: false,
-                position: top,
                 modal: true,
                 width: 750,
                 title: "Apagar equipos"
-            }).dialog('option', 'position', [x, y]);
+            });
             
             send("shutdown");            
 		});		
@@ -230,18 +246,15 @@
 		jQuery("#dialog-form").html("").css("display","none");
 		jQuery("#dialog-form").load("wakeupThin.html", function(data) {				
 	                                       
-            x = (jQuery(window).width()-750)/2;
-            y = (jQuery(window).height()-550)/2;
-    
             jQuery("#messageLoading").hide();
     
             jQuery("#dialog-form").dialog({
+                position: { my: "center top+5%", at: "top", of: window},
                 resizable: false,
-                position: top,
                 modal: true,
                 width: 750,
                 title: "Encender Thinclients"
-            }).dialog('option', 'position', [x, y]);            
+            });
 		});		
 	}
 
@@ -287,7 +300,7 @@
             jQuery("#messageLoading").hide();
     
             jQuery("#dialog-form").dialog({
-		position: { my: "center top+15%", at: "top", of: window},
+		        position: { my: "center top+15%", at: "top", of: window},
                 resizable: false,
                 modal: true,
                 width: 850,
@@ -340,8 +353,9 @@
 	    <div id="tabsHosts">
 	        <ul>
 	            <li><a href="#tabsHosts1"><span id="actions">Servidores</span></a></li>
-	            <li><a href="#tabsHosts2"><span id="actions">Workstations</span></a></li>
-	            <li><a href="#tabsHosts3"><span id="actions">Port&aacute;tiles</span></a></li>
+	            <li><a href="#tabsHosts2"><span id="actions">SIATIC</span></a></li>
+	            <li><a href="#tabsHosts3"><span id="actions">Workstations</span></a></li>
+	            <li><a href="#tabsHosts4"><span id="actions">Port&aacute;tiles</span></a></li>
 	        </ul>
 	        <div id="tabsHosts1" style="padding:3px;">  
 	            <table>
@@ -352,7 +366,7 @@
 	                </tr>
 	            </table>
 	        </div>
-	        <div id="tabsHosts2" style="padding:3px;">  
+	        <div id="tabsHosts2" style="padding:3px;">
 	            <table>
 	                <tr>
 	                    <td id="tableSelectable1">
@@ -366,6 +380,15 @@
 	                <tr>
 	                    <td id="tableSelectable2">
 	                        <ol id="selectable2" style="width:700px;"></ol>
+	                    </td>
+	                </tr>
+	            </table>
+	        </div>
+	        <div id="tabsHosts4" style="padding:3px;">
+	            <table>
+	                <tr>
+	                    <td id="tableSelectable3">
+	                        <ol id="selectable3" style="width:700px;"></ol>
 	                    </td>
 	                </tr>
 	            </table>

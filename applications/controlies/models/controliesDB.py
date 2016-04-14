@@ -31,6 +31,11 @@ try:
 except:
     pass
 
+try:
+    cdb.users_types.insert(id_user_type='3',user_type='Personal')
+except:
+    pass
+
 cdb.define_table('laptops_historical', 
                         Field('id_historical','integer'),
                         Field('id_laptop','integer'),
@@ -65,6 +70,11 @@ except:
 
 try:
     cdb.states.insert(id_state='4',state='Desaparecido')
+except:
+    pass
+
+try:
+    cdb.states.insert(id_state='5',state='Estropeado')
 except:
     pass
 

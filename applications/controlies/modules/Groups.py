@@ -30,6 +30,7 @@ from math import floor
 from operator import itemgetter
 from Utils import Utils, LdapUtils
 from applications.controlies.modules.Users import Users
+import types
 
 class Groups(object):
 
@@ -226,8 +227,12 @@ class Groups(object):
 		
 
     def add(self):
-        if self.exists_group_name(): return "OK"       
-        maxID = str(LdapUtils.getMaxID(self.ldap))
+        if self.exists_group_name(): return "OK"
+
+        if self.name=="staff":
+            maxID = "3100"
+        else:
+            maxID = str(LdapUtils.getMaxID(self.ldap))
 
         if len(self.users)>0:
             members = []
@@ -243,9 +248,11 @@ class Groups(object):
         ('grouptype', [self.type] ),		
         ('gidnumber', [maxID] ),		
         ('cn', [self.name] ),
-        ('description', [self.name+' department group']),
+        ('description', [self.name+' group']),
         ('memberuid', memberuids),
-        ('member', members)
+        ('member', members),
+        ('agegroup', ['']),
+        ('userpassword', ['']),
         ]
 
         self.ldap.add("cn="+self.name+",ou=Group", attr)
@@ -316,3 +323,9 @@ class Groups(object):
 
         newlist = sorted(rows, key=lambda k: k['sn']) 
         return newlist
+
+    def checkGroup(self):
+        search = self.ldap.search("cn="+self.name+",ou=Group","cn=*",["cn"])
+        if isinstance(search, types.NoneType):
+            return False
+        return True

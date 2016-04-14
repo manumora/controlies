@@ -76,7 +76,20 @@ def ltspservers():
         redirect(URL(c='default',f='index'))
         
     return dict()
-    
+
+def siatic():
+    if not auth.user:
+        session.flash='Debe iniciar sesión'
+        redirect(URL(c='default',f='index'))
+
+    l=conecta()
+    search = l.search("ou=Netgroup","cn=siatic-hosts",["cn"])
+    if not search:
+        h = Hosts(l,"","","","siatic-hosts")
+        h.createStructure()
+
+    return dict()
+
 def workstations():
     if not auth.user:
         session.flash='Debe iniciar sesión'
@@ -113,7 +126,7 @@ def laptops():
 @service.json
 @auth.requires_login()   
 def getNetgroups():
-    netgroups = ["ltsp-server-hosts","workstation-hosts","laptop-hosts","hardware-hosts"]
+    netgroups = ["ltsp-server-hosts","siatic-hosts","workstation-hosts","laptop-hosts","hardware-hosts"]
     netgroups.remove(request.vars['type_host'])
     return dict(response=netgroups)
 

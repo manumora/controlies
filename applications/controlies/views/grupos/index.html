@@ -100,21 +100,24 @@ function print_grid(){
       jQuery("#list").jqGrid('navGrid','#pager',{add:false,edit:false,del:false,search:false,refresh:false});
     
 		jQuery("#list").jqGrid('navButtonAdd','#pager',{
-				caption: "Insertar",
+		        caption: "",
+				title: "Insertar",
 				buttonicon :'ui-icon-plus',
 				onClickButton : function (){ 
 					addRecord();
 				} 
-		}); 
+		});
 		jQuery("#list").jqGrid('navButtonAdd','#pager',{
-				caption: "Modificar", 
+		        caption: "",
+				title: "Modificar",
 				buttonicon :'ui-icon-pencil',
 				onClickButton : function (){ 
 					modifyRecord();
 			} 
 		}); 
 		jQuery("#list").jqGrid('navButtonAdd','#pager',{
-				caption: "Borrar", 
+		        caption: "",
+				title: "Borrar",
 				buttonicon :'ui-icon-trash',
 				onClickButton : function (){ 
 					deleteRecord();
@@ -148,20 +151,17 @@ function addRecord(){
         jQuery("#dialog-form").html("");
         jQuery("#dialog-form").load("form.html", function() {
             jQuery("#form_data #action").val("add");
-            jQuery("#form_data #messageForm").html("Todos los campos son obligatorios");                                     
-    
-            x = (jQuery(window).width()-500)/2;
-            y = (jQuery(window).height()-500)/2;
+            jQuery("#form_data #messageForm").html("Todos los campos son obligatorios");
     
             jQuery("#messageLoading").hide();
     
             jQuery("#dialog-form").dialog({
                 resizable: false,
-                position: top,
+                position: { my: "center top+5%", at: "top", of: window},
                 modal: true,
                 width: 500,                     
                 title: "Añadir Grupo"
-            }).dialog('option', 'position', [x, y]);
+            });
             
             var autoComplete = new jQuery.TextboxList('#users', {unique: true, plugins: {autocomplete: {
                 minLength: 2,
@@ -200,18 +200,16 @@ function modifyRecord(){
                 
             jQuery("#form_data #type").replaceWith(textType+"<input type='hidden' id='type' name='type' value='"+result.response['type']+"'/>");
             jQuery("#form_data #name").replaceWith(result.response['name']+"<input type='hidden' id='name' name='name' value='"+result.response['name']+"'/>");
-                        
-            x = (jQuery(window).width()-500)/2;
-            y = (jQuery(window).height()-500)/2;
-            
+
             jQuery("#messageLoading").hide();
             
             jQuery("#dialog-form").dialog({
+                position: { my: "center top+5%", at: "top", of: window},
                 resizable: false,
                 modal: true,
                 width: 500,
                 title: "Modificar Grupo"
-            }).dialog('option', 'position', [x, y]);        
+            });
                             
             // Autocomplete with poll the server as you type
             autoComplete = new jQuery.TextboxList('#users', {unique: true, plugins: {autocomplete: {

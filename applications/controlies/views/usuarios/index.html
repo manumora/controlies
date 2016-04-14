@@ -44,7 +44,7 @@
                 
                 colNames:['Tipo Usuario','Nombre','Usuario','ID usuario','ID Grupo','Identificación'],
                 colModel:[ 
-                    {name:'type',index:'type', width:60, align:"center",  stype:'select', editoptions:{value:":Todo;Profesor:Profesores;Alumno:Alumnos"}},                  
+                    {name:'type',index:'type', width:60, align:"center",  stype:'select', editoptions:{value:":Todo;Profesor:Profesores;Alumno:Alumnos;Personal:Personal"}},
                     {name:'cn',index:'cn', width:140, align:"left"},
                     {name:'uid',index:'uid', width:90, align:"center"},
                     {name:'uidNumber',index:'uidNumber', width:70, align:"center"},
@@ -107,19 +107,16 @@
                 jQuery("#form_data #homeDirectoryP").css("display","block");
                 
                 jQuery("#form_data #messageForm").html("Todos los campos son obligatorios");                                     
-        
-                x = (jQuery(window).width()-350)/2;
-                y = (jQuery(window).height()-500)/2;
-        
+
                 jQuery("#messageLoading").hide();
         
                 jQuery("#dialog-form").dialog({
+                    position: { my: "center top+5%", at: "top", of: window},
                     resizable: false,
-                    position: top,
                     modal: true,
                     width: 350,
                     title: "Añadir Usuario"
-                }).dialog('option', 'position', [x, y]);
+                });
             });
     }
 
@@ -150,6 +147,8 @@
 
                 if(result.response['type']=="teacher")
                     var textType = "Profesor";
+                else if(result.response['type']=="staff")
+                    var textType = "Personal no docente";
                 else
                     var textType = "Alumno";
                     
@@ -174,12 +173,10 @@
 						this.click();
 				});
 
-                x = (jQuery(window).width()-350)/2;
-                y = (jQuery(window).height()-500)/2;
-                
                 jQuery("#messageLoading").hide();
                 
                 jQuery("#dialog-form").dialog({
+                    position: { my: "center top+5%", at: "top", of: window},
                     resizable: false,
                     modal: true,
                     width: 350,
@@ -188,7 +185,7 @@
 						$("#form_data #departments").multiselect("close");
 						$("#form_data #classrooms").multiselect("close");
 					}
-                }).dialog('option', 'position', [x, y]);                        
+                });
             });               
         });
     }
@@ -257,17 +254,16 @@
 		jQuery("#dialog-form2").load("form_home_directory.html", function() {
 			jQuery("#form_dataNFS #username").val(username);			
 			jQuery("#form_dataNFS #name").val(username+" ("+typeUser(type)+")");
-			jQuery("#form_dataNFS #type").val(type);					
-			x = (jQuery(window).width()-350)/2;
-			y = (jQuery(window).height()-500)/2;			
+			jQuery("#form_dataNFS #type").val(type);
 	
 			jQuery("#dialog-form2").dialog({
+			    position: { my: "center top+5%", at: "top", of: window},
 				resizable: false,
 				position: top,
 				modal: true,
 				width: 350,
 				title: "Crear Directorio Personal"
-			}).dialog('option', 'position', [x, y]);
+			});
 		});
 	}
 
@@ -275,6 +271,7 @@
 		switch(type){
 			case 'student': return "Alumno";
 			case 'teacher': return "Profesor";
+			case 'staff': return "Personal no docente";
 		}
 	}
 </script>

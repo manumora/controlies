@@ -82,6 +82,8 @@ def generateRSAkeys(_path):
 def homeDirectory(_type):
 	if _type == "teacher":
 		homeDirectory = "/home/profesor/"
+	elif _type == "staff":
+		homeDirectory = "/home/staff/"
 	else:
 		homeDirectory = "/home/alumnos/"
 		

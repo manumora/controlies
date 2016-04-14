@@ -142,11 +142,15 @@ class Users(object):
 
         rows = []
         for i in search:
-            typeRow="Alumno"
+            typeRow=""
             userdata=i[0][1]
             if userdata["homeDirectory"][0][0:14]=="/home/profesor":
                 typeRow="Profesor"
-                
+            elif userdata["homeDirectory"][0][0:13]=="/home/alumnos":
+                typeRow="Alumno"
+            elif userdata["homeDirectory"][0][0:11]=="/home/staff":
+                typeRow="Personal"
+
             if not "employeeNumber" in userdata: userdata["employeeNumber"]=["0"]
 
             try:
@@ -223,8 +227,7 @@ class Users(object):
         return filter
 
 
-    def add(self):        
-
+    def add(self):
         maxID = str(LdapUtils.getMaxID(self.ldap))
         passwd = '{SSHA}' + Utils.encrypt(self.password)
         name = self.name+" "+self.surname
@@ -258,8 +261,8 @@ class Users(object):
         ]
 
         self.ldap.add("cn="+self.user+",ou=Group", attr)
-        
-        
+
+
         # Add selected groups   
         attr = [
         (ldap.MOD_ADD, 'member', ['uid='+self.user+',ou=People,dc=instituto,dc=extremadura,dc=es'] ),
@@ -278,7 +281,9 @@ class Users(object):
             self.ldap.modify('cn=teachers,ou=Group', attr)
         elif self.type=='student':
             self.ldap.modify('cn=students,ou=Group', attr)
-                        
+        elif self.type=='staff':
+            self.ldap.modify('cn=staff,ou=Group', attr)
+
         return "OK"
             
             
@@ -352,6 +357,7 @@ class Users(object):
 
         self.ldap.modify('cn=teachers,ou=Group', attr)
         self.ldap.modify('cn=students,ou=Group', attr)
+        self.ldap.modify('cn=staff,ou=Group', attr)
 
         for d in currentGroups["departments"]:
             self.ldap.modify('cn='+ d +',ou=Group', attr)
@@ -431,10 +437,12 @@ class Users(object):
         if len(result) == 0:
             return { "user":"", "name":"", "surname":"", "nif":"", "photo":"", "type":"","uidnumber":"","gidnumber":"", "groups":[] }
         
-        type = "student"
+        type = "staff"
         if result[0][0][1]["homeDirectory"][0][0:14]=="/home/profesor":
             type = "teacher"
-        
+        elif result[0][0][1]["homeDirectory"][0][0:13]=="/home/alumnos":
+            type = "student"
+
         try:
             photo = base64.b64encode(result[0][0][1]["jpegPhoto"][0])
         except:

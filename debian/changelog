@@ -1,7 +1,14 @@
+controlies (0.7.0-2) unstable; urgency=low
+
+  * Añadir tipo de usuario Personal no docente
+  * Nuevo tipo SIATIC
+
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Thu, 14 Apr 2016 11:30:00 +0200
+
 controlies (0.7.0-1) unstable; urgency=low
 
   * Cambiada busqueda dominio en scripts de .domain a .ns para que soporte el servidor nuevo Jessie
-  * GeneraciÃ³n de tarea puppet con la nueva sintaxis para los file "modules"
+  * Generación de tarea puppet con la nueva sintaxis para los file "modules"
   * Adaptacion de paquetes de cliente a Ubuntu 14.04 - lightdm.conf - siatics/infolabs
 
  -- Alfonso Pastor <alfonso.pastor@gmail.com>  Sat, 13 Feb 2016 20:00:00 +0200

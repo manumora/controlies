@@ -67,21 +67,24 @@
           jQuery("#list").jqGrid('navGrid','#pager',{add:false,edit:false,del:false,search:false,refresh:false});
         
             jQuery("#list").jqGrid('navButtonAdd','#pager',{
-                    caption: "Insertar",
+                    caption : "",
+                    title: "Insertar",
                     buttonicon :'ui-icon-plus',
                     onClickButton : function (){ 
                         addRecord();
                     } 
             }); 
             jQuery("#list").jqGrid('navButtonAdd','#pager',{
-                    caption: "Modificar", 
+                    caption : "",
+                    title: "Modificar",
                     buttonicon :'ui-icon-pencil',
                     onClickButton : function (){ 
                         modifyRecord();
                 } 
             }); 
             jQuery("#list").jqGrid('navButtonAdd','#pager',{
-                    caption: "Borrar", 
+                    caption : "",
+                    title: "Borrar",
                     buttonicon :'ui-icon-trash',
                     onClickButton : function (){ 
                         deleteRecord();
@@ -119,18 +122,15 @@
                 jQuery("#form_data #action").val("add");
                 jQuery("#form_data #messageForm").html("Todos los campos son obligatorios");                                     
         
-                x = (jQuery(window).width()-350)/2;
-                y = (jQuery(window).height()-500)/2;
-        
                 jQuery("#messageLoading").hide();
         
                 jQuery("#dialog-form").dialog({
+                    position: { my: "center top+5%", at: "top", of: window},
                     resizable: false,
-                    position: top,
                     modal: true,
                     width: 350,
                     title: "Añadir Marca/Modelo"
-                }).dialog('option', 'position', [x, y]);
+                });
             });
     }
     
@@ -156,17 +156,15 @@
 					jQuery("#form_data #trademark").val(result.response['trademark']);
 					jQuery("#form_data #model").val(result.response['model']);					
 
-					x = (jQuery(window).width()-350)/2;
-					y = (jQuery(window).height()-500)/2;
-					
 					jQuery("#messageLoading").hide();
 					
 					jQuery("#dialog-form").dialog({
+					    position: { my: "center top+5%", at: "top", of: window},
 						resizable: false,
 						modal: true,
 						width: 350,
 						title: "Modificar Marca/Modelo"
-					}).dialog('option', 'position', [x, y]);                        
+					});
 				});               
 			});
     }

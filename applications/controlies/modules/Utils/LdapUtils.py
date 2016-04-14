@@ -164,6 +164,8 @@ def whatHome(type):
 	
 	if type == "teacher":
 		return "/home/profesor/"
+	elif type == "staff":
+		return "/home/staff/"
 	else:
 		return "/home/alumnos/"
 

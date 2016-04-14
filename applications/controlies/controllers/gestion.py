@@ -183,10 +183,7 @@ def getClassroomDetails():
 
     #return json.dumps({ "teacher" : teacherData, "classroom" : request.args['classroom'][0], "students" : response })
 
-
-
     return dict()
-  
 
 
 @auth.requires_login()    
@@ -313,7 +310,16 @@ def subida_rayuela():
 def getLTSPServers():
     l=conecta()
     h = Hosts (l,"","","","ltsp-server-hosts")
-    #h = Hosts (l,"","","","workstation-hosts")    
+    response = h.getListTriplets()
+    l.close()
+    return dict(response=response)
+
+
+@service.json
+@auth.requires_login()
+def getSIATIC():
+    l=conecta()
+    h = Hosts (l,"","","","siatic-hosts")
     response = h.getListTriplets()
     l.close()
     return dict(response=response)
@@ -368,14 +374,14 @@ def getLTSPStatus():
         computers = rpcServer.get_computers()
     except:
         computers=()   
-                     
+
     try:
         teachers = rpcServer.get_teachers()
     except:
         teachers=()   
   
     try:
-        laptops = rpcServer.get_laptops()        
+        laptops = rpcServer.get_laptops()
         numbers={}
         
         for i in laptops:
