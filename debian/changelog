@@ -1,3 +1,9 @@
+controlies (0.7.0-3) unstable; urgency=low
+
+  * Relacion de confianza ssh con equipos y router siatic
+
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Fri, 22 Apr 2016 10:30:00 +0200
+
 controlies (0.7.0-2) unstable; urgency=low
 
   * Añadir tipo de usuario Personal no docente

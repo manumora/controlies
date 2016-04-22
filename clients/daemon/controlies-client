@@ -21,7 +21,7 @@ rundir=/var/run
 pidfile=$rundir/controlies-client/RPCServer.pid
 logfile=/var/log/controlies-client.log
 daemon="/usr/bin/python"
-application=/usr/share/controlies-client/RPCServer.py
+application=/usr/share/controlies-client/RPCLTSPServer.py
 
 test -x $DAEMON || exit 0
 test -r $application || exit 0
