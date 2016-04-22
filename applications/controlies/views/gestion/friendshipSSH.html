@@ -1,0 +1,134 @@
+<script language="javascript">
+
+	var bigDialogClose=true;
+
+    $(function() {
+    	jQuery("#response").html("");
+
+		try {            
+	    	 if(!web2py_websocket('ws://ldap:8888/realtime/mygroup',function(e){
+	    	 	
+	    	 	jQuery("#response").append(e.data);			
+				var objDiv = document.getElementById("response");
+				objDiv.scrollTop = objDiv.scrollHeight;
+	    	 	
+	    	 })) alert("html5 websocket not supported by your browser, try Google Chrome");
+		}
+		catch(err) {}
+		friendshipSSH_form();
+        jQuery("#cancelButton")
+            .button({ icons: { primary: "ui-icon-close"}})
+            .click( function(){ jQuery('#dialog-form').dialog('close'); });
+	});
+
+
+	function friendshipSSH_form(){
+		ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+		jQuery("#dialog-form2").load("friendshipSSH_form.html", function() {
+			jQuery("#dialog-form2").dialog({
+				position: { my: "center top+30%", at: "top", of: window},
+				resizable: false,
+				modal: true,
+				width: 350,
+				title: "Credenciales",
+				close: function(event, ui) {
+					jQuery("#dialog-form2").dialog("close");
+					if (bigDialogClose)
+						jQuery("#dialog-form").dialog("close");
+				}
+			});
+		});
+	}
+
+
+    function restartStyle(){
+        jQuery("#form_setFriendship p span").css("color","black");
+        jQuery('#message').html("");
+    }
+
+    function setFriendship(){
+    	ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+    	
+        restartStyle();
+        jQuery.post('call/json/setRelationshipSSH', jQuery("#form_setFriendship").serialize(), function(result) {
+            switch(result.response){
+                case "OK":{
+                	bigDialogClose=false;
+                    $('#dialog-form2').dialog('close');
+                    setFriendshipCommand(jQuery("#form_setFriendship #passhost").val(), jQuery("#form_setFriendship #passrouter").val());
+                    break;
+                }
+                default:{
+                    jQuery('#form_setFriendship #'+result.response+"Tag").css("color","red");
+                    jQuery('#form_setFriendship #'+result.response).effect("highlight", {"color":"yellow"}, 1000).focus();
+                    jQuery('#form_setFriendship #message').html("Hay campos vacíos o incorrectos").effect("slide");
+                }
+            }
+        });
+        return false;
+	}
+
+    function setFriendshipCommand(passhost, passrouter){
+
+		var selected = computersSelected();
+				
+		jQuery('#command').attr('readonly', true);
+
+    	jQuery(".progress-label").text( "0%" );
+    	$("#progressbar").progressbar({value:0});
+
+		var each = 100/selected.length;		
+		var completed=0;
+
+		for(i=0;i<selected.length;i++){						
+	        jQuery.post('call/json/setRelationshipSSH', "&host="+selected[i]+"&passhost="+passhost+"&passrouter="+passrouter, function(result) {
+	            switch(result.response){
+	                case "OK":{
+						//jQuery("#response").append(result.message.replace(/\n/g, "<br/>")+"<br/>");		
+	                    break;
+	                }
+	                case "fail":{
+						jQuery("#response").append("<span style='color:red;'>"+result.message+"</span><br>");
+	                    break;
+	                }
+	            }
+
+				var objDiv = document.getElementById("response");
+				objDiv.scrollTop = objDiv.scrollHeight;
+				
+	            completed++;
+	            
+	            if(completed==selected.length){	            	
+	            	$('#command').attr('readonly', false).val("");
+	            	$("#progressbar").progressbar({value:100});
+	            	$(".progress-label").text( "100%" );
+	            }else{
+	            	percent = Math.round(each*completed);	
+	            	jQuery("#progressbar").progressbar({value:percent});
+	            	jQuery(".progress-label").text( percent + "%" );      	
+	            }
+	        });
+		}		
+        return false;
+    }
+
+</script>
+
+  <style>
+  .ui-progressbar {
+    position: relative;
+    weight:10px;
+  }
+  .progress-label {
+    position: absolute;
+    left: 50%;
+    top: 4px;
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #fff;
+  }
+  </style>
+
+<p><div id="progressbar"><div class="progress-label"></div></div></p>
+<div id="message" style="text-align:center; font-weight:bold; color:red; padding:3px; "></div>
+<div id="response" style="height:400px; overflow:auto; background-color: #000; color:#EEE; padding-left: 1em;"></div>
+<div style="text-align:center;"><button type="button" id="cancelButton" style="width:100px;">Cerrar</button></div>

@@ -1,0 +1,26 @@
+<script language="javascript">
+
+    jQuery(function() {
+        jQuery("#form_setFriendship #passhost").focus();
+        jQuery("#form_setFriendship #setFriendshipButton").button({ icons: { primary: "ui-icon-disk"}});
+        jQuery("#form_setFriendship #cancelsetFriendshipButton")
+            .button({ icons: { primary: "ui-icon-close"}})
+            .click( function(){ jQuery('#dialog-form2').dialog('close'); });
+    });
+
+
+</script>
+ 
+<form id="form_setFriendship" onsubmit="return setFriendship();">
+    <input type="hidden" id="type" name="type" value="testFields"/>
+    <div>
+		<p style="text-align:center;">Para establecer relación de confianza SSH necesitaré las credenciales<p>
+        <div>
+            <p><span id="passhostTag">Password equipo</span><br><input type="text" id="passhost" name="passhost"/></p>
+            <p><span id="passrouterTag">Password router SIATIC (opcional)</span><br><input type="text" id="passrouter" name="passrouter"/></p>
+        </div>
+    </div>
+    <div id="message" style="text-align:center; font-weight:bold; color:red; padding:3px; "></div>
+    <div style="text-align:center;"><button id="setFriendshipButton" type="submit" style="width:100px;">Aceptar</button>&nbsp;&nbsp;<button type="button" id="cancelsetFriendshipButton" style="width:100px;">Cancelar</button></div>
+    <p style="padding-top:10px; text-align:center; font-size:10px;" id="messageForm"></p>       
+</form>
