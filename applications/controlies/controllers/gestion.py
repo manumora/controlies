@@ -738,6 +738,12 @@ def execCommandClassroom():
 def infoComputers():
     return dict()
 
+def friendshipSSH():
+    return dict()
+
+def friendshipSSH_form():
+    return dict()
+
 def form_chat():
     return dict()
 
@@ -750,3 +756,90 @@ def call():
     """
     #session.forget()
     return service()
+
+@service.json
+@auth.requires_login()
+def setRelationshipSSH():
+
+    if request.vars['type']=="testFields":
+        if request.vars['passhost'].strip()=="":
+            return dict(response="passhost")
+        else:
+            return dict(response="OK")
+
+    import subprocess
+
+    try:
+        WS.websocket_send('http://ldap:8888','<span style="font-size:14pt;">'+request.vars["host"]+'</span><br>','mykey','mygroup')
+    except:
+        return dict(response="fail", host=request.vars["host"], message="No se pudo conectar con el servidor websocket.<br/>")
+
+    dir_ssh = '/var/web2py/applications/controlies'
+
+    p = subprocess.Popen('sshpass -p '+request.vars['passhost']+' ssh-copy-id -o StrictHostKeyChecking=no -i '+dir_ssh+'/.ssh/id_rsa.pub root@'+request.vars['host'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    try:
+        HTML_PARSER = ansi2html()
+        html = HTML_PARSER.parse(p.communicate()[0])
+        WS.websocket_send('http://ldap:8888',html,'mykey','mygroup')
+    except:
+        pass
+
+    if request.vars['passrouter'].strip():
+        p = subprocess.Popen('sshpass -p '+request.vars['passhost']+' ssh -A -t -o StrictHostKeyChecking=no root@'+request.vars["host"]+' sshpass -p '+request.vars['passrouter']+' ssh-copy-id -o StrictHostKeyChecking=no root@192.168.0.1', shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        try:
+            HTML_PARSER = ansi2html()
+            html = HTML_PARSER.parse(p.communicate()[0])
+            WS.websocket_send('http://ldap:8888','<span style="font-size:14pt;">Router '+request.vars["host"]+'</span><br/>'+html,'mykey','mygroup')
+        except:
+            pass
+
+    return dict(response = "OK")
+
+    c = SSHConnection(request.vars['host'],"root","")
+    response = c.connectWithoutPass("/var/web2py/applications/controlies/.ssh/id_rsa")
+
+    if not response:
+        return dict(response = "YetSSH", host=request.vars["host"], message="Este host ya tiene relación de confianza<br/>") #Ya tenía establecida relación de confianza SSH
+
+    try:
+        WS.websocket_send('http://ldap:8888','<span style="font-size:14pt;">'+request.vars["host"]+'</span><br>','mykey','mygroup')
+    except:
+        return dict(response="fail", host=request.vars["host"], message="No se pudo conectar con el servidor websocket.<br/>")
+
+    try:
+        dir_ssh = "/var/web2py/applications/controlies"
+        c.open_ftp()
+        c.removeFile("/tmp/controlIES_rsa.pub")
+        c.putFile(dir_ssh+"/.ssh/id_rsa.pub","/tmp/controlIES_rsa.pub")
+        c.exec_command('cat /tmp/controlIES_rsa.pub >> /root/.ssh/authorized_keys')
+        c.close_ftp()
+
+        if request.vars['type']=="SIATIC" and request.vars['passrouter']:
+            import subprocess
+
+            channel = subprocess.Popen('ssh -A -t root@'+request.vars['hostname']+' sshpass -p '+request.vars['routerPass']+' ssh-copy-id root@192.168.0.1', shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+            import select
+            while True:
+                if channel.exit_status_ready():
+                    break
+                rl, wl, xl = select.select([channel], [], [], 0.0)
+                if len(rl) > 0:
+                    HTML_PARSER = ansi2html()
+                    html = HTML_PARSER.parse(channel.recv(1024))
+                    try:
+                        WS.websocket_send('http://ldap:8888',html,'mykey','mygroup')
+                    except:
+                        pass
+
+            WS.websocket_send('http://ldap:8888','<br>','mykey','mygroup')
+            channel.close()
+
+    except:
+        return dict(response = "Error")
+        pass
+
+    c.close()
+    return dict(response = "OK")
+    #ssh -A -t root@a35-pro ssh-copy-id root@192.168.0.1
+    #ssh -A -t root@a02-pro sshpass -p TexFono1 ssh-copy-id root@192.168.0.1

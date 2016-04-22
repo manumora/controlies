@@ -40,7 +40,7 @@ def getLoginName():
     thinclient="False"
     if loginname == '':
         loginname = data[0]
-        if "profesor" in data[5]:
+        if "profesor" in data[5] or "staff" in data[5]:
             hostname = getHostName()
         else:
             h = subprocess.Popen(["who | grep '"+loginname+"' | awk '{ print $5}'"],shell=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT).communicate()[0]
