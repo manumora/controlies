@@ -776,7 +776,9 @@ def setRelationshipSSH():
 
     dir_ssh = '/var/web2py/applications/controlies'
 
-    p = subprocess.Popen('sshpass -p '+request.vars['passhost']+' ssh-copy-id -o StrictHostKeyChecking=no -i '+dir_ssh+'/.ssh/id_rsa.pub root@'+request.vars['host'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    p = subprocess.Popen('eval $(ssh-agent); ssh-add', shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+    p = subprocess.Popen('sshpass -p '+request.vars['passhost']+' ssh-copy-id -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i '+dir_ssh+'/.ssh/id_rsa.pub root@'+request.vars['host'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     try:
         HTML_PARSER = ansi2html()
         html = HTML_PARSER.parse(p.communicate()[0])
@@ -785,7 +787,7 @@ def setRelationshipSSH():
         pass
 
     if request.vars['passrouter'].strip():
-        p = subprocess.Popen('sshpass -p '+request.vars['passhost']+' ssh -A -t -o StrictHostKeyChecking=no root@'+request.vars["host"]+' sshpass -p '+request.vars['passrouter']+' ssh-copy-id -o StrictHostKeyChecking=no root@192.168.0.1', shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        p = subprocess.Popen('eval $(ssh-agent) sshpass -p '+request.vars['passhost']+' ssh -A -t -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i '+dir_ssh+'/.ssh/id_rsa.pub root@'+request.vars["host"]+' sshpass -p '+request.vars['passrouter']+' ssh-copy-id -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@192.168.0.1', shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         try:
             HTML_PARSER = ansi2html()
             html = HTML_PARSER.parse(p.communicate()[0])
