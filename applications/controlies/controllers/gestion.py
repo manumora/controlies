@@ -767,8 +767,6 @@ def setRelationshipSSH():
         else:
             return dict(response="OK")
 
-    import subprocess
-
     try:
         WS.websocket_send('http://ldap:8888','<span style="font-size:14pt;">'+request.vars["host"]+'</span><br>','mykey','mygroup')
     except:
@@ -776,8 +774,7 @@ def setRelationshipSSH():
 
     dir_ssh = '/var/web2py/applications/controlies'
 
-    p = subprocess.Popen('eval $(ssh-agent); ssh-add', shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-
+    import subprocess
     p = subprocess.Popen('sshpass -p '+request.vars['passhost']+' ssh-copy-id -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i '+dir_ssh+'/.ssh/id_rsa.pub root@'+request.vars['host'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     try:
         HTML_PARSER = ansi2html()
@@ -787,7 +784,25 @@ def setRelationshipSSH():
         pass
 
     if request.vars['passrouter'].strip():
-        p = subprocess.Popen('eval $(ssh-agent) sshpass -p '+request.vars['passhost']+' ssh -A -t -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i '+dir_ssh+'/.ssh/id_rsa.pub root@'+request.vars["host"]+' sshpass -p '+request.vars['passrouter']+' ssh-copy-id -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@192.168.0.1', shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+	    idRsaPub = open("/var/web2py/applications/controlies/.ssh/id_rsa.pub", "r").readline().replace("\n","").replace("\r","")
+
+        c = SSHConnection(request.vars['host'],"root","")
+        response = c.connectWithoutPass("/var/web2py/applications/controlies/.ssh/id_rsa")
+
+        if response != True:
+            WS.websocket_send('http://ldap:8888',response+'<br>','mykey','mygroup')
+            return dict(response = "OK")
+
+        c.open_ftp()
+        c.removeFile(dir_ssh+"/.ssh/controlIES_rsa.pub")
+        c.removeFile(dir_ssh+"/.ssh/controlIES_rsa")
+        c.putFile(dir_ssh+"/.ssh/id_rsa.pub","/root/.ssh/controlIES_rsa.pub")
+        c.putFile(dir_ssh+"/.ssh/id_rsa","/root/.ssh/controlIES_rsa")
+        c.exec_command("chmod 600 /root/.ssh/controlIES_rsa")
+        #c.exec_command("sshpass -p "+request.vars['passrouter'].strip()+" ssh root@192.168.0.1 \"if ! grep -Fxq '"+idRsaPub+"' /tmp/root/.ssh/authorized_keys > /dev/null ; then echo '"+idRsaPub+"' >> /tmp/root/.ssh/authorized_keys; fi\"")
+
+        p = subprocess.Popen('sshpass -p '+request.vars['passhost']+' ssh -A -t -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i '+dir_ssh+'/.ssh/id_rsa root@'+request.vars["host"]+' sshpass -p '+request.vars['passrouter']+' ssh-copy-id -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i /root/.ssh/controlIES_rsa.pub root@192.168.0.1', shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         try:
             HTML_PARSER = ansi2html()
             html = HTML_PARSER.parse(p.communicate()[0])
@@ -795,9 +810,12 @@ def setRelationshipSSH():
         except:
             pass
 
+        c.removeFile("/root/.ssh/controlIES_rsa.pub")
+        c.removeFile("/root/.ssh/controlIES_rsa")
+
     return dict(response = "OK")
 
-    c = SSHConnection(request.vars['host'],"root","")
+    """c = SSHConnection(request.vars['host'],"root","")
     response = c.connectWithoutPass("/var/web2py/applications/controlies/.ssh/id_rsa")
 
     if not response:
@@ -842,6 +860,6 @@ def setRelationshipSSH():
         pass
 
     c.close()
-    return dict(response = "OK")
+    return dict(response = "OK")"""
     #ssh -A -t root@a35-pro ssh-copy-id root@192.168.0.1
     #ssh -A -t root@a02-pro sshpass -p TexFono1 ssh-copy-id root@192.168.0.1
