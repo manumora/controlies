@@ -89,7 +89,7 @@ def create_home_directory_withoutpass():
     if response != True:
         return dict(response = response)
 		
-    make_directory(request.vars['username'],request.vars['type'])
+    make_directory(request.vars['username'],request.vars['type'], c)
 
     return dict(response = "OK")
 
@@ -104,7 +104,7 @@ def create_home_directory():
     if response != True:
         return dict(response = response)
 
-    make_directory(request.vars['username'],request.vars['type'])
+    make_directory(request.vars['username'],request.vars['type'], c)
 
     try:
         if request.vars["trustRelationship"] == "on":
@@ -121,7 +121,7 @@ def create_home_directory():
     c.close()    
     return dict(response = "OK")       
 
-def make_directory(username, type):
+def make_directory(username, type, c):
     l=conecta()
     u = Users(l,"","","","",username,"","","","")
     responseUser = u.getUserData()

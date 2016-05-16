@@ -23,6 +23,12 @@ case "$1" in
      then
        echo "Include /etc/apache2/conf.d/*" >> /etc/apache2/apache2.conf
      fi
+
+	cadena=`cat /var/web2py/applications/controlies/.ssh/id_rsa.pub`
+	if ! grep "$cadena" /root/.ssh/authorized_keys
+	then
+		    echo $cadena >> /root/.ssh/authorized_keys
+	fi
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

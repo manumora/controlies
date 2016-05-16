@@ -98,7 +98,12 @@ def servidores_aula():
         response = t2.move(c)
     
     l.close()
-    
+
+    c = SSHConnection(request.vars['host'],"root","")
+    response = c.connectWithoutPass("/var/web2py/applications/controlies/.ssh/id_rsa")
+    c.exec_command("if ! pgrep ssh-agent ; then eval $(ssh-agent -s); fi")
+    #c.exec_command("ssh-add /var/web2py/applications/controlies/.ssh/id_rsa")
+    c.close()
     return dict()
 
 
@@ -785,7 +790,7 @@ def setRelationshipSSH():
 
     if request.vars['passrouter'].strip():
 
-	    idRsaPub = open("/var/web2py/applications/controlies/.ssh/id_rsa.pub", "r").readline().replace("\n","").replace("\r","")
+        idRsaPub = open("/var/web2py/applications/controlies/.ssh/id_rsa.pub", "r").readline().replace("\n","").replace("\r","")
 
         c = SSHConnection(request.vars['host'],"root","")
         response = c.connectWithoutPass("/var/web2py/applications/controlies/.ssh/id_rsa")
@@ -813,6 +818,7 @@ def setRelationshipSSH():
         c.removeFile("/root/.ssh/controlIES_rsa.pub")
         c.removeFile("/root/.ssh/controlIES_rsa")
 
+        c.close()
     return dict(response = "OK")
 
     """c = SSHConnection(request.vars['host'],"root","")
