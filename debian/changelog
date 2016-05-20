@@ -1,3 +1,9 @@
+controlies (0.7.0-4) unstable; urgency=low
+
+  * Gestión de los Puntos de Acceso
+
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Fri, 20 May 2016 12:00:00 +0200
+
 controlies (0.7.0-3) unstable; urgency=low
 
   * Relacion de confianza ssh con equipos y router siatic

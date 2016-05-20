@@ -96,6 +96,11 @@
             .button({ icons: { primary: "ui-icon-heart"}})
             .click(function(){ setFriendshipSSH(); });
 
+        $( "#passwordAP" )
+            .css("font-size","11px")
+            .button({ icons: { primary: "ui-icon-signal-diag"}})
+            .click(function(){ routerCommands(); });
+
         $( "#selectable0" ).selectable();
         $( "#selectable1" ).selectable();
         $( "#selectable2" ).selectable();
@@ -338,6 +343,30 @@
             });
 		});
 	}
+
+	function routerCommands(){
+		var selected = computersSelected();
+		if(selected.length==0){
+			modalAlert("Para realizar la acci&oacute;n debe seleccionar al menos un equipo");
+			return;
+		}
+
+		jQuery("#dialog-form").html("").css("display","none");
+		jQuery("#dialog-form").load("routerCommands.html", function(data) {
+
+            jQuery("#messageLoading").hide();
+
+            jQuery("#dialog-form").dialog({
+				position: { my: "center top+20%", at: "top", of: window},
+                resizable: false,
+                modal: true,
+                width: 750,
+                title: "Puntos de Acceso",
+                close: function(ev, ui) { web2py_websocket_stop(); },
+            });
+		});
+	}
+
 </script>
 <table width="100%" cellspacing="12">
 <tr>
@@ -375,6 +404,9 @@
                 </tr>
                 <tr>
                     <td style="text-align:center;"><button id="friendshipSSH" style="width:123px;">Confianza SSH</button></td>
+                </tr>
+                <tr>
+                    <td style="text-align:center;"><button id="passwordAP" style="width:123px;">Wifi AP</button></td>
                 </tr>
             </table>
         </div>

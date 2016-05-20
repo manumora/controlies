@@ -1,0 +1,193 @@
+<script language="javascript">
+
+	var bigDialogClose=true;
+
+    $(function() {
+        jQuery("#getDataAP")
+            .button({ icons: { primary: "ui-icon-close"}})
+            .click( function(){ commandRouter("getData"); });
+
+        jQuery("#setDataAP")
+            .button({ icons: { primary: "ui-icon-close"}})
+            .click( function(){ setData_form() });
+
+        jQuery("#enableWifi")
+            .button({ icons: { primary: "ui-icon-close"}})
+            .click( function(){ commandRouter("enableWifi"); });
+
+        jQuery("#disableWifi")
+            .button({ icons: { primary: "ui-icon-close"}})
+            .click( function(){ commandRouter("disableWifi"); });
+
+    	jQuery("#response").html("");
+
+	try {            
+    	 if(!web2py_websocket('ws://ldap:8888/realtime/mygroup',function(e){
+    	 	
+    	 	jQuery("#response").append(e.data);			
+			var objDiv = document.getElementById("response");
+			objDiv.scrollTop = objDiv.scrollHeight;
+    	 	
+    	 })) alert("html5 websocket not supported by your browser, try Google Chrome");
+	}
+	catch(err) {}
+
+        jQuery("#cancelButton")
+            .button({ icons: { primary: "ui-icon-close"}})
+            .click( function(){ jQuery('#dialog-form').dialog('close'); });
+	});
+
+
+	function setData_form(){
+		ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+		jQuery("#dialog-form2").load("routerCommands_form.html", function() {
+			jQuery("#dialog-form2").dialog({
+				position: { my: "center top+20%", at: "top", of: window},
+				resizable: false,
+				modal: true,
+				width: 480,
+				title: "Establecer datos Punto de Acceso",
+				close: function(event, ui) {
+					jQuery("#dialog-form2").dialog("close");
+				}
+			});
+		});
+	}
+
+
+    function restartStyle(){
+        jQuery("#form_setDataAP p span").css("color","black");
+        jQuery('#message').html("");
+    }
+
+    function setDataAP(){
+    	ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+    	
+        restartStyle();
+
+	var selected = computersSelected();
+	jQuery('#command').attr('readonly', true);
+
+    	jQuery(".progress-label").text( "0%" );
+    	$("#progressbar").progressbar({value:0});
+
+	var each = 100/selected.length;		
+	var completed=0;
+
+	bigDialogClose=false;
+	//$('#dialog-form2').dialog('close');
+	for(i=0;i<selected.length;i++){		
+
+		jQuery.post('call/json/setDataAP', jQuery("#form_setDataAP").serialize()+"&host="+selected[i], function(result) {
+		    switch(result.response){
+			case "OK":{
+			    $('#dialog-form2').dialog('close');
+			    break;
+			}
+			case "noData":{
+			    jQuery('#form_setDataAP #'+result.response+"Tag").css("color","red");
+			    jQuery('#form_setDataAP #'+result.response).effect("highlight", {"color":"yellow"}, 1000).focus();
+			    jQuery('#form_setDataAP #message').html("No hay datos que actualizar").effect("slide");
+			    break;
+			}
+			case "wrongLength":{
+			    jQuery('#form_setDataAP #message').html("El password de la wifi debe contener<br>entre 8 y 63 caracteres").effect("slide");
+			    break;
+			}
+			default:{
+			    jQuery('#form_setDataAP #'+result.response+"Tag").css("color","red");
+			    jQuery('#form_setDataAP #'+result.response).effect("highlight", {"color":"yellow"}, 1000).focus();
+			    jQuery('#form_setDataAP #message').html("Hay campos vacíos o incorrectos").effect("slide");
+			    break;
+			}
+		    }
+		    var objDiv = document.getElementById("response");
+		    objDiv.scrollTop = objDiv.scrollHeight;
+			
+		    completed++;
+		    
+		    if(completed==selected.length){	            	
+		    	$('#command').attr('readonly', false).val("");
+		    	$("#progressbar").progressbar({value:100});
+		    	$(".progress-label").text( "100%" );
+		    }else{
+		    	percent = Math.round(each*completed);	
+		    	jQuery("#progressbar").progressbar({value:percent});
+		    	jQuery(".progress-label").text( percent + "%" );      	
+		    }
+		});
+	}	
+        return false;
+	}
+
+    function commandRouter(command){
+
+	var selected = computersSelected();
+	jQuery('#command').attr('readonly', true);
+
+    	jQuery(".progress-label").text( "0%" );
+    	$("#progressbar").progressbar({value:0});
+
+	var each = 100/selected.length;		
+	var completed=0;
+
+	bigDialogClose=false;
+	//$('#dialog-form2').dialog('close');
+	for(i=0;i<selected.length;i++){						
+		jQuery.post('call/json/commandsAP', "&host="+selected[i]+"&command="+command, function(result) {
+		    switch(result.response){
+		        case "OK":{
+			    //jQuery("#response").append(result.message.replace(/\n/g, "<br/>")+"<br/>");		
+		            break;
+		        }
+		        case "fail":{
+			    jQuery("#response").append("<span style='color:red;'>"+result.message+"</span><br>");
+		            break;
+		        }
+		    }
+
+		    var objDiv = document.getElementById("response");
+		    objDiv.scrollTop = objDiv.scrollHeight;
+			
+		    completed++;
+		    
+		    if(completed==selected.length){	            	
+		    	$('#command').attr('readonly', false).val("");
+		    	$("#progressbar").progressbar({value:100});
+		    	$(".progress-label").text( "100%" );
+		    }else{
+		    	percent = Math.round(each*completed);	
+		    	jQuery("#progressbar").progressbar({value:percent});
+		    	jQuery(".progress-label").text( percent + "%" );      	
+		    }
+		});
+	}		
+        return false;
+    }
+
+</script>
+
+  <style>
+  .ui-progressbar {
+    position: relative;
+    weight:10px;
+  }
+  .progress-label {
+    position: absolute;
+    left: 50%;
+    top: 4px;
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #fff;
+  }
+  </style>
+
+<div id="message" style="text-align:center; font-weight:bold; color:red; padding:3px; "></div>
+<div style="text-align:center">
+	<button id="getDataAP" type="button" style="width:150px;">Obtener Datos</button>&nbsp;
+	<button id="setDataAP" type="button" style="width:150px;">Establecer Datos</button>&nbsp;
+	<button id="enableWifi" type="button" style="width:150px;">Activar Wifi</button>&nbsp;
+	<button id="disableWifi" type="button" style="width:150px;">Desactivar Wifi</button>
+</div>
+<p><div id="progressbar"><div class="progress-label"></div></div></p>
+<div id="response" style="height:400px; overflow:auto; background-color: #000; color:#EEE; padding-left: 1em;"></div>
+<div style="text-align:center;"><button type="button" id="cancelButton" style="width:100px;">Cerrar</button></div>

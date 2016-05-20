@@ -1,0 +1,43 @@
+<script language="javascript">
+
+    jQuery(function() {
+        jQuery("#form_setDataAP #passroot").focus();
+        jQuery("#form_setDataAP #setDataAPButton").button({ icons: { primary: "ui-icon-disk"}});
+        jQuery("#form_setDataAP #cancelDataAPButton")
+            .button({ icons: { primary: "ui-icon-close"}})
+            .click( function(){ jQuery('#dialog-form2').dialog('close'); });
+    });
+
+
+</script>
+ 
+<form id="form_setDataAP" onsubmit="return setDataAP();">
+    <div>
+        <div>
+	  <fieldset>
+	    <legend>Datos generales</legend>
+		<p><span id="nameAPTag">Nombre AP</span><br><input type="text" id="nameAP" name="nameAP"/>&nbsp;<input type="checkbox" id="nameAPcheck" name="nameAPcheck"/></p>
+            	<p><span id="passrootTag">Password administración</span><br><input type="text" id="passroot" name="passroot"/></p>
+	  </fieldset>
+	  <br/>
+	  <fieldset>
+	    <legend>Wifi 2.4 Ghz</legend>
+		<p><span id="ssidATag">SSID</span><br><input type="text" id="ssidA" name="ssidA"/>&nbsp;<input type="checkbox" id="ssidAcheck" name="ssidAcheck"/></p>
+		<p><span id="passATag">Password</span><br><input type="text" id="passA" name="passA"/>&nbsp;<input type="checkbox" id="passAcheck" name="passAcheck"/></p>
+	  </fieldset>
+	  <br/>
+	  <fieldset>
+	    <legend>Wifi 5 Ghz</legend>
+		<p><span id="ssidBTag">SSID</span><br><input type="text" id="ssidB" name="ssidB"/>&nbsp;<input type="checkbox" id="ssidBcheck" name="ssidBcheck"/></p>
+		<p><span id="passBTag">Password</span><br><input type="text" id="passB" name="passB"/>&nbsp;<input type="checkbox" id="passBcheck" name="passBcheck"/></p>
+	  </fieldset>
+        </div>
+    </div>
+	<br>
+    <p style="text-align:center;">Checkbox: establecen como prefijo el nombre del servidor de aula<p>
+    <p style="text-align:center;">Los campos vac&iacute;os no sufrir&aacute;n ning&uacute;n cambio<p>
+    <p style="text-align:center;">Importante: esta acci&oacute;n reiniciará el Punto de Acceso<p>
+    <div id="message" style="text-align:center; font-weight:bold; color:red; padding:3px; "></div>
+    <div style="text-align:center;"><button id="setDataAPButton" type="submit" style="width:100px;">Aceptar</button>&nbsp;&nbsp;<button type="button" id="cancelDataAPButton" style="width:100px;">Cancelar</button></div>
+    <p style="padding-top:10px; text-align:center; font-size:10px;" id="messageForm"></p>       
+</form>

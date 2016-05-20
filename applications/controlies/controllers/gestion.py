@@ -16,6 +16,7 @@ from gluon.tools import Mail
 
 import re
 import cgi
+import select
 from applications.controlies.modules import ansi
 from applications.controlies.modules.ansi2html import ansi2html
 from applications.controlies.modules.SSHConnection import SSHConnection
@@ -99,8 +100,11 @@ def servidores_aula():
     
     l.close()
 
-    c = SSHConnection(request.vars['host'],"root","")
+    c = SSHConnection("localhost","root","")
     response = c.connectWithoutPass("/var/web2py/applications/controlies/.ssh/id_rsa")
+    if response != True:
+        return dict()
+
     c.exec_command("if ! pgrep ssh-agent ; then eval $(ssh-agent -s); fi")
     #c.exec_command("ssh-add /var/web2py/applications/controlies/.ssh/id_rsa")
     c.close()
@@ -749,6 +753,12 @@ def friendshipSSH():
 def friendshipSSH_form():
     return dict()
 
+def routerCommands():
+    return dict()
+
+def routerCommands_form():
+    return dict()
+
 def form_chat():
     return dict()
 
@@ -815,6 +825,8 @@ def setRelationshipSSH():
         except:
             pass
 
+        p = subprocess.Popen('sshpass -p '+request.vars['passhost']+' ssh -A -t -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i '+dir_ssh+'/.ssh/id_rsa root@'+request.vars["host"]+' sshpass -p '+request.vars['passrouter']+' ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@192.168.0.1 "nvram set sshd_authorized_keys=\''+idRsaPub.replace(" ","\\ ")+'\' nvram commit"', shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
         c.removeFile("/root/.ssh/controlIES_rsa.pub")
         c.removeFile("/root/.ssh/controlIES_rsa")
 
@@ -869,3 +881,228 @@ def setRelationshipSSH():
     return dict(response = "OK")"""
     #ssh -A -t root@a35-pro ssh-copy-id root@192.168.0.1
     #ssh -A -t root@a02-pro sshpass -p TexFono1 ssh-copy-id root@192.168.0.1
+
+def getChannel(channel, name):
+    while True:
+        if channel.exit_status_ready():
+            break
+        rl, wl, xl = select.select([channel], [], [], 0.0)
+        if len(rl) > 0:
+            HTML_PARSER = ansi2html()
+            html = HTML_PARSER.parse(channel.recv(1024))
+            try:
+                if html=="":
+                    html="<br/>"
+                WS.websocket_send('http://ldap:8888',name+": "+html,'mykey','mygroup')
+            except:
+                pass
+
+@service.json
+@auth.requires_login()
+def commandsAP():
+    from applications.controlies.modules import paramiko2
+
+    proxy_key = "/var/web2py/applications/controlies/.ssh/id_rsa"
+    proxy_user=user="root"
+    proxy_host=request.vars["host"]
+    host="192.168.0.1"
+
+    proxy_command = 'ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i %s %s@%s nc %s %s' % (proxy_key, proxy_user, proxy_host, host, 22)
+    proxy = paramiko2.ProxyCommand(proxy_command)
+
+    client = paramiko2.SSHClient()
+    client.set_missing_host_key_policy(paramiko2.AutoAddPolicy())
+
+    WS.websocket_send('http://ldap:8888','<br><span style="font-size:14pt;">'+request.vars["host"]+'</span><br>','mykey','mygroup')
+
+    try:
+        client.connect(proxy_host, username=user, key_filename="/var/web2py/applications/controlies/.ssh/id_rsa", timeout=5)
+    except:
+        WS.websocket_send('http://ldap:8888','<span style="font-size:10pt;">No se pudo conectar. ¿Está encendido el equipo? ¿Has establecido la relación de confianza?</span><br>','mykey','mygroup')
+        return dict()
+
+    try:
+        client.connect(host, username=user, key_filename="/var/web2py/applications/controlies/.ssh/id_rsa", sock=proxy)
+    except:
+        WS.websocket_send('http://ldap:8888','<span style="font-size:10pt;">No se pudo conectar con el punto de acceso. ¿Está encendido? ¿Has establecido la relación de confianza?</span><br>','mykey','mygroup')
+        return dict()
+
+    if request.vars["command"]=="getData":
+        #stdin, stdout, stderr = client.exec_command('hostname')
+        channel = client.get_transport().open_session()
+        channel.exec_command('nvram get router_name')
+        getChannel(channel, "Router name")
+
+        WS.websocket_send('http://ldap:8888','------------<br/>Red 2.4Ghz<br/>','mykey','mygroup')
+
+        channel = client.get_transport().open_session()
+        channel.exec_command('nvram get wl0_ssid')
+        getChannel(channel, "SSID")
+
+        channel = client.get_transport().open_session()
+        channel.exec_command('nvram get wl0_wpa_psk')
+        getChannel(channel, "Password")
+
+        channel = client.get_transport().open_session()
+        channel.exec_command('cat /sys/devices/virtual/net/ra0/operstate')
+        getChannel(channel, "Estado")
+
+        WS.websocket_send('http://ldap:8888','------------<br/>Red 5Ghz<br/>','mykey','mygroup')
+
+        channel = client.get_transport().open_session()
+        channel.exec_command('nvram get wl1_ssid')
+        getChannel(channel, "SSID")
+
+        channel = client.get_transport().open_session()
+        channel.exec_command('nvram get wl1_wpa_psk')
+        getChannel(channel, "Password")
+
+        channel = client.get_transport().open_session()
+        channel.exec_command('cat /sys/devices/virtual/net/ba0/operstate')
+        getChannel(channel, "Estado")
+
+        #WS.websocket_send('http://ldap:8888','<br>','mykey','mygroup')
+        channel.close()
+        client.close()
+
+    if request.vars["command"]=="enableWifi":
+        channel = client.get_transport().open_session()
+        channel.exec_command('ifconfig ra0 up; ifconfig ba0 up')
+        WS.websocket_send('http://ldap:8888','Wifi activada<br/>','mykey','mygroup')
+
+    if request.vars["command"]=="disableWifi":
+        channel = client.get_transport().open_session()
+        #channel.exec_command('setuserpasswd root SAVISA34')
+        channel.exec_command('ifconfig ra0 down; ifconfig ba0 down')
+        WS.websocket_send('http://ldap:8888','Wifi desactivada<br/>','mykey','mygroup')
+
+    return dict(response = "OK")
+
+@service.json
+@auth.requires_login()
+def setDataAP():
+    if request.vars["nameAP"].strip()=="" and request.vars["passroot"].strip()=="" and request.vars["ssidA"].strip()=="" and request.vars["passA"].strip()=="" and request.vars["ssidB"].strip()=="" and request.vars["passB"].strip()=="" and request.vars["nameAPcheck"]=="" and request.vars["ssidAcheck"]=="" and request.vars["ssidBcheck"]=="" and request.vars["passAcheck"]=="" and request.vars["passBcheck"]=="":
+        return dict(response = "noData")
+
+    if request.vars["passA"].strip()!="":
+        if len(request.vars["passA"])<8 or len(request.vars["passA"])>63:
+            return dict(response = "wrongLength")
+
+    if request.vars["passB"].strip()!="":
+        if len(request.vars["passB"])<8 or len(request.vars["passB"])>63:
+            return dict(response = "wrongLength")
+
+    from applications.controlies.modules import paramiko2
+
+    proxy_key = "/var/web2py/applications/controlies/.ssh/id_rsa"
+    proxy_user=user="root"
+    proxy_host=request.vars["host"]
+    host="192.168.0.1"
+
+    proxy_command = 'ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i %s %s@%s nc %s %s' % (proxy_key, proxy_user, proxy_host, host, 22)
+    proxy = paramiko2.ProxyCommand(proxy_command)
+
+    client = paramiko2.SSHClient()
+    client.set_missing_host_key_policy(paramiko2.AutoAddPolicy())
+
+    WS.websocket_send('http://ldap:8888','<br><span style="font-size:14pt;">'+request.vars["host"]+'</span><br>','mykey','mygroup')
+
+    try:
+        client.connect(proxy_host, username=user, key_filename="/var/web2py/applications/controlies/.ssh/id_rsa", timeout=5)
+    except:
+        WS.websocket_send('http://ldap:8888','<span style="font-size:10pt;">No se pudo conectar. ¿Está encendido el equipo? ¿Has establecido la relación de confianza?</span><br>','mykey','mygroup')
+        return dict(response = "OK")
+
+    try:
+        client.connect(host, username=user, key_filename="/var/web2py/applications/controlies/.ssh/id_rsa", sock=proxy)
+    except:
+        WS.websocket_send('http://ldap:8888','<span style="font-size:10pt;">No se pudo conectar con el punto de acceso. ¿Está encendido? ¿Has establecido la relación de confianza?</span><br>','mykey','mygroup')
+        return dict(response = "OK")
+
+    if request.vars["nameAP"].strip()!="" or request.vars["nameAPcheck"]=="on":
+        if request.vars["nameAPcheck"]=="on":
+            request.vars["nameAP"] = request.vars["host"]+request.vars["nameAP"]
+
+        channel = client.get_transport().open_session()
+        channel.exec_command('nvram set router_name="'+request.vars["nameAP"].strip()+'"; nvram set wan_hostname="'+request.vars["nameAP"].strip()+'"; nvram commit;')
+        WS.websocket_send('http://ldap:8888','Nombre del punto de acceso actualizado<br/>','mykey','mygroup')
+
+    if request.vars["passroot"].strip()!="":
+        channel = client.get_transport().open_session()
+        channel.exec_command('setuserpasswd root '+request.vars["passroot"].strip())
+        WS.websocket_send('http://ldap:8888','Password de administrador actualizado<br/>','mykey','mygroup')
+
+    if request.vars["ssidA"].strip()!="" or request.vars["ssidAcheck"]=="on":
+        if request.vars["ssidAcheck"]=="on":
+            request.vars["ssidA"] = request.vars["host"]+request.vars["ssidA"]
+
+        channel = client.get_transport().open_session()
+        channel.exec_command('nvram set wl0_ssid="'+request.vars["ssidA"].strip()+'"; nvram commit;')
+        WS.websocket_send('http://ldap:8888','SSID 2.4 Ghz actualizado<br/>','mykey','mygroup')
+
+    if request.vars["passA"].strip()!="" or request.vars["passAcheck"]=="on":
+        if request.vars["passAcheck"]=="on":
+            request.vars["passA"] = request.vars["host"]+request.vars["passA"]
+
+        channel = client.get_transport().open_session()
+        channel.exec_command('nvram set wl0_wpa_gtk_rekey="3600"; nvram set wl0_crypto="tkip+aes"; nvram set wl0_akm="psk2"; nvram set wl0_security_mode="psk2"; nvram set wl0_closed="0" nvram set wl0_wpa_psk="'+request.vars["passA"].strip()+'"; nvram commit;')
+        WS.websocket_send('http://ldap:8888','Password 2.4 Ghz actualizado<br/>','mykey','mygroup')
+
+    if request.vars["ssidB"].strip()!="" or request.vars["ssidBcheck"]=="on":
+        if request.vars["ssidBcheck"]=="on":
+            request.vars["ssidB"] = request.vars["host"]+request.vars["ssidB"]
+
+        channel = client.get_transport().open_session()
+        channel.exec_command('nvram set wl1_ssid="'+request.vars["ssidB"].strip()+'_B"; nvram commit;')
+        WS.websocket_send('http://ldap:8888','SSID 5 Ghz actualizado<br/>','mykey','mygroup')
+
+    if request.vars["passB"].strip()!="" or request.vars["passBcheck"]=="on":
+        if request.vars["passBcheck"]=="on":
+            request.vars["passB"] = request.vars["host"]+request.vars["passB"]
+
+        channel = client.get_transport().open_session()
+        channel.exec_command('nvram set wl1_wpa_gtk_rekey="3600"; nvram set wl1_crypto="tkip+aes"; nvram set wl1_akm="psk2"; nvram set wl1_security_mode="psk2"; nvram set wl1_closed="0"; nvram set wl1_wpa_psk="'+request.vars["passB"].strip()+'"; nvram commit;')
+        WS.websocket_send('http://ldap:8888','Password 5 Ghz actualizado<br/>','mykey','mygroup')
+
+    channel = client.get_transport().open_session()
+    channel.exec_command('reboot')
+    WS.websocket_send('http://ldap:8888','Reiniciando AP...<br/>','mykey','mygroup')
+
+    return dict(response = "OK")
+    """try:
+        WS.websocket_send('http://ldap:8888','<span style="font-size:14pt;">'+request.vars["host"]+'</span><br>','mykey','mygroup')
+    except:
+        return dict(response="fail", host=request.vars["host"], message="No se pudo conectar con el servidor websocket.<br/>")
+
+    dir_ssh = '/var/web2py/applications/controlies'
+
+    import subprocess
+    comando = 'ssh -v -A -t -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i '+dir_ssh+'/.ssh/id_rsa root@'+request.vars['host']+' ssh -A -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@192.168.0.1 nvram get wl0_wpa_psk'
+    #comando = 'ssh -i '+dir_ssh+'/.ssh/id_rsa root@'+request.vars['host']+' ls /etc'
+    c = SSHConnection("localhost","root","")
+    response = c.connectWithoutPass("/var/web2py/applications/controlies/.ssh/id_rsa")
+    if response != True:
+        return dict()
+
+    channel = c.exec_command(comando)
+    WS.websocket_send('http://ldap:8888',comando,'mykey','mygroup')
+    import select
+    while True:
+        WS.websocket_send('http://ldap:8888',channel.recv(1024),'mykey','mygroup')
+        if channel.exit_status_ready():
+            break
+        rl, wl, xl = select.select([channel], [], [], 0.0)
+        if len(rl) > 0:
+            HTML_PARSER = ansi2html()
+            html = HTML_PARSER.parse(channel.recv(1024))
+            try:
+                WS.websocket_send('http://ldap:8888',html,'mykey','mygroup')
+            except:
+                pass
+
+    WS.websocket_send('http://ldap:8888','<br>','mykey','mygroup')
+    channel.close()
+    c.close()
+
+    return dict(response = "OK")
+    return dict(response = "OK")"""
