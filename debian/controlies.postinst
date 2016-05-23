@@ -11,6 +11,8 @@ case "$1" in
      chown -R  www-data:www-data /var/web2py
      eval `ssh-agent -s`
 	 ssh-add /var/web2py/applications/controlies/.ssh/id_rsa
+	 mkdir /var/www/.ssh
+	 chown www-data:www-data /var/www/.ssh
      chmod +x /etc/init.d/controlies
      a2enmod ssl
      a2enmod wsgi
