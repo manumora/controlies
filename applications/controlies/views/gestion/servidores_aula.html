@@ -22,6 +22,7 @@
 	.ui-menu { position: absolute; width: 100px; }
 	
 	.computersON { display:none; width:12px; height:12px; border: 1px solid; border-color:black; border-radius: 75px; margin-left:50px; margin-top:45px; padding:2px; color:white; background-color:red; font-size:11px; position: absolute; }
+	.wifiStatus { width:12px; height:12px; border: 1px solid; border-color:black; border-radius: 75px; margin-left:50px; margin-top:45px; padding:2px; color:white; background-color:red; font-size:11px; position: absolute; }
 </style> 
 
 {{extend 'layout.html'}}
@@ -117,7 +118,7 @@
     function getLTSPServers(){
         jQuery.post('call/json/getLTSPServers', function(result) {                                                            
             jQuery.each(result.response, function(i, l){
-                jQuery('#selectable0').append('<li class="ui-state-default" id="selectable-'+l+'"><div id="pcName" style="font-size:11px;">'+l+'</div><div id="computersON" class="computersON"></div>{{=IMG(_src=URL(r=request,c="static",f="images/turnOff.png"),_class="thumb-image")}}<div id="userName" style="font-size:11px;"></div></li>');               
+                jQuery('#selectable0').append('<li class="ui-state-default" id="selectable-'+l+'"><div id="pcName" style="font-size:11px;">'+l+'</div><div id="wifiStatus" class="wifiStatus">a</div><div id="computersON" class="computersON"></div>{{=IMG(_src=URL(r=request,c="static",f="images/turnOff.png"),_class="thumb-image")}}<div id="userName" style="font-size:11px;"></div></li>');               
             });            
         });
     }
