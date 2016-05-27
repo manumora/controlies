@@ -5,6 +5,7 @@ ControlIES
 * Date: 11 November 2013
 * Authors: Manuel Mora Gordillo, Francisco Damián Méndez Palma, Alfonso Pastor, José Luis Redrejo
 * Copyright: 2013 - Manuel Mora Gordillo
+* Technologies used: Python, jQuery, Web2py, LDAP, RPC, Avahi, WebSockets, SSH, Bash
 
 LDAP Users management
 ---------------------
@@ -24,6 +25,10 @@ Mass command execution
 [![Alt text for your video](http://img.youtube.com/vi/4T50mxdujq4/0.jpg)](http://www.youtube.com/watch?v=4T50mxdujq4)
 ![alt text](https://raw.github.com/manumora/controlies/master/screenshots/massExecution1.png "Mass command execution")
 ![alt text](https://raw.github.com/manumora/controlies/master/screenshots/massExecution2.png "Mass command execution")
+
+Wifi Access Point management
+-------------------------
+[![Alt text for your video](http://img.youtube.com/vi/p19iTxjG_4A/0.jpg)](https://www.youtube.com/watch?v=p19iTxjG_4A)
 
 Computer database and user assignment
 -------------------------------------
