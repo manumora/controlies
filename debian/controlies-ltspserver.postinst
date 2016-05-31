@@ -53,7 +53,7 @@ case "$1" in
     fi
     
     chmod 755 /usr/share/controlies-ltspserver/seguimiento_equipo
-    service cron restart
+    sudo service cron restart
 
     ######################################################
     # Seguimiento usuario

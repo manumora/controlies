@@ -26,7 +26,7 @@ case "$1" in
 	# Seguimiento equipos
 	sed -i.bak '/@reboot root \/usr\/share\/controlies-ltspserver\/seguimiento_equipo/d' /etc/crontab
         sed -i.bak '/\*\/57 \* \* \* \* root \/usr\/share\/controlies-ltspserver\/seguimiento_equipo/d' /etc/crontab
-	service cron restart
+	sudo service cron restart
 
         ######################################################
         # controlies-seguimiento fuera de rc.local

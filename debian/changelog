@@ -1,3 +1,9 @@
+controlies (0.7.0-5) unstable; urgency=low
+
+  * Modificaciones en generacion de paquetes
+
+ -- Manuel Mora Gordillo <manuito@gmail.com>  Tue, 31 May 2016 12:00:00 +0200
+
 controlies (0.7.0-4) unstable; urgency=low
 
   * Gestión de los Puntos de Acceso
