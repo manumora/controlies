@@ -1,0 +1,18 @@
+#!/bin/bash
+# preinst script for controlies-client
+set -e
+
+PKG="controlies-ltspserver"
+SHAREDIR="/usr/share/controlies-ltspserver"
+
+divert() {
+    diverted_file=$1
+
+    dpkg-divert --package "$PKG" --add --rename \
+	--divert "${diverted_file}-pre-$PKG" $diverted_file
+}
+
+#Mete en divert el fichero zjstream.py para no crear conflicto con pkpgdll
+divert /usr/share/pyshared/pkpgpdls/zjstream.py
+
+exit 0

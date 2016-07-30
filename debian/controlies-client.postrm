@@ -1,8 +1,18 @@
-#!/bin/sh
+#!/bin/bash
 # postrm script for controlies-client
 #
 
 set -e
+
+PKG="controlies-client"
+SHAREDIR="/usr/share/controlies-client"
+
+remove_divert() {
+    diverter=$(dpkg-divert --listpackage $1)
+    if [ "$diverter" = "controlies-client" ]; then
+        dpkg-divert --package controlies-client --rename --remove $1
+    fi
+}
 
 DIR="gdm"
 if [ -f "/etc/init.d/gdm3" ]; then
@@ -11,6 +21,13 @@ fi
 
 case "$1" in
     remove|purge)
+
+        #####################################################
+        # Liberamos zjstream.py
+        if [ "$1" = remove ]; then
+            remove_divert /usr/share/pyshared/pkpgpdls/zjstream.py
+        fi
+
 	#####################################################
 	# Registro Post Session
         if [  -e /etc/lightdm ]

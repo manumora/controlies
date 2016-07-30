@@ -24,13 +24,13 @@ TEATITLE=$(python -c "import sys, urllib as ul; print ul.quote_plus(sys.argv[1])
 #Echo para pruebas
 #echo $TEAPRINTERNAME $TEAJOBID $TEAUSERNAME $TEATITLE $TEACLIENTHOST $TEACOPIES `pkpgcounter $TEADATAFILE` >>/var/log/printaccounting.log
 
-dominio=$(host -d -t CNAME servidor | grep -e .domain -e .ns | cut -f1 -d".")
 paginas=$(pkpgcounter "$TEADATAFILE")
 
 #Primero comprobamos si estamos dentro del centro educativo y tenemos red, con un timeout de 3 segundos.
 ping -c 1 ldap -W 3 > /dev/null 2>&1
 if [ $? -eq 0 ]
 then
+        dominio=$(host -d -t CNAME servidor | grep -e .domain -e .ns | cut -f1 -d".")
 
 	#Hay que convertir el valor de TEACLIENTHOST en un nombre de equipo.
 	if [ "$TEACLIENTHOST" == "localhost" ]
