@@ -1,6 +1,12 @@
 CAMBIOS
 =======
 
+Julio 2016
+
+  - Adaptaciones a clientes Ubuntu 14.04. Retoques.
+  - Resolución de bugs pendientes
+  - Fusion y limpieza de las clases puppet instala_controlies y actualizaciones_controlies
+
 13 febrero 2016
 
   -Adaptacion de clientes a Ubuntu 14.04. Ver changelog.
