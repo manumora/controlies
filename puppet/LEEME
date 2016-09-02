@@ -1,7 +1,7 @@
 "instala_controlies": para instalar los paquetes en los clients y thinclients de forma masiva.
 
 
-TAREAS OPCIONALES:
+TAREAS OPCIONALES: YA ELIMINADAS, NO SE USAN.
 
 "controlies_borrar_antiguos":
 - antes de empaquetar "controlies-client" y "controlies-thinclient" se introducían los ficheros en los clientes por puppet.

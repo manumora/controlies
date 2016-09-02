@@ -1,12 +1,12 @@
 #!/bin/bash
 
 equipo=$(hostname -s)
-dominio=$(host -d -t CNAME servidor | grep -e .domain -e .ns | cut -f1 -d".")
 
 #Primero comprobamos si estamos dentro del centro educativo y tenemos red, con un timeout de 3 segundos.
 ping -c 1 ldap -W 3 > /dev/null 2>&1
 if [ $? -eq 0 ]
 then
+        dominio=$(host -d -t CNAME servidor | grep -e .domain -e .ns | cut -f1 -d".")
 	#Determinamos que tipo de equipo es en función del facter use. Si no tiene el facter lo consideramos workstation.
 	tipo="WORKSTATION"
 	if [ -e /usr/bin/facter ]
@@ -33,6 +33,12 @@ then
                             "siatic") tipo="LTSP"
                             ;;
                             "infolab") tipo="WORKSTATION"
+                            ;;
+                            "ltsp") tipo="LTSP"
+                            ;;
+                            "portatil-alumno") tipo="PORTATIL"
+                            ;;
+                            "notebookHP") tipo="PORTATIL"
                             ;;
                        esac
                    ;;

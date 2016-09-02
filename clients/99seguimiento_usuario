@@ -4,12 +4,12 @@
 
 equipo=$(hostname -s)
 usuario=$USER
-dominio=$(host -d -t CNAME servidor | grep -e .domain -e .ns | cut -f1 -d".")
 
 #Primero comprobamos si estamos dentro del centro educativo y tenemos red, con un timeout de 3 segundos.
 ping -c 1 ldap -W 3 > /dev/null 2>&1
 if [ $? -eq 0 ]
 then
+        dominio=$(host -d -t CNAME servidor | grep -e .domain -e .ns | cut -f1 -d".")
 	#Determinamos que tipo de equipo es en función del facter use. Si no tiene el facter lo consideramos workstation.
 	tipo="WORKSTATION"
 	if [ -e /usr/bin/facter ]
@@ -34,7 +34,13 @@ then
                        case $tipo_ubuntu in 
                           siatic) tipo="LTSP"
                           ;;
+                          ltsp) tipo="LTSP"
+                          ;;
                           infolab) tipo="WORKSTATION"
+                          ;;
+                          portatil-alumno) tipo="PORTATIL"
+                          ;;
+                          notebookHP) tipo="PORTATIL"
                           ;;
                           *) tipo="WORKSTATION"
                           ;;
@@ -52,7 +58,7 @@ then
 	if [ $tipo = "LTSP" ]
 	then 
 		es_profe=$(id -nG $usuario | grep teachers | wc -l)
-		if [ $es_profe -ne 0 ]
+		if [ $es_profe -ne 0 -o "$usuario" = "linex" ]
 		then
 		  peticion="http://ldap.$dominio/controlies/init/registro/login?usuario=$usuario&maquina=$equipo&tipohost=$tipo"
 		  actualiza=$(wget -q -O - $peticion 2>/dev/null)
