@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#/var/lib/puppet/state/last_run_report.yaml 
+
+fecha=$(date)
+echo "Voy a actualizar controlies con puppet $fecha" >> /var/log/controlies.log
+
+fichero="/var/lib/puppet/state/last_run_report.yaml"
+test -e "$fichero" || exit 0
+
+#Primero comprobamos si estamos dentro del centro educativo y tenemos red, con un timeout de 3 segundos.
+ping -c 1 ldap -W 3 > /dev/null 2>&1
+if [ $? -eq 0 ]
+then
+   equipo=$(hostname -s)
+   dominio=$(host -d -t CNAME servidor | grep -e 'domain\.' -e 'ns\.' | cut -f1 -d".")
+
+   sed "s/  host: .*/  host: ${equipo}.${dominio}/" /var/lib/puppet/state/last_run_report.yaml > /tmp/last_run_report.yaml
+
+   curl -X POST --data-binary @/tmp/last_run_report.yaml  http://ldap.$dominio/controlies/init/registro/actualizalogpuppet
+fi
+

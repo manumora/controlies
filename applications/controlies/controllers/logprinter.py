@@ -186,7 +186,7 @@ def export_csv():
     doc="Id,Time,Impresora,Jobid,Usuario,Host,Nombre_Trabajo,Paginas,Copias,Total,Tamanio\n"
                 
     for reg in consulta:
-        doc = doc+str(reg[0]) +',"'+reg[1]+'","'+reg[2]+'",'+str(reg[3])+',"'+reg[4]+'","'+reg[5]+'","'+reg[6]+'",'+str(reg[7])+","+str(reg[8])+","+str(reg[9])+","+str(reg[10])+"\n"
+        doc = doc+str(reg[0]) +',"'+str(reg[1])+'","'+reg[2]+'",'+str(reg[3])+',"'+reg[4]+'","'+reg[5]+'","'+reg[6]+'",'+str(reg[7])+","+str(reg[8])+","+str(reg[9])+","+str(reg[10])+"\n"
        
     response.headers['Content-Type']=gluon.contenttype.contenttype('.csv')
     #Pasamos el documento a utf-8, si no da error el codifirlo en base64
@@ -352,7 +352,68 @@ def export_pdf_user():
     doc64=embed64(data=doc,extension='application/pdf')    
     return 'window.open("%s");' % doc64 
 
-   
+auth.requires_login()   
+def export_pdf_user_summary():
+        
+    title = "Informe de impresiones por usuario"
+    
+    head = THEAD(TR(TH("Usuario",_width="80%"), 
+                    TH("Total",_width="20%"),  
+                    _bgcolor="#A0A0A0"))
+
+    tablas=[]
+    rowsTable = []
+    i=0;
+    
+    rows=consultaInforme('USER')
+    usuario=""
+    subtotal=0
+    
+    for r in rows:
+        if usuario!=r[4]:
+            col = i % 2 and "#F0F0F0" or "#FFFFFF"
+            if usuario!="":                  
+                 rowsTable.append(TR(TD(usuario, _align="left"),
+                           TD(subtotal, _align="right"),
+                           _bgcolor=col))
+            usuario=r[4]
+            subtotal=0            
+            i+=1
+        subtotal=subtotal+r[9]
+
+    body = TBODY(*rowsTable)
+    table = TABLE(*[head, body], _border="1", _align="center", _width="100%")
+    tablas.append(table)
+    contenido = DIV(*tablas, _width="100%", _align="center")
+
+    class MyFPDF(FPDF, HTMLMixin):
+        
+        def __init__(self):
+            FPDF.__init__(self,'L')
+        
+        def header(self):
+            self.set_font('Arial','B',15)
+            self.cell(0,10, title ,1,0,'C')
+            
+        def footer(self):
+            self.set_y(-15)
+            self.set_font('Arial','I',8)
+            self.cell(0,10,"IES",0,0,'L')
+            txt = 'Pag. %s de %s' % (self.page_no(), self.alias_nb_pages())
+            self.cell(0,10,txt,0,0,'R')
+                
+    pdf=MyFPDF()
+    ##pdf.set_font("Arial",'I', size=8) No vale para nada, no formatea bien
+    pdf.add_page()    
+    pdf.write_html(str(XML(contenido, sanitize=False)))        
+
+    response.headers['Content-Type']='application/pdf'
+    doc=pdf.output(dest='S')
+    doc64=embed64(data=doc,extension='application/pdf')    
+    return 'window.open("%s");' % doc64 
+
+
+
 
 def consultaInforme(orden='GRID'):
     
@@ -575,7 +636,55 @@ def modificarLogPrinter():
     except:
        retorno="fail"
     return dict(response=retorno)
-   
+ 
+@service.json
+@auth.requires_login()
+def borrarIntervaloLogPrinter():
+
+    retorno="OK"
+    
+    fechainiborrado='01-01-2000'
+    try:
+        if len(str(request.vars['fechainiborrado'])) > 0 :
+            fechainiborrado=request.vars['fechainiborrado'].replace("/","-")         
+    except LookupError:
+        pass
+        
+    try:
+        if len(str(request.vars['fechafinborrado'])) > 0 :
+            fechafinborrado=request.vars['fechafinborrado'].replace("/","-")
+        else:
+            retorno="fechafin"
+    except LookupError:
+        retorno="fechafin"
+
+    if retorno=="OK":
+        if validarFecha(fechafinborrado) and validarFecha(fechainiborrado):
+            fechainiborrado = formatearFecha(fechainiborrado)
+            fechafinborrado = formatearFecha(fechafinborrado)
+            sql="delete from logprinter where time between '"+fechainiborrado+"' and date('"+fechafinborrado+"','+24 hours')"           
+            file = open('/tmp/sql.txt', 'w')
+            file.write(sql)
+            file.close()       
+            try:
+                cdb.executesql(sql)
+                retorno="OK"
+            except:
+                retorno="fail"
+        else:
+            retorno="format"
+              
+    return dict(response=retorno)
+    
+def validarFecha(fecha):
+   try:
+      datetime.datetime.strptime(fecha,"%d-%m-%Y")
+      retorno=True
+   except ValueError as err:
+      retorno=False
+
+   return retorno
+
 @service.json
 def getUserData():
 
@@ -588,6 +697,11 @@ def getUserData():
     
 def form():
     return dict()
+
+
+def formdelete():
+    return dict()
+
 
 def call():
     """

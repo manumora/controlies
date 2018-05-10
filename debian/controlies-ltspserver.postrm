@@ -50,6 +50,10 @@ case "$1" in
         # controlies-seguimiento fuera de rc.local
         sed -i.bak '/\/usr\/share\/controlies-ltspserver\/controlies-seguimiento/d' /etc/rc.local
 
+        ######################################################
+        # Script para actualizar resultado tras ejecutar puppet
+        sed -i.bak '/puppet_update_state/d'   /etc/puppet/etckeeper-commit-post  # Borramos invocaciones de instalaciones anteriores
+
 	######################################################
 	# Servicio
 	update-rc.d -f controlies-ltspserver remove

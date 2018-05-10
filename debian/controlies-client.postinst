@@ -46,7 +46,7 @@ case "$1" in
     then
         echo "@reboot root /usr/share/controlies-client/seguimiento_equipo" >> /etc/crontab
     fi
-    
+
     chmod 755 /usr/share/controlies-client/seguimiento_equipo
     sudo service cron restart
 
@@ -69,6 +69,28 @@ case "$1" in
     then
         sed -i -e '$i \/usr/share/controlies-client/controlies-seguimiento &\n' /etc/rc.local
     fi
+
+    ######################################################
+    # Llamada a puppet_update_state tras finalizar la sincronización por puppet. Se hace así porque
+    # los yaml de puppet ya no llevan el nombre del equipo, llevan su uuid. Por tanto nos hace falta
+    # este script para mandar nombre equipo y  el yaml corecto.
+    # Inserta la llamada en /etc/puppet/etckeeper-commit-post justo por debajo de la linea "PATH=..."
+
+    sed -i '/puppet_update_state/d'   /etc/puppet/etckeeper-commit-post  # Borramos invocaciones de instalaciones anteriores
+    linea="/usr/share/controlies-client/puppet_update_state"
+    if ! grep "$linea" /etc/puppet/etckeeper-commit-post
+    then
+        sed -i --follow-symlinks "/^PATH=/a ${linea}"   /etc/puppet/etckeeper-commit-post 
+    fi
+
+    ######################################################
+    # Hay que cambiar cupsd.conf para que permita a seguimiento_impresion acceder a los datos del trabajo
+    # Deben ser:
+    #     JobPrivateAccess default
+    #     JobPrivateValues none    <- en principio es la unica que cambio, creo que es suficiente
+    #     SubscriptionPrivateAccess default
+    #     SubscriptionPrivateValues none
+    sed -i --follow-symlinks 's/JobPrivateValues *default/JobPrivateValues none/g'  /etc/cups/cupsd.conf
 
     ######################################################
     # Avahi server 

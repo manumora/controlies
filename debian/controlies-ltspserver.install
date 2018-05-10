@@ -20,4 +20,5 @@ clients/ltspremote/SSHConnection.py usr/share/controlies-ltspserver
 clients/ltspremote/websocket_messaging.py usr/share/controlies-ltspserver
 clients/14-logout.conf usr/share/controlies-ltspserver
 clients/zjstream.py usr/share/pyshared/pkpgpdls
+clients/puppet_update_state usr/share/controlies-ltspserver
 

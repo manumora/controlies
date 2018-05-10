@@ -2,40 +2,23 @@ import "/etc/puppet/defines/*.pp"
 
 class instala_controlies {
 
-   $version="0.7.0-6"
+   $version="0.7.0-7"
    $paquete_client="controlies-client_${version}_all.deb"
    $paquete_ltspserver="controlies-ltspserver_${version}_all.deb"
    $paquete_thinclient="controlies-thinclient_${version}_all.deb"
 
-   #Añadimos el facter is_ltsp a la máquina destino
+   #Usamos el facter is_ltsp definido en escuela2.0 para determinar si el equipo es un LTSP
+   #Usamos el facter is_ltsp definido en escuela2.0 para determinar si el equipo es un LTSP
    file {"/usr/lib/ruby/vendor_ruby/facter/is_ltsp.rb":
-                                owner => root, group => root, mode => 644,
-                                source => "puppet:///modules/instala_controlies/is_ltsp.rb",
+           ensure => absent,
    }
 
-
-   #  Hay que cambiar cupsd.conf para que permita a seguimiento_impresion acceder a los datos del trabajo
-   #  Deben ser:
-   #     JobPrivateAccess default
-   #     JobPrivateValues none    <- en principio es la unica que cambio, creo que es suficiente
-   #     SubscriptionPrivateAccess default
-   #     SubscriptionPrivateValues none 
-   replace { "cupsd-conf":
-        file => "/etc/cups/cupsd.conf",
-        pattern => "JobPrivateValues default",
-        replacement => "JobPrivateValues none",
-   }
-
-   #Usamos el facter is_ltsp para determinar si el equipo es un LTSP
    case $is_ltsp {
-      "SI" : {
+      "si", "yes", "true" : {
         $tipo_imagen="ltsp"
       }
-      "NO" : {
+      default : {  #Ante la duda, no lo consideramos ltsp
         $tipo_imagen="otro"
-      }
-      default:  { #Todavia no está el facter instalado, no podemos determinar el tipo de imagen
-        $tipo_imagen=""
       }
    }
 
@@ -136,6 +119,8 @@ class instala_controlies {
 		   ##################################################################
 		   #Paquete clients, para workstations, portatiles, etc...
 		   ##################################################################
+                   package { "controlies-ltspserver": ensure => "purged"}
+
 		   file {"/var/cache/$paquete_client":
 				owner => root, group => root, mode => 755,
 				source => "puppet:///modules/instala_controlies/$paquete_client",

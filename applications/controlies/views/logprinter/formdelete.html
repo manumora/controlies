@@ -1,0 +1,91 @@
+<script language="javascript">
+
+    $(function() {
+        $("#purpose").focus();
+        $("#deleteButton").button({ icons: { primary: "ui-icon-trash"}});
+        $("#cancelButton")
+            .button({ icons: { primary: "ui-icon-close"}})
+            .click( function(){ $('#dialog-form-borrado').dialog('close'); });
+
+	    jQuery( "#fechainiborrado" ).datepicker({
+	      changeMonth: true,
+	      changeYear: true,
+	      dateFormat: "dd/mm/yy", 
+	      onClose: function( selectedDate ) {
+	        $( "#fechafinborrado" ).datepicker( "option", "minDate", selectedDate );
+	      },
+	    });
+	    
+	    jQuery( "#fechafinborrado" ).datepicker({
+	      changeMonth: true,
+	      changeYear: true,
+	      dateFormat: "dd/mm/yy", 
+	      onClose: function( selectedDate ) {
+	      	$( "#fechainiborrado" ).datepicker( "option", "maxDate", selectedDate );
+	  	  },
+	    });
+    });
+
+    function restartStyle(){
+        $("#form_data p span").css("color","black");
+        $('#message').html("");
+    }
+
+    function send(){
+    	ajax("{{=URL('default', 'login_status')}}", [], ':eval'); //Check session
+        restartStyle();
+  
+        jQuery.post('call/json/borrarIntervaloLogPrinter', jQuery("#form_data").serialize(), function(result) {			
+            switch(result.response){
+                case "OK":{
+                    jQuery('#message').html("Operación realizada correctamente").css("color","green").effect("highlight", {"color":"yellow"}, 1000);
+                    setTimeout("$('#dialog-form-borrado').dialog('close')",1000);
+                    jQuery("#list").trigger("reloadGrid");
+                    break;
+                }
+                case "fail":{
+                    jQuery('#message').html("Se produjo un error").effect("highlight", {"color":"yellow"}, 1000);
+                    break;
+                  }          
+                case "fechafin": {
+	                jQuery('#message').html("La fecha final es obligatoria").effect("highlight", {"color":"yellow"}, 1000);
+                    break;
+			    }
+			    case "format": {
+	                jQuery('#message').html("Formato incorrecto en fechas").effect("highlight", {"color":"yellow"}, 1000);
+                    break;
+                }	
+                default:{
+                    jQuery('#'+result.response+"Tag").css("color","red");
+                    jQuery('#'+result.response).effect("highlight", {"color":"yellow"}, 1000).focus();
+                    jQuery('#message').html("Hay campos vacíos o incorrectos").effect("slide");
+                    break;
+                }
+            }
+        });
+
+        return false;
+    }
+    
+</script>
+ 
+ 
+<form id="form_data" onsubmit="return send();">
+    <input type="hidden" id="action" name="action"/>
+    <div>
+		<table width="100%">
+		<tr>
+			<td>Fecha inicio: </td><td> <input id="fechainiborrado" name="fechainiborrado" style="text-align:center; width:80px"/></td>
+		</tr>
+		<tr>
+			<td>Fecha fin: </td><td> <input id="fechafinborrado" name="fechafinborrado" style="text-align:center; width:80px"/></td>				
+		</tr>
+		</table>
+	</div>
+	<br/>
+    <div id="message" style="text-align:center; font-weight:bold; color:red; padding:3px; "></div>
+    <br/>
+    <div style="text-align:center;"><button id="deleteButton" type="submit" style="width:100px;">Borrar</button>&nbsp;&nbsp;<button type="button" id="cancelButton" style="width:100px;">Cancelar</button></div>
+    <p style="padding-top:10px; text-align:center; font-size:10px;" id="messageForm"></p>       
+</form>
+
