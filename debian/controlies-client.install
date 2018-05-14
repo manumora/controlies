@@ -14,3 +14,4 @@ clients/daemon/controlies-client.dhcp etc/dhcp/dhclient-exit-hooks.d
 clients/controlies-seguimiento usr/share/controlies-client
 clients/14-logout.conf usr/share/controlies-client
 clients/zjstream.py usr/share/pyshared/pkpgpdls
+clients/puppet_update_state usr/share/controlies-client

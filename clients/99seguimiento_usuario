@@ -9,12 +9,12 @@ usuario=$USER
 ping -c 1 ldap -W 3 > /dev/null 2>&1
 if [ $? -eq 0 ]
 then
-        dominio=$(host -d -t CNAME servidor | grep -e .domain -e .ns | cut -f1 -d".")
+        dominio=$(host -d -t CNAME servidor | grep -e 'domain\.' -e 'ns\.' | cut -f1 -d".")
 	#Determinamos que tipo de equipo es en función del facter use. Si no tiene el facter lo consideramos workstation.
 	tipo="WORKSTATION"
 	if [ -e /usr/bin/facter ]
 	then
-	      use=$(facter | grep ^use | cut -d" " -f3)
+	      use=$(facter use)
               case $use in
                    # ltsp-wheezy, ltsp-squeeze
                    ltsp*) tipo="LTSP"
@@ -30,13 +30,13 @@ then
                    ;;
                    #equipos nuevos.
                    ubuntu)
-                       tipo_ubuntu=$(facter | grep ^tipo | cut -d" " -f3)
+                       tipo_ubuntu=$(facter tipo)
                        case $tipo_ubuntu in 
-                          siatic) tipo="LTSP"
+                          siatic) tipo="SIATIC"
                           ;;
                           ltsp) tipo="LTSP"
                           ;;
-                          infolab) tipo="WORKSTATION"
+                          infolab) tipo="INFOLAB"
                           ;;
                           portatil-alumno) tipo="PORTATIL"
                           ;;
@@ -52,22 +52,10 @@ then
               esac
 	fi
 
-	#Si es un LTSP, debemos saber si es profesor, ya que los alumnos tambien hacen login (indirectamente) en el equipo del profesor
-	#y aparecerían registrados en él.
 	#OJO: aqui el comparador es =. No usar ==, ya que estos scripts NO los ejecuta bash y el == no funciona.
-	if [ $tipo = "LTSP" ]
-	then 
-		es_profe=$(id -nG $usuario | grep teachers | wc -l)
-		if [ $es_profe -ne 0 -o "$usuario" = "linex" ]
-		then
-		  peticion="http://ldap.$dominio/controlies/init/registro/login?usuario=$usuario&maquina=$equipo&tipohost=$tipo"
-		  actualiza=$(wget -q -O - $peticion 2>/dev/null)
-		fi
-	else
-	    #Si es un PORTATIL además hay que intentar averiguar en que aula está para pasar ese dato.
-	    if [ $tipo = "PORTATIL" ]
-	    then
-
+        #Si es un PORTATIL además hay que intentar averiguar en que aula está para pasar ese dato.
+        if [ $tipo = "PORTATIL" ]
+        then
 		#Ahora comprobamos si estamos dentro de un aula, haciendo ping al servidor de aula con un timeout de 3 segundos.
                 ping -c 1 -W 3 192.168.0.254  > /dev/null 2>&1
                 resultado=$?
@@ -82,11 +70,12 @@ then
                 fi
                 test -z $aula && aula="NO"
 		peticion="http://ldap.$dominio/controlies/init/registro/login?usuario=$usuario&maquina=$equipo&tipohost=$tipo&aula=$aula"
-	    else
+        else
 		peticion="http://ldap.$dominio/controlies/init/registro/login?usuario=$usuario&maquina=$equipo&tipohost=$tipo"    
-	    fi
-
-	    actualiza=$(wget -q -O - $peticion 2>/dev/null)
 	fi
+        if [ -z "$LTSP_CLIENT" ] #Si no es un thinclient mandamos los datos al servidor para registrarlos. Si es thinclient se mandan desde otro script de la imagen de thinclients.
+        then
+             actualiza=$(wget -q -O - $peticion 2>/dev/null)
+        fi
 fi
 

@@ -1,7 +1,21 @@
+controlies (0.7.0-7) unstable; urgency=low
+
+  * Bug arreglado: problemas en determinacion de dominio para seguimiento en IES con "ns" en el nombre.
+  * Adaptado la actualizacion del estado puppet para el trabajo con UUID en lugar de con nombres de host.
+  * Eliminado facter is_ltsp.rb. Ahora se definira manualmente como un facter en /etc/escuela2.0
+  * Al instalar los paquetes clientes se modifica cupsd.conf para "JobPrivateValues none". Asi tea4cups puede ver el propietario.
+  * Bug arreglado: los facter use y tipo tomados de /etc/escuela2.0 se procesaban mal en el seguimiento, produciendo confusion con tipo_imagen e use2.
+  * Bug arreglado: controlies-seguimiento siempre llamaba a /usr/share/controlies-client/seguimiento_equipo. Se modifica para que funcione en ltspservers.
+  * Logprinter: arreglado problemas de formato con campo time al generar pdf.
+  * Logprinter: nueva opcion de informe "sumarizado" por profesor, sin detalle.
+  * Logprinter: nueva opcion borrado de log de antiguos trabajos de impresion entre dos fechas dadas.
+
+ -- Alfonso Pastor <alfonso.pastor@gmail.com>  Thu, 03 May 2018 12:00:00 +0200
+
 controlies (0.7.0-6) unstable; urgency=low
 
   * Adaptaciones a clientes Ubuntu 14.04
-  * Resolución de bugs pendientes
+  * Resolucion de bugs pendientes
   * Fusion de las clases puppet instala_controlies y actualizaciones_controlies
 
  -- Alfonso Pastor <alfonso.pastor@gmail.com>  Tue, 30 Jul 2016 12:00:00 +0200

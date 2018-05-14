@@ -1,6 +1,81 @@
 CAMBIOS
 =======
 
+Abril-Mayo 2018
+
+  - Bug arreglado: problemas en determinacion de dominio para seguimiento en IES con "ns" en el nombre.
+  - Adaptado la actualizacion del estado puppet para el trabajo con UUID en lugar de con nombres de host.
+  - Eliminado facter is_ltsp.rb. Ahora se definira manualmente como un facter en /etc/escuela2.0
+  - Al instalar los paquetes clientes se modifica cupsd.conf para "JobPrivateValues none". Asi tea4cups puede ver el propietario.
+  - Bug arreglado: los facter use y tipo tomados de /etc/escuela2.0 se procesaban mal en el seguimiento, produciendo confusion con tipo_imagen e use2.
+  - Bug arreglado: controlies-seguimiento siempre llamaba a /usr/share/controlies-client/seguimiento_equipo. Se modifica para que funcione en ltspservers.
+  - Logprinter: arreglado problemas de formato con campo time al generar pdf.
+  - Logprinter: nueva opcion de informe "sumarizado" por profesor, sin detalle.
+  - Logprinter: nueva opcion borrado de log de antiguos trabajos de impresion entre dos fechas dadas.
+
+  Notas instalación version 0.7.0-7:
+
+        -Copiar instala_controlies.zip en /etc/puppet/modules y descomprimir.
+
+             El controlies en el servidor se instala dpkg -i dpkg -i /etc/puppet/modules/instala_controlies/files/controlies_0.7.0-7_all.deb. Si da error con /var/www/.ssh borrar ese directorio y reinstalar.
+ 
+             El controlies en el cliente se pone con include "instala_controlies" en  /etc/puppet/manifests/classes/xubuntu/especifica-xubuntu-linex-2015.pp. Es conveniente empezar probando en varios pc primero y
+             luego extenderlo a todo el centro:
+
+		   case $hostname {
+			       "a02-pro","a32a-pro","depleng-o01": {
+				   include "instala_controlies"
+			       }
+			       default: {
+			       }
+			}
+
+
+        -Servidor ldap: el paquete controlies del servidor viene configurado para LDAP Seguro. Si no lo tenemos seguro nos dará error de validación al entrar en http:/ldap/controlies
+         En ese caso ha que editar el fichero servidor:/var/web2py/applications/controlies/models/db.py y comentar la línea 95 y descomentar la línea 98. Reiniciar despues apache2.
+
+        -Clientes: a partir de ahora, si el equipo tiene thinclients hay que definirlo mediante el facter is_ltsp=true en /etc/escuela2.0. De esta manera se instala controlies-ltspserver. En caso contrario
+         se instala controlies-client.
+
+        -Servidor ldap: si se tocó en el fichero servidor:/etc/puppet/puppet.conf para permitir seguimiento de las actualizaciones de puppet hay que volver a dejarlo bien. Es decir, debe estar
+
+                         reports=store
+
+         en lugar de 
+                         reports=store,http 
+                         reporturl=http://ldap.<tudominio>/controlies/init/registro/actualizalogpuppet 
+
+        -Thinclients: si el aula tiene thinclients y quieres realizar seguimiento para ellos, para que se identifique bien su nombre en el seguimiento hay que meter el servidor DNS de nuestro centro en
+
+                 /opt/ltsp/i386/etc/resolv.conf 
+
+                    nameserver 172.X.Y.Z
+                    search tudominio
+
+         o en 
+                 /opt/ltsp/i386/etc/lts.conf (no probado)
+                 
+                     DNS_SERVER=172.X.Y.Z 
+                    SEARCH_DOMAIN=tudominio
+
+         y regenerar imagen de thinclients.
+
+        -Servidor ldap: si hay errores en la ejecución de controlies se pueden depurar según: http://2tazasdelinux.blogspot.com.es/2016/09/depurar-errores-de-importacion-en.html
+
+        -Servidor ldap: si se quiere acceder por la puerta trasera a la BBDD msql donde se almacena todo para consultar o realizar borrados de dato en el servidor hacemos
+
+                     apt-get install sqlite3
+                     sqlite3 /var/web2py/applications/controlies/databases/controlies.sqlite
+
+         Una vez dentro:
+ 
+                      .help: todos los comandos
+                      .schema: estructura de tablas de la BBDD
+                      .quit: salir
+
+                      Cualquier SQL soportado por SQLite, por ejemplo: select * from log_printer;
+
+
 Julio 2016
 
   - Adaptaciones a clientes Ubuntu 14.04. Retoques.

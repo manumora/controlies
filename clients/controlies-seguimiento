@@ -24,7 +24,13 @@ then
 	if [ $? -eq 0 ]
 	then
 	   #Ahora que hay red válida, llamamos a sequimiento de equipo
-	   /usr/share/controlies-client/seguimiento_equipo
+           is_ltsp=$(facter is_ltsp)
+           case $is_ltsp in
+               yes | true | si)  /usr/share/controlies-ltspserver/seguimiento_equipo
+                       ;;
+               *)     /usr/share/controlies-client/seguimiento_equipo
+                       ;;
+           esac
 
 	   #Si hay un usuario logueado, hacemos un seguimiento_usuario
 	   USUARIO=$(who | grep "(:0)" | head -1 | cut -d" " -f1)
