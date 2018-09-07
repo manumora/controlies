@@ -9,42 +9,24 @@ usuario=$USER
 ping -c 1 ldap -W 3 > /dev/null 2>&1
 if [ $? -eq 0 ]
 then
-        dominio=$(host -d -t CNAME servidor | grep -e 'domain\.' -e 'ns\.' | cut -f1 -d".")
-	#Determinamos que tipo de equipo es en función del facter use. Si no tiene el facter lo consideramos workstation.
+        dominio=$(host -d -t CNAME servidor | grep -e ';servidor\.' | cut -f2 -d".")
+	#Determinamos que tipo de equipo es en función del facter uso. Si no tiene el facter lo consideramos workstation.
 	tipo="WORKSTATION"
 	if [ -e /usr/bin/facter ]
 	then
-	      use=$(facter use)
-              case $use in
-                   # ltsp-wheezy, ltsp-squeeze
-                   ltsp*) tipo="LTSP"
+	      uso=$(facter uso)
+              case $uso in
+                   "pccole") tipo="PCCOLE"
                    ;;
-                   # aulatic-profesor-wheezy -> otro tipo de ltsp.
-                   aula*) tipo="LTSP"
+                   "infolab") tipo="INFOLAB"
                    ;;
-                   # workstation, workstation-wheezy
-                   work*) tipo="WORKSTATION"
+                   "siatic") tipo="SIATIC"
                    ;;
-                   # todos los tipos de portatil port*
-                   port*) tipo="PORTATIL"
+                   "portatiles") tipo="PORTATIL"
                    ;;
-                   #equipos nuevos.
-                   ubuntu)
-                       tipo_ubuntu=$(facter tipo)
-                       case $tipo_ubuntu in 
-                          siatic) tipo="SIATIC"
-                          ;;
-                          ltsp) tipo="LTSP"
-                          ;;
-                          infolab) tipo="INFOLAB"
-                          ;;
-                          portatil-alumno) tipo="PORTATIL"
-                          ;;
-                          notebookHP) tipo="PORTATIL"
-                          ;;
-                          *) tipo="WORKSTATION"
-                          ;;
-                       esac
+                   "ltsp") tipo="LTSP"
+                   ;;
+                   "workstation") tipo="WORKSTATION"
                    ;;
                    # ante la duda, lo consideramos workstation
                    *) tipo="WORKSTATION"

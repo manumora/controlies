@@ -30,7 +30,7 @@ paginas=$(pkpgcounter "$TEADATAFILE")
 ping -c 1 ldap -W 3 > /dev/null 2>&1
 if [ $? -eq 0 ]
 then
-        dominio=$(host -d -t CNAME servidor | grep -e 'domain\.' -e 'ns\.' | cut -f1 -d".")
+        dominio=$(host -d -t CNAME servidor | grep -e ';servidor\.' | cut -f2 -d".")
 
 	#Hay que convertir el valor de TEACLIENTHOST en un nombre de equipo.
 	if [ "$TEACLIENTHOST" == "localhost" ]

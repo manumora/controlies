@@ -14,18 +14,18 @@ Description: Gestión de LDAP para un centro educativo
 
 Package: controlies-client
 Architecture: all
-Depends: curl, cups, pkpgcounter, python-avahi, python-netifaces, python-dbus, python-twisted
-Conflicts: controlies, controlies-ltspserver
+Depends: curl, cups, pkpgcounter, python-avahi, python-netifaces, python-dbus, python-twisted, puppet-linex
+Conflicts: controlies, controlies-ltspserver, controlies-thinclient
 Description: Caracteristicas adicionales de controlies para clientes
 
 Package: controlies-ltspserver
 Architecture: all
-Depends: curl, cups, pkpgcounter, python-avahi, python-netifaces, python-dbus, python-paramiko, python-tornado
-Conflicts: controlies, controlies-client
+Depends: curl, cups, pkpgcounter, python-avahi, python-netifaces, python-dbus, python-paramiko, python-tornado, puppet-linex
+Conflicts: controlies, controlies-client, controlies-thinclient
 Description: Caracteristicas adicionales de controlies para ltspservers
 
 Package: controlies-thinclient
 Architecture: all
 Depends: 
-Conflicts: controlies
+Conflicts: controlies, controlies-client, controlies-ltspserver
 Description: Caracteristicas adicionales de controlies para thinclients

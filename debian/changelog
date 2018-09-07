@@ -1,3 +1,17 @@
+controlies (0.7.0-8) unstable; urgency=low
+
+  * Adaptacion general a Ubuntu Bionic.
+  * Quitado soporte debian wheezy (gdm/gdm3).
+  * Quitado uso de rc.local ya que no viene por defecto en Ubuntu Bionic, sustituido por controlies-seguimiento.service en /lib/systemd/system
+  * Soporte para nuevos facter uso/tipo/sistema/usuario e ies_isltsp.
+  * Script despierta_thinclients: modificado para que etherwake use la tarjeta de red de la red interna, ya que ahora puede cambiar.
+  * El paquete pkpgcounter ya no está en repositorios de Bionic, se debe instalar de otra fuente (repositorio privado) o previamente a los paquetes controlies-client/controlies-ltspserver.
+  * Adaptado el codigo para obtener el dominio en los scripts de controlies-client y similares.
+  * Puestas debian/control las dependencias para puppet-linex y los conflictos entre paquetes controlies-client, controlies-ltspserver y controlies-thinclient.
+  * Gestion de clases puppet aplicada: comentado codigo (no lo usa nadie) y limpiadas tablas que lo llevan, penaliza mucho el rendimiento de la BBDD para su nulo uso.
+
+ -- Alfonso Pastor <alfonso.pastor@gmail.com>  Thu, 10 Sep 2018 12:00:00 +0200
+
 controlies (0.7.0-7) unstable; urgency=low
 
   * Bug arreglado: problemas en determinacion de dominio para seguimiento en IES con "ns" en el nombre.
