@@ -9,8 +9,7 @@ dominio=$(host -d -t CNAME servidor | grep -e ';servidor\.' | cut -f2 -d".")
 #Extrae de ldap la lista de thinclients de ese aula.
 thinclients=$(ldapsearch -xLLL -h ldap -b cn=THINCLIENTS,cn=DHCP\ Config,dc=instituto,dc=extremadura,dc=es "cn" | grep -i "cn: $aula-O"  | cut -f2 -d" ")
 
-#Averigua  el nombre del interfaz de la red vlan interna del aula, ya 
-que no tiene por que ser eth0
+#Averigua  el nombre del interfaz de la red vlan interna del aula, ya que no tiene por que ser eth0
 red_interna=$(ifconfig | grep -B1 192.168 | grep -o "^\w*")
 
 for thinclient in $thinclients 
