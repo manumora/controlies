@@ -14,7 +14,7 @@
 ### END INIT INFO
 
 equipo=$(hostname -s)
-dominio=$(host -d -t CNAME servidor | grep -e 'domain\.' -e 'ns\.' | cut -f1 -d".")
+dominio=$(host -d -t CNAME servidor | grep -e ';servidor\.' | cut -f2 -d".")
 
 #En teclados Sweex USB, aparece mouse en devices, aun cuando no haya ratón 
 #conectado. Con el filtro grep -v kbd eliminamos esas lineas, para que solo

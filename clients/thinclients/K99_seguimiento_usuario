@@ -16,8 +16,7 @@ LDM_USERNAME=$(ssh -S $LDM_SOCKET $LDM_SERVER "id -un")
 
 equipo=$(hostname -s)
 usuario=$LDM_USERNAME
-dominio=$(host -d -t CNAME servidor | grep -e 'domain\.' -e 'ns\.' | cut -f1 -d".")
-
+dominio=$(host -d -t CNAME servidor | grep -e ';servidor\.' | cut -f2 -d".")
 
 peticion="http://ldap.$dominio/controlies/init/registro/logout?usuario=$usuario&maquina=$equipo"
 actualiza=$(wget -q -O - $peticion 2>/dev/null)

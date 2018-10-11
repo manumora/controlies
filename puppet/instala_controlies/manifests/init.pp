@@ -2,30 +2,19 @@ import "/etc/puppet/defines/*.pp"
 
 class instala_controlies {
 
-   $version="0.7.0-7"
+   $version="0.7.0-8"
    $paquete_client="controlies-client_${version}_all.deb"
    $paquete_ltspserver="controlies-ltspserver_${version}_all.deb"
    $paquete_thinclient="controlies-thinclient_${version}_all.deb"
 
-   #Usamos el facter is_ltsp definido en escuela2.0 para determinar si el equipo es un LTSP
-   #Usamos el facter is_ltsp definido en escuela2.0 para determinar si el equipo es un LTSP
+   #Limpiamos facter is_ltsp por si estuviera de antes
    file {"/usr/lib/ruby/vendor_ruby/facter/is_ltsp.rb":
            ensure => absent,
    }
 
-   case $is_ltsp {
-      "si", "yes", "true" : {
-        $tipo_imagen="ltsp"
-      }
-      default : {  #Ante la duda, no lo consideramos ltsp
-        $tipo_imagen="otro"
-      }
-   }
-
-
-   case $tipo_imagen {
-        #Servidores ltsp
-        "ltsp" : {
+   case $ies_isltsp {  # Una imagen tipo ltsp puede ser un servidor de telefonica, una siatic, etc. Cualquiera que este
+                       # en un aula con thinclients. Debe ser declarado con un facter propio ies_isltsp en /etc/escuela2.0
+        "si","yes","true" : {
 
 		    #################################
 		    #Paquete thinclients
@@ -46,22 +35,8 @@ class instala_controlies {
 					notify => Exec["actualiza-imagen-controlies"]
 			}
 
-			#El comando para actualizar la imagen de los thinclient difiere entre squeeze/wheezy-ubuntu
-
-			case $use {
-				 "ltsp-wheezy", "aulatic-profesor-wheezy", "ubuntu": {
-					 $comandoupdateimagen="/usr/sbin/ltsp-update-image"
-				 }
-				 "ltsp-server": {
-					 $comandoupdateimagen="/usr/sbin/ltsp-update-image --arch i386"
-				 }
-				 default: {
-					 $comandoupdateimagen="/usr/sbin/ltsp-update-image"
-				 }
-			}
-
 			exec { "actualiza-imagen-controlies":
-					 command => "$comandoupdateimagen",
+					 command => "/usr/sbin/ltsp-update-image",
 					 refreshonly => true,
 			}
  
@@ -82,6 +57,7 @@ class instala_controlies {
 				unless => "dpkg -l | grep controlies-ltspserver | grep $version | grep ^ii",
 				require => File["/var/cache/$paquete_ltspserver"],
 			}
+
 
 		    ###################################################################################################
 			# configuracion del despertado automatico de los thinclients para el seguimiento de los mismos.
@@ -114,7 +90,7 @@ class instala_controlies {
 			#}
 
 	}
-	"otro": {
+	default: {
 
 		   ##################################################################
 		   #Paquete clients, para workstations, portatiles, etc...
@@ -129,11 +105,14 @@ class instala_controlies {
 		   exec { "instala_controlies_client":
 				path => "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
 				command => "apt-get remove --purge controlies-client; dpkg -i --force-confnew  --force-overwrite $paquete_client; apt-get -f -y install ",
-		#		command => "dpkg -i --force-confnew  --force-overwrite $paquete_client; apt-get -f -y install ",
 				cwd => "/var/cache",
 				unless => "dpkg -l | grep controlies-client | grep $version | grep ^ii",
 				require => File["/var/cache/$paquete_client"],
 		   }
+
 	}
+
+
    }    
+
 }

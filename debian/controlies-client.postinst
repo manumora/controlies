@@ -13,28 +13,10 @@ case "$1" in
     then #lightdm
         cp -f /usr/share/controlies-client/14-logout.conf /etc/lightdm/lightdm.conf.d/14-logout.conf
         chmod 644 /etc/lightdm/lightdm.conf.d/14-logout.conf
-    else #gdm o gdm3
-       DIR="gdm"
-       if [ -f "/etc/init.d/gdm3" ]; then
-           DIR="gdm3"
-       fi
-
-       if [ ! -f /etc/$DIR/PostSession/Default ]; then
-           echo "#!/bin/sh" >> /etc/$DIR/PostSession/Default
-       fi
-
-       sed -i.bak '/exit 0/d' /etc/$DIR/PostSession/Default
-
-       if ! grep "/usr/share/controlies-client/PostSession" /etc/$DIR/PostSession/Default
-       then
-          echo "/usr/share/controlies-client/PostSession" >> /etc/$DIR/PostSession/Default
-       fi
-
-       echo "exit 0" >> /etc/$DIR/PostSession/Default
-       chmod +x /etc/$DIR/PostSession/Default
     fi
     chmod 755 /usr/share/controlies-client/PostSession
     chmod 755 /usr/share/controlies-client/controlies-seguimiento
+    chmod 644 /lib/systemd/system/controlies-seguimiento.service
 
     ######################################################
     # Seguimiento equipos
@@ -42,9 +24,11 @@ case "$1" in
     then
         echo "*/57 * * * * root /usr/share/controlies-client/seguimiento_equipo" >> /etc/crontab
     fi
-    if ! grep "@reboot root /usr/share/controlies-client/seguimiento_equipo" /etc/crontab
-    then
-        echo "@reboot root /usr/share/controlies-client/seguimiento_equipo" >> /etc/crontab
+
+    pidof systemd 2>&1 > /dev/null
+    if [ $? -eq "0" ]; then
+        systemctl enable controlies-seguimiento.service
+        systemctl start controlies-seguimiento.service
     fi
 
     chmod 755 /usr/share/controlies-client/seguimiento_equipo
@@ -60,15 +44,8 @@ case "$1" in
     #chmod 644 /usr/share/pyshared/pkpgpdls/zjstream.py
     chmod 644 /etc/cups/tea4cups.conf
     chmod 700 /usr/lib/cups/backend/tea4cups
+    chmod 755  /usr/share/controlies-client/puppet_update_state
     service cups restart
-
-    ######################################################
-    # Seguimiento equipos y usuarios en portatiles y pc con NetworkManager
-    # Añadimos llamada al script controlies-seguimiento en rc.local, si no está previamente.
-    if ! grep "/usr/share/controlies-client/controlies-seguimiento" /etc/rc.local
-    then
-        sed -i -e '$i \/usr/share/controlies-client/controlies-seguimiento &\n' /etc/rc.local
-    fi
 
     ######################################################
     # Llamada a puppet_update_state tras finalizar la sincronización por puppet. Se hace así porque

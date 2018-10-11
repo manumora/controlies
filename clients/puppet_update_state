@@ -2,9 +2,6 @@
 
 #/var/lib/puppet/state/last_run_report.yaml 
 
-fecha=$(date)
-echo "Voy a actualizar controlies con puppet $fecha" >> /var/log/controlies.log
-
 fichero="/var/lib/puppet/state/last_run_report.yaml"
 test -e "$fichero" || exit 0
 
@@ -13,7 +10,7 @@ ping -c 1 ldap -W 3 > /dev/null 2>&1
 if [ $? -eq 0 ]
 then
    equipo=$(hostname -s)
-   dominio=$(host -d -t CNAME servidor | grep -e 'domain\.' -e 'ns\.' | cut -f1 -d".")
+   dominio=$(host -d -t CNAME servidor | grep -e ';servidor\.' | cut -f2 -d".")
 
    sed "s/  host: .*/  host: ${equipo}.${dominio}/" /var/lib/puppet/state/last_run_report.yaml > /tmp/last_run_report.yaml
 

@@ -24,13 +24,12 @@ then
 	if [ $? -eq 0 ]
 	then
 	   #Ahora que hay red válida, llamamos a sequimiento de equipo
-           is_ltsp=$(facter is_ltsp)
-           case $is_ltsp in
-               yes | true | si)  /usr/share/controlies-ltspserver/seguimiento_equipo
-                       ;;
-               *)     /usr/share/controlies-client/seguimiento_equipo
-                       ;;
-           esac
+           if [ -e /usr/share/controlies-ltspserver/seguimiento_equipo ]
+           then
+               /usr/share/controlies-ltspserver/seguimiento_equipo
+           else
+               /usr/share/controlies-client/seguimiento_equipo
+           fi
 
 	   #Si hay un usuario logueado, hacemos un seguimiento_usuario
 	   USUARIO=$(who | grep "(:0)" | head -1 | cut -d" " -f1)
@@ -43,6 +42,15 @@ then
 	   fi
 	fi
     fi
+else # No tenemos nm-online->no networkmanager-> llamamos a seguimiento_equipo sin mas dilación
+
+    if [ -e /usr/share/controlies-ltspserver/seguimiento_equipo ]
+    then
+       /usr/share/controlies-ltspserver/seguimiento_equipo
+    else
+       /usr/share/controlies-client/seguimiento_equipo
+    fi
+
 fi
 
 exit 0

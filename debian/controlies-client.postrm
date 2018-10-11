@@ -14,11 +14,6 @@ remove_divert() {
     fi
 }
 
-DIR="gdm"
-if [ -f "/etc/init.d/gdm3" ]; then
-    DIR="gdm3"
-fi
-
 case "$1" in
     remove|purge)
 
@@ -33,22 +28,12 @@ case "$1" in
         if [  -e /etc/lightdm ]
         then #lightdm
                rm -f /etc/lightdm/lightdm.conf.d/14-logout.conf
-        else #gdm o gdm3
- 
- 	   if [ -f "/etc/$DIR/PostSession/Default" ]; then
-		sed -i.bak '/\/usr\/share\/controlies-client\/PostSession/d' /etc/$DIR/PostSession/Default
-	   fi
         fi
 
 	######################################################
 	# Seguimiento equipos
-	sed -i.bak '/@reboot root \/usr\/share\/controlies-client\/seguimiento_equipo/d' /etc/crontab
         sed -i.bak '/\*\/57 \* \* \* \* root \/usr\/share\/controlies-client\/seguimiento_equipo/d' /etc/crontab
 	sudo service cron restart
-
-        ######################################################
-        # controlies-seguimiento fuera de rc.local
-        sed -i.bak '/\/usr\/share\/controlies-client\/controlies-seguimiento/d' /etc/rc.local
 
         ######################################################
         # Script para actualizar resultado tras ejecutar puppet
@@ -58,6 +43,12 @@ case "$1" in
 	######################################################
 	# Servicio RPC
 	update-rc.d -f controlies-client remove
+
+        ######################################################
+        # Seguimiento
+        update-rc.d controlies-seguimiento remove
+        systemctl disable controlies-seguimiento
+
     ;;
     upgrade|abort-upgrade|abort-remove|abort-deconfigure)
     ;;

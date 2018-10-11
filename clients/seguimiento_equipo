@@ -6,43 +6,24 @@ equipo=$(hostname -s)
 ping -c 1 ldap -W 3 > /dev/null 2>&1
 if [ $? -eq 0 ]
 then
-        dominio=$(host -d -t CNAME servidor | grep -e 'domain\.' -e 'ns\.' | cut -f1 -d".")
-	#Determinamos que tipo de equipo es en función del facter use. Si no tiene el facter lo consideramos workstation.
+        dominio=$(host -d -t CNAME servidor | grep -e ';servidor\.' | cut -f2 -d".")
+	#Determinamos que tipo de equipo es en función del facter uso. Si no tiene el facter lo consideramos workstation.
 	tipo="WORKSTATION"
 	if [ -e /usr/bin/facter ]
 	then
-	      use=$(facter use)
-	      use=${use:0:4}
-              case $use in
-                   # ltsp-wheezy, ltsp-squeeze
+	      uso=$(facter uso)
+              case $uso in
+                   "pccole") tipo="PCCOLE"
+                   ;;
+                   "infolab") tipo="INFOLAB"
+                   ;;
+                   "siatic") tipo="SIATIC"
+                   ;;
+                   "portatiles") tipo="PORTATIL"
+                   ;;
                    "ltsp") tipo="LTSP"
                    ;;
-                   # aulatic-profesor-wheezy -> otro tipo de ltsp
-                   "aula") tipo="LTSP"
-                   ;;
-                   # workstation, workstation-wheezy
-                   "work") tipo="WORKSTATION"
-                   ;;
-                   # todos los tipos de portatil port*
-                   "port") tipo="PORTATIL"
-                   ;;
-                   #equipos nuevos.
-                   "ubun")
-                       tipo_ubuntu=$(facter tipo)
-                       case $tipo_ubuntu in
-                            "siatic") tipo="SIATIC"
-                            ;;
-                            "infolab") tipo="INFOLAB"
-                            ;;
-                            "ltsp") tipo="LTSP"
-                            ;;
-                            "portatil-alumno") tipo="PORTATIL"
-                            ;;
-                            "notebookHP") tipo="PORTATIL"
-                            ;;
-                            *) tipo="WORKSTATION"
-                            ;;
-                       esac
+                   "workstation") tipo="WORKSTATION"
                    ;;
                    # ante la duda, lo consideramos workstation
                    *) tipo="WORKSTATION"

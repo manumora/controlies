@@ -235,13 +235,16 @@ def doactualizalogpuppet(filetext):
         fila.update_record(ultimopuppet=ahora,estadopuppet=estadoglobal,logpuppet=cdb.maquinas.logpuppet.store(output,filename=host))
     output.close()
      
+    #Sep/2018: Este código se comenta porque ya no vamos a hacer este seguimiento: No lo usa nadie y penaliza mucho el rendimiento de la BBDD
     #Insertamos todas las clases recopiladas, con el estado pertinente: ok (si todo va bien), error (si alguno de los
     # recursos fallo). Previamente borramos todas las clases anteriormente asociadas a dicho host.    
-
-    limpiar_clases(host)
-    for clase in clases_todas:    
-        estado="ERROR" if clase in clases_error else "OK"
-        inserta_clase(clase,host_original,ahora,estado)
+    #limpiar_clases(host)
+    #for clase in clases_todas:    
+    #    estado="ERROR" if clase in clases_error else "OK"
+    #    inserta_clase(clase,host_original,ahora,estado)
+   
+    #Se purgan las tablas de clases para limpiar todo lo almacenado
+    purgar_clases()    
     
     return "OK"
  
@@ -407,6 +410,19 @@ def limpiar_clases(host):
     except:
         pass
     
+def purgar_clases():
+
+    sql="delete from clases_puppet_host"
+    try:
+        cdb.executesql(sql)
+    except:
+        pass
+
+    sql="delete from clases_puppet"
+    try:
+        cdb.executesql(sql)
+    except:
+        pass
 
 def getTipo(host):
     
