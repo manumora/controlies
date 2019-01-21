@@ -3,7 +3,8 @@ ControlIES
 
 * Language: Python (Web2py framework)
 * Date: 11 November 2013
-* Authors: Manuel Mora Gordillo, Francisco Damián Méndez Palma, Alfonso Pastor, José Luis Redrejo
+* Author: Manuel Mora Gordillo
+* Contributors: Francisco Damián Méndez Palma, Alfonso Pastor, José Luis Redrejo
 * Copyright: 2013 - Manuel Mora Gordillo
 * Technologies used: Python, jQuery, Web2py, LDAP, RPC, Avahi, WebSockets, SSH, Bash
 
